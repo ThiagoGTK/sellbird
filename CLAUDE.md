@@ -1,3 +1,41 @@
+# Sellbird PT-BR — leia isto primeiro
+
+Esta é a **versão em português (Brasil)** do Sellbird. Tudo abaixo desta seção é o
+guia original (em inglês) e continua valendo; esta seção diz o que muda.
+
+**Fale com o usuário em português do Brasil**, de forma simples, uma coisa por vez.
+Quando ele disser "configure o Sellbird para mim", siga o fluxo de configuração
+abaixo (Setup Flow), mas em português e com estes ajustes:
+
+- **Sistema operacional:** muitos usuários estão no Windows (PowerShell). No Windows o
+  ambiente virtual é `py -3.13 -m venv .venv` e `.venv\Scripts\Activate.ps1` (se a
+  ativação for bloqueada: `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`). O
+  Codex não funciona no Windows: use o Claude.
+- **Idioma dos e-mails:** a seção `language` do config (`default: "pt-BR"`,
+  `by_country: true`) faz o Sellbird escrever em português para empresas do Brasil e em
+  inglês para as de fora. As respostas seguem o idioma do prospect. Veja
+  `sellbird/language.py`.
+- **Rodapé:** além de `compliance.postal_address`, existe `compliance.opt_out_line_pt`
+  (linha de descadastro dos e-mails em português). Peça o endereço da empresa para o
+  rodapé (boa prática da LGPD e exigência da CAN-SPAM para destinatários nos EUA).
+- **Provedor de e-mail:** além de Gmail e Microsoft 365, muitos brasileiros usam SMTP de
+  Hostinger, Locaweb, Zoho, KingHost (`provider: smtp`; exemplo da Hostinger no
+  `.env.example`). Sempre recomende um **domínio secundário só para envio**.
+- **Cliente ideal:** segmentos em português funcionam na busca grátis do OpenStreetMap
+  (clínica odontológica, contabilidade, imobiliária, academia, salão de beleza...; lista
+  completa em `docs/pt-BR/GUIA.md`). Cidades com estado e país: `"Curitiba, PR, Brasil"`.
+  Cargos em português (Sócio, Proprietário, Fundador, Diretor) são reconhecidos.
+- **Treino:** `sellbird train <url>` grava tudo em português (descrição, benefícios,
+  objeções) no `sellbird.local.yaml`, que tem prioridade sobre o `sellbird.yaml`.
+- **LGPD:** não dê aconselhamento jurídico; aponte para a seção "LGPD e boas práticas" do
+  `docs/pt-BR/GUIA.md`. O Precleared (Step 7) ainda não cobre o Brasil.
+- **Guia completo para o usuário:** `docs/pt-BR/GUIA.md`. Prompts e playbooks estão em
+  português em `prompts/` e `skills/`.
+- **Mudanças de código:** mantenha os textos visíveis ao usuário em português e rode
+  `python -m pytest -q` (inclui `tests/test_portugues.py`).
+
+---
+
 # Sellbird — the open-source outreach platform
 
 Sellbird (formerly Harvey) is an open-source outreach platform powered by Claude Code. It finds prospects, writes cold emails, sends them from your own mailbox (Gmail, Microsoft 365 or SMTP), handles replies, and works conversations toward a meeting.

@@ -72,7 +72,7 @@ Você precisa de:
 ### Deixe o Claude configurar
 
 ```bash
-git clone https://github.com/ThiagoGTK/sellbird.git
+git clone -b pt-br https://github.com/ThiagoGTK/sellbird.git
 cd sellbird
 claude
 ```
