@@ -534,23 +534,23 @@ def _opt_out_reason(their_text: str, own_words: str) -> dict | None:
     for p in OPT_OUT_PATTERNS:
         if p in flat:
             return {"rule": "phrase", "matched": p,
-                    "why": f'Their reply contains "{p}".'}
+                    "why": f'A resposta contém "{p}".'}
     m = _hebrew_opt_out(flat)
     if m:
         return {"rule": "phrase", "matched": m.group(0),
-                "why": f'Their reply contains "{m.group(0)}".'}
+                "why": f'A resposta contém "{m.group(0)}".'}
     m = _spanish_opt_out(_accent_free_lines(their_text))
     if m:
         return {"rule": "phrase", "matched": m.group(0),
-                "why": f'Their reply contains "{m.group(0)}".'}
+                "why": f'A resposta contém "{m.group(0)}".'}
     m = _french_opt_out(_accent_free_lines(their_text))
     if m:
         return {"rule": "phrase", "matched": m.group(0),
-                "why": f'Their reply contains "{m.group(0)}".'}
+                "why": f'A resposta contém "{m.group(0)}".'}
     m = _portuguese_opt_out(_accent_free_lines(their_text))
     if m:
         return {"rule": "phrase", "matched": m.group(0),
-                "why": f'Their reply contains "{m.group(0)}".'}
+                "why": f'A resposta contém "{m.group(0)}".'}
     for line in their_text.split("\n"):
         line = _flat(line)
         m = (SPANISH_NO_THANKS_RE.search(_no_accents(line))
@@ -558,26 +558,26 @@ def _opt_out_reason(their_text: str, own_words: str) -> dict | None:
              or PORTUGUESE_NO_THANKS_RE.search(_no_accents(line)))
         if m:
             return {"rule": "no_thanks", "matched": m.group(0),
-                    "why": f'Their reply says "{m.group(0)}" (no thanks).'}
+                    "why": f'A resposta diz "{m.group(0)}" (não, obrigado).'}
         m = NO_THANKS_RE.search(line)
         if m:
             return {"rule": "no_thanks", "matched": m.group(0),
-                    "why": f'Their reply says "{m.group(0)}", what the opt-out line asks for.'}
+                    "why": f'A resposta diz "{m.group(0)}", o que a linha de descadastro pede.'}
         m = HEBREW_NO_THANKS_RE.search(line)
         if m:
             return {"rule": "no_thanks", "matched": m.group(0),
-                    "why": f'Their reply says "{m.group(0)}" (no thanks).'}
+                    "why": f'A resposta diz "{m.group(0)}" (não, obrigado).'}
     bare = _no_accents(_flat(_MOBILE_SIGNATURE_RE.sub("", own_words or "")))
     bare = re.sub(r"[^\w\s-]", "", bare).strip()
     if (bare in BARE_OPT_OUTS
             or " ".join(w for w in bare.split() if w not in _BARE_COURTESIES) in BARE_OPT_OUTS):
         return {"rule": "only_words", "matched": bare,
-                "why": f'Their reply was only "{bare}".'}
+                "why": f'A resposta foi só "{bare}".'}
     return None
 
 
 MODEL_OPT_OUT = {"rule": "model", "matched": "",
-                 "why": "No opt-out phrase matched; the model read the reply as a request to stop."}
+                 "why": "Nenhuma frase de saída bateu; o modelo leu a resposta como um pedido para parar."}
 
 # Phrases that mean a human must take over. Never auto-reply to these.
 ESCALATION_PATTERNS = (

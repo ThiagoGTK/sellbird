@@ -216,10 +216,10 @@ def _render_actions(convo):
 def test_an_escalation_from_someone_who_opted_out_cant_be_handed_back():
     html = _render_actions({"id": "c1", "status": "needs_human", "prospect_status": "opted_out",
                             "prospect_id": "p1", "prospect_email": "i@x.test"})
-    assert "Opted out, and Sellbird handed this to you" in html
-    assert "Hand back to Sellbird" not in html
-    assert "Close</button>" in html and "Why opted out?" in html
+    assert "Pediu para sair, e o Sellbird passou isto para você" in html
+    assert "Devolver ao Sellbird" not in html
+    assert "Encerrar</button>" in html and "Por que saiu?" in html
     # Anyone else's escalation can still go back to Sellbird.
     html = _render_actions({"id": "c2", "status": "needs_human", "prospect_status": "replied",
                             "prospect_id": "p2", "prospect_email": "b@x.test"})
-    assert "Hand back to Sellbird" in html and "Why opted out?" not in html
+    assert "Devolver ao Sellbird" in html and "Por que saiu?" not in html

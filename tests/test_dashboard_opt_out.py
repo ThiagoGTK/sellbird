@@ -127,20 +127,20 @@ def _render_panel(prospect, data, armed=False):
 def test_the_panel_shows_the_reason_and_escapes_their_message():
     html = _render_panel(
         {"first_name": "Iris", "last_name": "<b>X</b>", "email": "i@x.test"},
-        {"opted_out": True, "recorded": True, "rule": "only_words", "why": 'Their reply was only "stop".',
+        {"opted_out": True, "recorded": True, "rule": "only_words", "why": 'A resposta foi só "stop".',
          "message": "<img src=x onerror=alert(1)>STOP", "at": "2026-10-20", "history": []})
-    assert "Their reply was only &quot;stop&quot;." in html
-    assert "Their reply was only an opt-out word" in html
+    assert "A resposta foi só &quot;stop&quot;." in html
+    assert "A resposta foi só uma palavra de saída" in html
     assert "<img" not in html and "&lt;img src=x onerror=alert(1)&gt;STOP" in html
     assert "<b>X</b>" not in html
-    assert "Undo opt-out" in html and "Confirm undo" not in html
+    assert "Desfazer saída" in html and "Sim, desfazer" not in html
 
 
 def test_the_panel_asks_before_undoing_and_says_what_happens():
     html = _render_panel({"first_name": "Iris", "email": "i@x.test"},
                          {"opted_out": True, "recorded": False, "message": "", "history": []}, armed=True)
-    assert "before Sellbird kept a record" in html
-    assert "Confirm undo" in html and "Nothing is sent automatically" in html
+    assert "antes de o Sellbird guardar o motivo" in html
+    assert "Sim, desfazer" in html and "Nada é enviado automaticamente" in html
 
 
 def test_the_panel_after_an_undo():
@@ -148,9 +148,9 @@ def test_the_panel_after_an_undo():
                          {"opted_out": False, "recorded": True, "status": "replied", "rule": "phrase",
                           "why": "w", "message": "m",
                           "history": [{"action": "opt_out", "at": "a"}, {"action": "opt_out_undone", "at": "b"}]})
-    assert "You undid an opt-out" in html and "Not opted out now (Replied)" in html
-    assert "Opt-out history for Iris" in html
-    assert "Undo opt-out" not in html
+    assert "Você desfez um pedido de saída" in html and "Não está mais fora (Replied)" in html
+    assert "Histórico de saída de Iris" in html
+    assert "Desfazer saída" not in html
 
 
 def test_an_undone_opt_out_without_a_reason_still_shows_their_message(client):

@@ -28,7 +28,7 @@ def test_the_step_starts_open_with_the_link(client):
 def test_another_service_completes_the_step(client):
     assert client.post("/api/trulyinbox/other").json()["success"]
     step = _step(client)
-    assert step["done"] and "your own" in step["label"]
+    assert step["done"] and "seu próprio" in step["label"]
 
 
 def test_connecting_checks_the_key_then_saves_it(client, monkeypatch):

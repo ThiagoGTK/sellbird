@@ -237,22 +237,22 @@ MODE = {"mode": "approval", "provider": "gmail", "file": "sellbird.local.yaml",
 
 def test_the_outbox_says_which_mode_and_offers_the_way_out():
     approval = _render("sendingModeBanner", MODE)
-    assert "Approval mode" in approval and "waits here until you approve it" in approval
+    assert "Modo de aprovação" in approval and "espera aqui até você aprovar" in approval
     auto = _render("sendingModeBanner", {**MODE, "mode": "autopilot", "held": 2})
-    assert "Autopilot is on" in auto and "(2 now)" in auto and "Turn off autopilot" in auto
+    assert "Piloto automático ligado" in auto and "(2 agora)" in auto and "Desligar o piloto automático" in auto
     instantly = _render("sendingModeBanner", {**MODE, "provider": "instantly"})
-    assert "campaigns aren’t sent to Instantly" in instantly
+    assert "as campanhas só vão para o Instantly" in instantly
 
 
 def test_settings_explains_both_and_asks_for_the_word():
     card = _render("sendingModeCard", MODE)
-    assert "Sending mode: Approval" in card and "<b>Autopilot</b>: Sellbird sends on its own" in card
+    assert "Modo de envio: Aprovação" in card and "<b>Piloto automático</b>: o Sellbird envia sozinho" in card
     assert "acme.com, &lt;b&gt;x&lt;/b&gt;" in card and "sellbird.local.yaml" in card
-    assert "Turn on autopilot…" in card and 'id="autopilot-go"' not in card
+    assert "Ligar o piloto automático…" in card and 'id="autopilot-go"' not in card
     armed = _render("sendingModeCard", MODE, armed=True)
     assert 'id="autopilot-confirm"' in armed and 'id="autopilot-go" disabled' in armed
     auto = _render("sendingModeCard", {**MODE, "mode": "autopilot"})
-    assert "Turn off autopilot" in auto and "works at once" in auto
+    assert "Desligar o piloto automático" in auto and "vale na hora" in auto
 
 
 # ── review of the switch: no autopilot email after "off" ──

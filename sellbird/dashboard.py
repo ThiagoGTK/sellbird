@@ -57,7 +57,7 @@ def _resolve_config_file() -> Path:
 
 # No /docs, /redoc or /openapi.json: the API is for this UI only, and every
 # route except the static shell needs the token (see dashboard_auth).
-app = FastAPI(title="Sellbird Dashboard", docs_url=None, redoc_url=None, openapi_url=None)
+app = FastAPI(title="Painel do Sellbird", docs_url=None, redoc_url=None, openapi_url=None)
 token_store = auth.TokenStore(TOKEN_FILE)
 agent_token_store = auth.TokenStore(AGENT_TOKEN_FILE)
 # Innermost first: the guard (added next) sets the principal before this runs.
@@ -231,21 +231,21 @@ async def get_setup_status():
 
     # 1. Venv
     checks.append({
-        "id": "venv", "label": "Python virtual environment",
+        "id": "venv", "label": "Ambiente virtual do Python",
         # An installed app (pipx) has no checkout venv to make.
         "done": (not is_checkout(PACKAGE_ROOT)) or (PACKAGE_ROOT / ".venv").is_dir(),
         "required": True,
-        "help": "Run: python3 -m venv .venv && source .venv/bin/activate && pip install -e .",
+        "help": "Rode: python3 -m venv .venv && source .venv/bin/activate && pip install -e .",
     })
 
     # 2. Env file
     env_vars = _read_env_file()
     env_exists = ENV_FILE.exists() and bool(env_vars)
     checks.append({
-        "id": "env_file", "label": "Environment file (.env)",
+        "id": "env_file", "label": "Arquivo de ambiente (.env)",
         "done": env_exists,
         "required": True,
-        "help": "Go to the Settings tab to enter your API keys.",
+        "help": "Vá na aba Configurações para informar suas chaves de API.",
     })
 
     # 3. Email provider configured (matches channels.email.provider)
@@ -257,22 +257,22 @@ async def get_setup_status():
     if provider == "gmail":
         provider_done = _has("GMAIL_CLIENT_ID", "GMAIL_CLIENT_SECRET") and \
             (PROJECT_ROOT / "data" / "gmail_token.json").is_file()
-        provider_help = ("Add your Google OAuth client ID and secret in Settings, then sign "
-                         "in on the Inboxes tab (or run 'sellbird gmail auth').")
+        provider_help = ("Coloque o ID e o segredo do cliente OAuth do Google em Configurações e depois entre na aba Caixas de e-mail (ou rode 'sellbird gmail auth')."
+                         "")
     elif provider == "microsoft":
         provider_done = _has("M365_CLIENT_ID") and \
             (PROJECT_ROOT / "data" / "m365_token.json").is_file()
-        provider_help = ("Add your Microsoft 365 client and tenant IDs in Settings, then sign "
-                         "in on the Inboxes tab (or run 'sellbird microsoft auth').")
+        provider_help = ("Coloque os IDs de cliente e de locatário do Microsoft 365 em Configurações e depois entre na aba Caixas de e-mail (ou rode 'sellbird microsoft auth')."
+                         "")
     elif provider == "smtp":
         provider_done = _has("SMTP_HOST", "SMTP_USERNAME", "SMTP_PASSWORD")
-        provider_help = "Enter your SMTP host, username, and password in Settings."
+        provider_help = "Informe o servidor SMTP, o usuário e a senha em Configurações."
     else:
         instantly_key = env_vars.get("INSTANTLY_API_KEY", "") or os.getenv("INSTANTLY_API_KEY", "")
         provider_done = bool(instantly_key) and instantly_key != "your_instantly_api_key_here"
-        provider_help = "Enter your Instantly API key in Settings."
+        provider_help = "Informe sua chave de API do Instantly em Configurações."
     checks.append({
-        "id": "email_provider", "label": f"Email provider configured ({provider})",
+        "id": "email_provider", "label": f"Provedor de e-mail configurado ({provider})",
         "done": provider_done,
         "required": True,
         "help": provider_help,
@@ -281,11 +281,11 @@ async def get_setup_status():
     # 4. Email verification (needed for addresses to be sendable, not 'guess')
     verifier_set = _has("REOON_API_KEY") or _has("ZEROBOUNCE_API_KEY") or _has("HUNTER_API_KEY")
     checks.append({
-        "id": "verifier", "label": "Email verification key",
+        "id": "verifier", "label": "Chave de verificação de e-mail",
         "done": verifier_set,
         "required": True,
-        "help": "Add a Reoon (free 600/mo), ZeroBounce, or Hunter key in Settings — "
-                "without one, found emails stay 'guess' and are never sent.",
+        "help": "Adicione uma chave do Reoon (600 grátis/mês), ZeroBounce ou Hunter em Configurações. Sem nenhuma, os e-mails encontrados ficam como 'palpite' e nunca são enviados."
+                "",
     })
 
     # 5. Config valid
@@ -300,39 +300,39 @@ async def get_setup_status():
         except Exception:
             pass
     checks.append({
-        "id": "config", "label": f"Sellbird configured ({config_path.name})",
+        "id": "config", "label": f"Sellbird configurado ({config_path.name})",
         "done": config_valid,
         "required": True,
-        "help": "Train Sellbird on your product. Use the trainer or set up manually through Claude.",
+        "help": "Treine o Sellbird no seu produto. Use o treinador ou configure à mão pelo Claude.",
     })
 
     # 6. Product trained
     product_trained = (PROJECT_ROOT / "skills" / "product_knowledge.md").exists()
     checks.append({
-        "id": "product_trained", "label": "Product knowledge trained",
+        "id": "product_trained", "label": "Conhecimento do produto treinado",
         "done": product_trained,
         "required": True,
-        "help": "Run: sellbird train https://yourwebsite.com (or set up through Claude).",
+        "help": "Rode: sellbird train https://seusite.com.br (ou configure pelo Claude).",
     })
 
     # 7. LinkedIn (optional)
     linkedin_email = env_vars.get("LINKEDIN_EMAIL", "") or os.getenv("LINKEDIN_EMAIL", "")
     linkedin_pass = env_vars.get("LINKEDIN_PASSWORD", "") or os.getenv("LINKEDIN_PASSWORD", "")
     checks.append({
-        "id": "linkedin", "label": "LinkedIn credentials",
+        "id": "linkedin", "label": "Credenciais do LinkedIn",
         "done": bool(linkedin_email) and bool(linkedin_pass),
         "required": False,
-        "help": "Optional. Enter your LinkedIn credentials in Settings to enable LinkedIn prospecting.",
+        "help": "Opcional. Informe suas credenciais do LinkedIn em Configurações para ligar a prospecção no LinkedIn.",
     })
 
     # 8. Cloudflare (optional)
     cf_id = env_vars.get("CLOUDFLARE_ACCOUNT_ID", "") or os.getenv("CLOUDFLARE_ACCOUNT_ID", "")
     cf_token = env_vars.get("CLOUDFLARE_API_TOKEN", "") or os.getenv("CLOUDFLARE_API_TOKEN", "")
     checks.append({
-        "id": "cloudflare", "label": "Cloudflare deep crawling",
+        "id": "cloudflare", "label": "Leitura profunda com Cloudflare",
         "done": bool(cf_id) and bool(cf_token),
         "required": False,
-        "help": "Optional. For JavaScript-rendered website crawling during training.",
+        "help": "Opcional. Para ler sites com JavaScript durante o treinamento.",
     })
 
     # 9. Warmup service: TrulyInbox connected, or another service the user named
@@ -347,14 +347,14 @@ async def get_setup_status():
         choice = "connected"
     checks.append({
         "id": "warmup_service",
-        "label": {"connected": "Warmup: TrulyInbox connected",
-                  "other": "Warmup: your own warmup service"}.get(choice, "Warm up your mailbox"),
+        "label": {"connected": "Aquecimento: TrulyInbox conectado",
+                  "other": "Aquecimento: seu próprio serviço"}.get(choice, "Aqueça sua caixa de e-mail"),
         "done": bool(choice),
         # Instantly warms its own accounts, so there it's a suggestion, not a step.
         "required": provider != "instantly",
-        "help": ("A new mailbox needs 2-4 weeks of warmup before cold email, and warmup "
-                 "keeps it out of spam after that. We recommend TrulyInbox: connect it and "
-                 "Sellbird shows whether your mailbox is warmed."),
+        "help": ("Uma caixa nova precisa de 2 a 4 semanas de aquecimento antes do e-mail frio, e o aquecimento mantém ela fora do spam depois. Recomendamos o TrulyInbox: conecte e o Sellbird mostra se a sua caixa está aquecida."
+                 ""
+                 ""),
         "link": ti.AFFILIATE_URL,
     })
 
@@ -441,9 +441,9 @@ async def save_env_settings(request: Request):
     try:
         data = await request.json()
     except Exception:
-        return JSONResponse({"success": False, "message": "Invalid request body."}, status_code=400)
+        return JSONResponse({"success": False, "message": "Corpo da requisição inválido."}, status_code=400)
     if not isinstance(data, dict):
-        return JSONResponse({"success": False, "message": "Invalid request body."}, status_code=400)
+        return JSONResponse({"success": False, "message": "Corpo da requisição inválido."}, status_code=400)
     async with _env_lock:
         updates = {}
         for key in ["INSTANTLY_API_KEY", "LINKEDIN_EMAIL", "LINKEDIN_PASSWORD",
@@ -456,15 +456,15 @@ async def save_env_settings(request: Request):
             if key in data and data[key] is not None:
                 value = data[key]
                 if isinstance(value, bool) or not isinstance(value, (str, int, float)):
-                    return JSONResponse({"success": False, "message": f"{key} must be text."},
+                    return JSONResponse({"success": False, "message": f"{key} precisa ser texto."},
                                         status_code=400)
                 value = str(value)
                 # A port Sellbird can't parse would stop it starting at all.
                 if key.endswith("_PORT") and value.strip() and not value.strip().isdigit():
-                    return JSONResponse({"success": False, "message": f"{key} must be a number."},
+                    return JSONResponse({"success": False, "message": f"{key} precisa ser um número."},
                                         status_code=400)
                 if len(value) > 4096 or "\x00" in value:
-                    return JSONResponse({"success": False, "message": f"{key} is invalid."},
+                    return JSONResponse({"success": False, "message": f"{key} é inválido."},
                                         status_code=400)
                 # Strip newlines so a crafted value can't inject extra .env entries
                 updates[key] = value.replace("\n", " ").replace("\r", " ").strip()
@@ -473,7 +473,7 @@ async def save_env_settings(request: Request):
                 _write_env_file(updates)
             except Exception as e:
                 logger.warning("Failed to write .env: %s", e)
-                return {"success": False, "message": "Could not write .env file."}
+                return {"success": False, "message": "Não deu para gravar o arquivo .env."}
             # The sign-in clients take effect now, so the Inboxes tab can sign in
             # without a restart (load_dotenv never overwrites a value already set).
             for key in ("GMAIL_CLIENT_ID", "GMAIL_CLIENT_SECRET", "M365_CLIENT_ID", "M365_TENANT_ID"):
@@ -493,7 +493,7 @@ async def trulyinbox_connect(request: Request):
         data = None
     key = data.get("key") if isinstance(data, dict) else None
     if not isinstance(key, str) or not key.strip() or len(key) > 512:
-        return JSONResponse({"success": False, "message": "Paste your TrulyInbox API key."},
+        return JSONResponse({"success": False, "message": "Cole sua chave de API do TrulyInbox."},
                             status_code=400)
     key = key.strip()
     try:
@@ -520,7 +520,7 @@ async def trulyinbox_connect(request: Request):
             _write_env_file(updates)
         except Exception as e:
             logger.warning("Failed to write .env: %s", e)
-            return {"success": False, "message": "Could not write .env file."}
+            return {"success": False, "message": "Não deu para gravar o arquivo .env."}
     state = _state()
     await state.init_db()
     await ti.set_choice(state, "connected")
@@ -582,7 +582,7 @@ async def get_offer():
     try:
         return offer_view(load_config())
     except Exception as e:
-        return JSONResponse({"error": f"Couldn't read your config: {e}"}, status_code=500)
+        return JSONResponse({"error": f"Não deu para ler sua configuração: {e}"}, status_code=500)
 
 
 @app.post("/api/offer/suggest")
@@ -594,10 +594,10 @@ async def suggest_offer():
         ideas = await suggest_offers(brain, config)
     except Exception as e:
         logger.warning(f"Offer suggestions failed: {e}")
-        return JSONResponse({"error": "Sellbird couldn't come up with offers just now. Try again."},
+        return JSONResponse({"error": "O Sellbird não conseguiu pensar em ofertas agora. Tente de novo."},
                             status_code=502)
     if not ideas:
-        return JSONResponse({"error": "Sellbird couldn't come up with offers just now. Try again."},
+        return JSONResponse({"error": "O Sellbird não conseguiu pensar em ofertas agora. Tente de novo."},
                             status_code=502)
     return {"ideas": ideas}
 
@@ -609,13 +609,13 @@ async def preview_offer(request: Request):
     body = await request.json() if request.headers.get("content-type", "").startswith("application/json") else {}
     entry = " ".join(str((body or {}).get("entry") or "").split())[:MAX_OFFER_CHARS]
     if not entry:
-        return JSONResponse({"ok": False, "message": "Write an offer first."}, status_code=400)
+        return JSONResponse({"ok": False, "message": "Escreva uma oferta primeiro."}, status_code=400)
     try:
         brain, state, config = await _offer_brain()
         return await preview_email(brain, state, config, entry)
     except Exception as e:
         logger.warning(f"Offer preview failed: {e}")
-        return JSONResponse({"ok": False, "message": "The preview failed. Try again."}, status_code=502)
+        return JSONResponse({"ok": False, "message": "O exemplo falhou. Tente de novo."}, status_code=502)
 
 
 @app.post("/api/offer")
@@ -634,11 +634,11 @@ async def save_offer_route(request: Request):
         await state.init_db()
         await state.delete_setting(PROPOSED_KEY)
     except Exception as e:
-        return JSONResponse({"success": False, "message": f"Couldn't save to {target.name}: {e}"},
+        return JSONResponse({"success": False, "message": f"Não deu para salvar em {target.name}: {e}"},
                             status_code=500)
     return {"success": True, "entry": entry,
-            "message": "Saved. Every new first email ends with this offer." if entry
-                       else "Saved. With no offer, first emails end with a question."}
+            "message": "Salvo. Todo primeiro e-mail novo termina com esta oferta." if entry
+                       else "Salvo. Sem oferta, os primeiros e-mails terminam com uma pergunta."}
 
 
 @app.get("/api/company")
@@ -653,7 +653,7 @@ async def get_company():
         proposed = json.loads(raw) if raw else None
         return company_view(load_config(), PROJECT_ROOT, proposed)
     except Exception as e:
-        return JSONResponse({"error": f"Couldn't read your config: {e}"}, status_code=500)
+        return JSONResponse({"error": f"Não deu para ler sua configuração: {e}"}, status_code=500)
 
 
 @app.post("/api/company")
@@ -664,14 +664,14 @@ async def save_company_route(request: Request):
     section = str((body or {}).get("section") or "")
     fields = (body or {}).get("fields")
     if not isinstance(fields, dict) or not fields:
-        return JSONResponse({"success": False, "message": "Nothing to save."}, status_code=400)
+        return JSONResponse({"success": False, "message": "Nada para salvar."}, status_code=400)
     try:
         save_company(_offer_config_file(), section, fields)
     except ValueError as e:
-        return JSONResponse({"success": False, "message": f"Not saved: {e}."}, status_code=400)
+        return JSONResponse({"success": False, "message": f"Não salvo: {e}."}, status_code=400)
     except Exception as e:
-        return JSONResponse({"success": False, "message": f"Couldn't save: {e}"}, status_code=500)
-    return {"success": True, "message": "Saved. New emails use it from the next draft."}
+        return JSONResponse({"success": False, "message": f"Não deu para salvar: {e}"}, status_code=500)
+    return {"success": True, "message": "Salvo. Os e-mails novos usam isso a partir do próximo rascunho."}
 
 
 @app.post("/api/offer/propose")
@@ -683,13 +683,13 @@ async def propose_offer(request: Request):
     entry = " ".join(str((body or {}).get("entry") or "").split())[:MAX_OFFER_CHARS]
     why = " ".join(str((body or {}).get("why") or "").split())[:500]
     if not entry:
-        return JSONResponse({"ok": False, "message": "An offer is required."}, status_code=400)
+        return JSONResponse({"ok": False, "message": "A oferta é obrigatória."}, status_code=400)
     state = _state()
     await state.init_db()
     await state.set_setting(PROPOSED_KEY, json.dumps({"entry": entry, "why": why,
                                                       "at": datetime.now(timezone.utc).isoformat()}))
-    return {"ok": True, "message": "Proposed. The user confirms it on the Your company tab "
-                                    "(dashboard → Your company → Your offer → Use this offer)."}
+    return {"ok": True, "message": "Proposta. O usuário confirma na aba Sua empresa "
+                                    "(painel → Sua empresa → Sua oferta → Usar esta oferta)."}
 
 
 @app.delete("/api/offer/propose")
@@ -710,7 +710,7 @@ async def test_instantly(request: Request):
         data = {}
     api_key = str(data.get("api_key", "") or "")
     if not api_key:
-        return {"success": False, "message": "No API key provided."}
+        return {"success": False, "message": "Nenhuma chave de API informada."}
     try:
         import httpx
         async with httpx.AsyncClient(timeout=10) as client:
@@ -719,11 +719,11 @@ async def test_instantly(request: Request):
                 headers={"Authorization": f"Bearer {api_key}"},
             )
             if resp.status_code == 200:
-                return {"success": True, "message": "Connected to Instantly."}
+                return {"success": True, "message": "Conectado ao Instantly."}
             else:
-                return {"success": False, "message": f"API returned {resp.status_code}. Check your key."}
+                return {"success": False, "message": f"A API respondeu {resp.status_code}. Confira sua chave."}
     except Exception as e:
-        return {"success": False, "message": f"Connection failed: {str(e)}"}
+        return {"success": False, "message": f"A conexão falhou: {str(e)}"}
 
 
 # ── Companies ──
@@ -824,7 +824,7 @@ async def add_feedback(request: Request):
     entity_id = str(data.get("entity_id", "") or "")[:100]
     comment = str(data.get("comment", "") or "").strip()[:4000]
     if not comment:
-        return {"success": False, "message": "Comment is required."}
+        return {"success": False, "message": "O comentário é obrigatório."}
     feedback_id = uuid.uuid4().hex[:12]
     try:
         DB_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -846,7 +846,7 @@ async def add_feedback(request: Request):
             await db.commit()
     except Exception as e:
         logger.warning("Failed to save feedback: %s", e)
-        return {"success": False, "message": "Could not save feedback."}
+        return {"success": False, "message": "Não deu para salvar o comentário."}
     return {"success": True, "id": feedback_id}
 
 
@@ -884,11 +884,11 @@ async def start_sellbird():
     global _sellbird_process, _sellbird_started_at
 
     if _check_sellbird_pid():
-        return {"success": False, "message": "Sellbird is already running."}
+        return {"success": False, "message": "O Sellbird já está rodando."}
     from sellbird.main import _needs_setup
     if _needs_setup():
         return {"success": False,
-                "message": "Sellbird isn't set up yet. Run `sellbird setup` in a terminal first."}
+                "message": "O Sellbird ainda não está configurado. Rode `sellbird setup` num terminal primeiro."}
 
     # Ensure data dir exists
     (PROJECT_ROOT / "data").mkdir(parents=True, exist_ok=True)
@@ -917,7 +917,7 @@ async def start_sellbird():
             log_handle.close()
     except Exception as e:
         logger.warning("Failed to start Sellbird: %s", e)
-        return {"success": False, "message": f"Failed to start Sellbird: {e}"}
+        return {"success": False, "message": f"Não deu para ligar o Sellbird: {e}"}
     _sellbird_started_at = datetime.now()
     # The loop writes its own PID file once it holds the loop lock. Writing
     # the child's PID here would overwrite a running loop's record if this
@@ -932,7 +932,7 @@ async def stop_sellbird():
 
     pid = _check_sellbird_pid()
     if not pid:
-        return {"success": False, "message": "Sellbird is not running."}
+        return {"success": False, "message": "O Sellbird não está rodando."}
 
     own = _sellbird_process if _sellbird_process and _sellbird_process.pid == pid else None
 
@@ -964,7 +964,7 @@ async def stop_sellbird():
     if alive():
         # Started by another user, or from an elevated terminal on Windows.
         return {"success": False,
-                "message": f"Couldn't stop Sellbird (pid {pid}). Stop it where it was started."}
+                "message": f"Não deu para parar o Sellbird (pid {pid}). Pare onde ele foi iniciado."}
 
     _sellbird_process = None
     _sellbird_started_at = None
@@ -1321,7 +1321,7 @@ async def get_sending_mode():
     try:
         config = load_config(str(path))
     except Exception as e:
-        return JSONResponse({"error": f"Couldn't read {path.name}: {e}"}, status_code=500)
+        return JSONResponse({"error": f"Não deu para ler {path.name}: {e}"}, status_code=500)
     state = _state()
     await state.init_db()
     return {
@@ -1348,7 +1348,7 @@ async def set_sending_mode(request: Request):
     if mode not in ("approval", "autopilot"):
         return _refuse('expected {"mode": "approval"} or {"mode": "autopilot", "confirm": "autopilot"}', 400)
     if mode == "autopilot" and body.get("confirm") != "autopilot":
-        return _refuse('Type "autopilot" to confirm: Sellbird will send email without asking you.', 400)
+        return _refuse('Digite "autopilot" para confirmar: o Sellbird vai enviar e-mails sem perguntar para você.', 400)
     path = _resolve_config_file()
     try:
         set_require_approval(mode == "approval", path)
@@ -1405,7 +1405,7 @@ async def outbox_edit(item_id: str, request: Request):
         item = await state.get_outbox_item(item_id)
         if not item or item.get("status") != "pending_review":
             return JSONResponse({"success": False,
-                                 "message": "Only drafts awaiting review can be edited."},
+                                 "message": "Só rascunhos esperando revisão podem ser editados."},
                                 status_code=409)
         if item.get("kind") == "reply":
             # Gmail threads a reply by its subject: a new one would land as a
@@ -1414,7 +1414,7 @@ async def outbox_edit(item_id: str, request: Request):
             subject = item.get("subject") or ""
         if not subject.strip() or not text:
             return JSONResponse({"success": False,
-                                 "message": "Subject and body are both required."},
+                                 "message": "Assunto e corpo são obrigatórios."},
                                 status_code=400)
         # The sender re-checks every email before it goes out; an edit it
         # would block is refused now, while the reviewer can still fix it,
@@ -1434,17 +1434,17 @@ async def outbox_edit(item_id: str, request: Request):
                                kind="reply" if item.get("kind") == "reply" else "cold")
         if style:
             return JSONResponse({"success": False,
-                                 "message": "The sender would hold this: the email "
+                                 "message": "O envio seguraria isto: o e-mail "
                                             + "; ".join(style)},
                                 status_code=400)
         if not gate:
             return JSONResponse({"success": False,
-                                 "message": "The sender would have blocked this: "
+                                 "message": "O envio bloquearia isto: "
                                             + "; ".join(gate.reasons)},
                                 status_code=400)
         if not await state.edit_outbox_draft(item_id, subject, text):
             return JSONResponse({"success": False,
-                                 "message": "Only drafts awaiting review can be edited."},
+                                 "message": "Só rascunhos esperando revisão podem ser editados."},
                                 status_code=409)
         await state.log_action("outbox_edited", "dashboard", {
             "outbox_id": item_id, "to_email": item.get("to_email", ""),
@@ -1615,8 +1615,8 @@ async def mark_prospect_sent(prospect_id: str, request: Request):
             await state.set_setting(key, current)
             if prospect_id in await _sellbird_committed_ids():
                 await state.delete_setting(key)
-                return _refuse("Sellbird has already approved or sent an email to this person. "
-                               "Check the Outbox.")
+                return _refuse("O Sellbird já aprovou ou enviou um e-mail para esta pessoa. Confira a Caixa de saída."
+                               "")
             await state.update_prospect_status(prospect_id, "contacted")
             # Anything Sellbird had queued for them must not go out as well.
             changed = await state.cancel_pending_outbox_for_prospect(
@@ -1627,7 +1627,7 @@ async def mark_prospect_sent(prospect_id: str, request: Request):
                     return {"success": True, "sent": False}
                 if current == "contacted":
                     # Setting them back would make Sellbird write and send again.
-                    return _refuse("This wasn't marked as sent by hand here, so it stays sent.")
+                    return _refuse("Isto não foi marcado como enviado à mão aqui, então continua como enviado.")
                 return {"success": True, "sent": True, "status": current}
             if current != "contacted":
                 # They replied, opted out or bounced since: that stands.
@@ -1661,7 +1661,7 @@ async def outbox_reject(item_id: str):
         state = _state()
         await state.init_db()
         if not await state.reject_outbox_item(item_id):
-            return _refuse("That email is already sending or sent, so it can't be rejected.")
+            return _refuse("Esse e-mail já está saindo ou já saiu, então não dá para rejeitar.")
         return {"success": True}
     except Exception as e:
         return JSONResponse({"success": False, "message": str(e)}, status_code=500)
@@ -1807,7 +1807,7 @@ async def undo_opt_out(prospect_id: str, request: Request):
     if not await state.undo_opt_out(prospect_id, details={
             "prospect_email": rows[0].get("email") or "",
             "previous_why": last.get("why", ""), "previous_at": last.get("at", "")}):
-        return _refuse("This person isn't opted out.")
+        return _refuse("Esta pessoa não pediu para sair.")
     return {"success": True, "status": "replied"}
 
 
@@ -1926,7 +1926,7 @@ async def set_conversation_status(convo_id: str, request: Request):
                             status_code=400)
     rows = await query_db("SELECT status FROM conversations WHERE id = ?", (convo_id,))
     if not rows:
-        return JSONResponse({"success": False, "message": "No such conversation."},
+        return JSONResponse({"success": False, "message": "Essa conversa não existe."},
                             status_code=404)
     state = _state()
     await state.update_conversation(convo_id, status=status)
@@ -2210,7 +2210,7 @@ REPLY_STATUSES = ("replied", "meeting", "closed")
 def _eta_text(minutes) -> str:
     if minutes is None:
         return ""
-    return "less than a minute left" if minutes < 1 else f"about {round(minutes)} min left"
+    return "falta menos de um minuto" if minutes < 1 else f"cerca de {round(minutes)} min restantes"
 
 
 @app.get("/api/live-status")
@@ -2314,49 +2314,49 @@ async def get_live_status():
                 "state": state_, "detail": detail}
 
     profile_eta = next((r["eta_min"] for r in running if r["stage"] == "profile"), None)
-    read_detail = f"{profiled} of {with_site} read"
+    read_detail = f"{profiled} de {with_site} lidos"
     if reading and profile_eta is not None:
         read_detail += " · " + _eta_text(profile_eta)
     if no_site:
-        read_detail += f" · {no_site} have no website (skipped)"
+        read_detail += f" · {no_site} sem site (puladas)"
 
     steps = [
-        step("Find businesses", companies, 0, finding,
-             f"{companies} businesses found", info=True),
-        step("Read their websites", profiled, with_site, reading, read_detail),
-        step("Find emails", checked, profiled, finding_emails,
-             f"{checked} of {profiled} checked · {len(with_email)} emails found"),
-        step("Check emails are real", len(with_email) - unconfirmed, len(with_email), False,
-             f"{by_status.get('verified', 0)} verified · {by_status.get('risky', 0)} risky · "
-             f"{unconfirmed} not confirmed"
-             + (f" · {by_status['invalid']} bad" if by_status.get("invalid") else "")),
-        step("Write first emails", len(drafted), len(deliverable | drafted), False,
-             f"{len(drafted)} written · see Campaigns"),
-        step("Sent", len(sent & drafted), len(drafted), False,
-             f"{len(sent & drafted)} of {len(drafted)} sent"),
-        step("Replies", replies, 0, False,
-             f"{replies} replies" if replies else "No replies yet", info=True),
+        step("Encontrar empresas", companies, 0, finding,
+             f"{companies} empresas encontradas", info=True),
+        step("Ler os sites", profiled, with_site, reading, read_detail),
+        step("Encontrar e-mails", checked, profiled, finding_emails,
+             f"{checked} de {profiled} conferidas · {len(with_email)} e-mails encontrados"),
+        step("Conferir se os e-mails existem", len(with_email) - unconfirmed, len(with_email), False,
+             f"{by_status.get('verified', 0)} verificados · {by_status.get('risky', 0)} arriscados · "
+             f"{unconfirmed} não confirmados"
+             + (f" · {by_status['invalid']} inválidos" if by_status.get("invalid") else "")),
+        step("Escrever os primeiros e-mails", len(drafted), len(deliverable | drafted), False,
+             f"{len(drafted)} escritos · veja Campanhas"),
+        step("Enviados", len(sent & drafted), len(drafted), False,
+             f"{len(sent & drafted)} de {len(drafted)} enviados"),
+        step("Respostas", replies, 0, False,
+             f"{replies} respostas" if replies else "Nenhuma resposta ainda", info=True),
     ]
 
     next_tab = ""   # where the next step is done, when it's done in the dashboard
     if reading or finding:
-        next_up = "Wait — Sellbird is working. This page updates by itself."
+        next_up = "Espere: o Sellbird está trabalhando. Esta página atualiza sozinha."
     elif finding_emails:
-        next_up = "Wait — emails are being found."
+        next_up = "Espere: os e-mails estão sendo encontrados."
     elif stopped:
-        next_up, next_tab = "A job stopped before finishing. Run it again.", "discover"
+        next_up, next_tab = "Uma tarefa parou antes de terminar. Rode de novo.", "discover"
     elif sellbird_sends and awaiting_review:
-        next_up, next_tab = f"Review the {awaiting_review} draft(s) waiting in the Outbox.", "outbox"
+        next_up, next_tab = f"Revise os {awaiting_review} rascunho(s) esperando na Caixa de saída.", "outbox"
     elif by_hand:
-        next_up, next_tab = f"Open Campaigns and send the {len(by_hand)} unsent email(s).", "campaigns"
+        next_up, next_tab = f"Abra Campanhas e envie os {len(by_hand)} e-mail(s) não enviado(s).", "campaigns"
     elif profiled > checked:
-        next_up, next_tab = f"Find emails for the {profiled - checked} businesses not checked yet.", "controls"
+        next_up, next_tab = f"Encontre e-mails para as {profiled - checked} empresas ainda não conferidas.", "controls"
     elif deliverable - drafted:
-        next_up, next_tab = f"Write first emails for {len(deliverable - drafted)} more contact(s).", "controls"
+        next_up, next_tab = f"Escreva os primeiros e-mails para mais {len(deliverable - drafted)} contato(s).", "controls"
     elif not companies:
-        next_up, next_tab = "Search for businesses to get started.", "discover"
+        next_up, next_tab = "Busque empresas para começar.", "discover"
     else:
-        next_up, next_tab = "Search more cities or industries to get more leads.", "discover"
+        next_up, next_tab = "Busque mais cidades ou segmentos para ter mais leads.", "discover"
 
     return {
         "steps": steps,
@@ -2430,14 +2430,14 @@ async def get_today():
         # Ordered by how much it blocks Sellbird from doing anything at all.
         brain = await _brain_status()
         if brain.get("status") == "paused":
-            who = "Codex" if brain.get("provider") == "codex" else "Sellbird's model"
+            who = "Codex" if brain.get("provider") == "codex" else "O modelo do Sellbird"
             items.append({
                 "key": "brain-paused", "tone": "bad",
-                "title": f"{who} is paused, so Sellbird is waiting",
-                "detail": (str(brain.get("reason") or "It can't be used right now.")[:300] +
-                           " Replies and queued emails are untouched; Sellbird resumes "
-                           "once it's fixed. sellbird status --check says what's wrong."),
-                "action": "Open the log", "tab": "controls",
+                "title": f"{who} está pausado, então o Sellbird está esperando",
+                "detail": (str(brain.get("reason") or "Não dá para usar agora.")[:300] +
+                           " Respostas e e-mails na fila ficam intactos; o Sellbird volta quando for resolvido. O comando sellbird status --check diz o que está errado."
+                           ""),
+                "action": "Abrir o registro", "tab": "controls",
             })
 
         from sellbird.agents.writer import EMAIL_RULES_PROBLEM_KEY
@@ -2445,10 +2445,10 @@ async def get_today():
         if rules_problem:
             items.append({
                 "key": "email-rules", "tone": "bad",
-                "title": "Sellbird isn't writing emails: your email rules can't be used",
-                "detail": (f"{rules_problem}. Fix the file, or clear writer.email_rules "
-                           "to use Sellbird's built-in rules."),
-                "action": "Open the log", "tab": "controls",
+                "title": "O Sellbird não está escrevendo e-mails: suas regras de e-mail não podem ser usadas",
+                "detail": (f"{rules_problem}. Corrija o arquivo, ou apague writer.email_rules para usar as regras padrão do Sellbird."
+                           ""),
+                "action": "Abrir o registro", "tab": "controls",
             })
 
         hold = await state.current_sends_held()
@@ -2457,15 +2457,15 @@ async def get_today():
             title, detail = held_message(hold, waiting=len(approved))
             items.append({
                 "key": "sends-held", "tone": "bad", "title": title, "detail": detail,
-                "action": "Open the log", "tab": "controls",
+                "action": "Abrir o registro", "tab": "controls",
             })
 
         if paused:
             items.append({
                 "key": "paused", "tone": "bad",
-                "title": "Sending is paused",
-                "detail": str(paused) + ". Nothing will go out until you resume it.",
-                "action": "Review and resume", "tab": "outbox",
+                "title": "O envio está pausado",
+                "detail": str(paused) + ". Nada sai até você retomar.",
+                "action": "Revisar e retomar", "tab": "outbox",
             })
 
         # Cold email waiting on the optional Precleared check: its free
@@ -2482,7 +2482,7 @@ async def get_today():
             items.append({
                 "key": "precleared-hold", "tone": message["tone"],
                 "title": message["title"], "detail": message["detail"],
-                "action": "Open the log", "tab": "controls",
+                "action": "Abrir o registro", "tab": "controls",
                 "url": message["url"], "url_label": message["url_label"],
             })
 
@@ -2492,79 +2492,79 @@ async def get_today():
                        if c.get("required") and not c.get("done")]
             items.append({
                 "key": "setup", "tone": "warn",
-                "title": "Finish setting Sellbird up",
-                "detail": ", ".join(missing[:3]) or "Some required steps are incomplete.",
-                "action": "Open setup", "tab": "settings",
+                "title": "Termine de configurar o Sellbird",
+                "detail": ", ".join(missing[:3]) or "Algumas etapas obrigatórias estão incompletas.",
+                "action": "Abrir configuração", "tab": "settings",
             })
 
         if proposed:
             items.append({
                 "key": "signals", "tone": "warn",
-                "title": (f"{len(proposed)} signal waiting for your confirmation"
+                "title": (f"{len(proposed)} sinal esperando sua confirmação"
                           if len(proposed) == 1
-                          else f"{len(proposed)} signals waiting for your confirmation"),
-                "detail": ("Sellbird won't collect anything you haven't approved. "
-                           "Confirm which signals define a good prospect for you."),
-                "action": "Review signals", "tab": "signals",
+                          else f"{len(proposed)} sinais esperando sua confirmação"),
+                "detail": ("O Sellbird não coleta nada que você não aprovou. Confirme quais sinais definem um bom prospect para você."
+                           ""),
+                "action": "Revisar sinais", "tab": "signals",
             })
         elif not confirmed:
             items.append({
                 "key": "signals-none", "tone": "warn",
-                "title": "No signals confirmed",
-                "detail": "Every signal is rejected, so prospecting has nothing to collect.",
-                "action": "Review signals", "tab": "signals",
+                "title": "Nenhum sinal confirmado",
+                "detail": "Todos os sinais estão rejeitados, então a prospecção não tem o que coletar.",
+                "action": "Revisar sinais", "tab": "signals",
             })
 
         if not n_companies and confirmed:
             items.append({
                 "key": "discover", "tone": "good",
-                "title": "No companies yet",
-                "detail": ("Signals are confirmed but nothing has been collected. "
-                           "Discovery is free to try — no account needed."),
-                "action": "Find businesses", "tab": "discover",
+                "title": "Nenhuma empresa ainda",
+                "detail": ("Os sinais estão confirmados, mas nada foi coletado ainda. A busca é grátis para testar, sem precisar de conta."
+                           ""),
+                "action": "Encontrar empresas", "tab": "discover",
             })
 
         unprofiled = unprofiled_count
         if unprofiled:
             items.append({
                 "key": "profile", "tone": "good",
-                "title": f"{unprofiled} companies not looked at yet",
-                "detail": ("Reading their websites is free and it is what makes "
-                           "an email specific — who their agency is, what they "
-                           "are missing, whether they are spending on ads."),
-                "action": "Read their sites", "tab": "discover",
+                "title": f"{unprofiled} empresas ainda não vistas",
+                "detail": ("Ler os sites é grátis e é o que deixa um e-mail específico: qual a agência deles, o que está faltando, se estão investindo em anúncios."
+                           ""
+                           ""),
+                "action": "Ler os sites", "tab": "discover",
             })
 
         if needs_human:
             items.append({
                 "key": "needs-human", "tone": "bad",
-                "title": (f"{needs_human} conversation needs you" if needs_human == 1
-                          else f"{needs_human} conversations need you"),
-                "detail": ("Sellbird stopped and handed these over: an escalation, or a "
-                           "reply it had no safe answer for. Reply yourself, then close "
-                           "it or hand it back."),
-                "action": "Read them", "tab": "conversations",
+                "title": (f"{needs_human} conversa precisa de você" if needs_human == 1
+                          else f"{needs_human} conversas precisam de você"),
+                "detail": ("O Sellbird parou e passou estas para você: uma escalada ou uma resposta para a qual ele não tinha uma resposta segura. Responda você mesmo e depois encerre ou devolva."
+                           ""
+                           ""),
+                "action": "Ler", "tab": "conversations",
             })
 
         if pending:
             items.append({
                 "key": "outbox", "tone": "warn",
-                "title": (f"{len(pending)} email waiting for approval" if len(pending) == 1
-                          else f"{len(pending)} emails waiting for approval"),
-                "detail": ("Nothing sends until you approve it. Read them one at a time."
+                "title": (f"{len(pending)} e-mail esperando aprovação" if len(pending) == 1
+                          else f"{len(pending)} e-mails esperando aprovação"),
+                "detail": ("Nada sai até você aprovar. Leia um de cada vez."
                            if _require_approval_now() else
-                           "Autopilot sends the rest on its own; these wait for you. "
-                           "Read them one at a time."),
-                "action": "Open the decisions desk", "tab": "outbox",
+                           "O piloto automático envia o resto sozinho; estes esperam por você. Leia um de cada vez."
+                           ""),
+                "action": "Abrir a mesa de decisões", "tab": "outbox",
             })
 
         if open_convos:
             items.append({
                 "key": "replies", "tone": "good",
-                "title": (f"{open_convos} live conversation" if open_convos == 1
-                          else f"{open_convos} live conversations"),
-                "detail": "People replied. Check how Sellbird is handling them.",
-                "action": "Read conversations", "tab": "conversations",
+                "title": (f"{open_convos} conversa ativa" if open_convos == 1
+                          else f"{open_convos} conversas ativas"),
+                "detail": "Pessoas responderam. Veja como o Sellbird está lidando com elas.",
+                "action": "Ler conversas", "tab": "conversations",
             })
 
         return {"items": items, "stats": stats}
@@ -2581,24 +2581,24 @@ async def get_today():
 
 CATEGORY_META = {
     "discovery": {
-        "label": "Discovery — who exists",
-        "blurb": "How Sellbird finds businesses at all, and how visible they are. "
-                 "This is the only stage that costs money.",
+        "label": "Descoberta: quem existe",
+        "blurb": "Como o Sellbird encontra as empresas e quão visíveis elas são. É a única etapa que custa dinheiro."
+                 "",
     },
     "profile": {
-        "label": "Profile — what they are",
-        "blurb": "Read from the pages a business already publishes. Free, no AI "
-                 "tokens, three HTTP requests per company. These are the signals "
-                 "that make an email specific.",
+        "label": "Perfil: o que elas são",
+        "blurb": "Lido das páginas que a empresa já publica. Grátis, sem tokens de IA, três requisições HTTP por empresa. São os sinais que deixam um e-mail específico."
+                 ""
+                 "",
     },
     "people": {
-        "label": "People — who decides",
-        "blurb": "Named humans and whether they're the one who can say yes.",
+        "label": "Pessoas: quem decide",
+        "blurb": "Pessoas com nome e se são elas que podem dizer sim.",
     },
     "verification": {
-        "label": "Contactability — can you reach them",
-        "blurb": "Whether the address will actually deliver, and what to do when "
-                 "it won't.",
+        "label": "Alcance: dá para falar com elas",
+        "blurb": "Se o endereço realmente recebe e o que fazer quando não recebe."
+                 "",
     },
 }
 CATEGORY_ORDER = ["discovery", "profile", "people", "verification"]
@@ -2838,7 +2838,7 @@ async def export_cohort(require: str = "", exclude: str = "", ranges: str = ""):
         return JSONResponse({"error": str(e)}, status_code=400)
     except Exception as e:
         logger.warning("Cohort export failed: %s", e)
-        return JSONResponse({"error": "Cohort export failed"}, status_code=500)
+        return JSONResponse({"error": "A exportação do grupo falhou"}, status_code=500)
     return PlainTextResponse(
         buf.getvalue(),
         media_type="text/csv",
@@ -2921,8 +2921,8 @@ def _check_loopback_bind(host: str) -> str:
         name = name[1:-1]
     if not auth.is_loopback(name):
         raise DashboardSetupError(
-            f"Refusing to listen on {host!r}: the dashboard only listens on this machine "
-            "(127.0.0.1, ::1 or localhost). To reach it from elsewhere, tunnel instead: "
+            f"Recusando escutar em {host!r}: o painel só escuta neste computador "
+            "(127.0.0.1, ::1 ou localhost). Para acessar de outro lugar, use um túnel: "
             "ssh -L 5555:127.0.0.1:5555 <this-host>")
     return name
 
@@ -2994,12 +2994,12 @@ def start_dashboard(host: str = "127.0.0.1", port: int = 5555):
     except (DashboardSetupError, auth.TokenError) as e:
         raise DashboardSetupError(str(e)) from e
 
-    print(f"\n  Sellbird Dashboard running. Open this link to unlock it:\n\n    {url}\n")
-    print(f"  The token is stored in {token_store.path} (owner-only). Keep the link")
-    print("  private; anyone with it can use the dashboard. Press Ctrl+C to stop.\n")
+    print(f"\n  Painel do Sellbird rodando. Abra este link para desbloquear:\n\n    {url}\n")
+    print(f"  O token fica guardado em {token_store.path} (só o dono lê). Mantenha o link")
+    print("  em segredo; quem tiver ele usa o painel. Aperte Ctrl+C para parar.\n")
     if os.name == "nt":
-        print("  Windows: the token file is protected by your folder's permissions,")
-        print("  not POSIX file modes.\n")
+        print("  Windows: o arquivo de token é protegido pelas permissões da sua pasta,")
+        print("  não por permissões POSIX.\n")
     from sellbird import dashboard_instance
     dashboard_instance.write(DB_PATH.parent, host=bind, port=port, instance=INSTANCE_ID)
     try:

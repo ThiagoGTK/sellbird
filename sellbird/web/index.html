@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -52,17 +52,15 @@
 <div id="lock-screen"
      style="display:none;position:fixed;inset:0;z-index:1000;align-items:center;justify-content:center;padding:24px">
   <div class="card" style="max-width:500px;width:100%">
-    <h2>Dashboard locked</h2>
+    <h2>Painel bloqueado</h2>
     <p class="lede" id="lock-reason" role="alert"></p>
-    <p class="lede">Open the link that <code>sellbird dashboard</code> printed in your terminal,
-      or run <code>sellbird dashboard --url</code> to print it again. You can also paste the
-      token from <code>data/dashboard-token</code>:</p>
+    <p class="lede">Abra o link que o <code>sellbird dashboard</code> mostrou no seu terminal, ou rode <code>sellbird dashboard --url</code> para mostrar de novo. Você também pode colar o token de <code>data/dashboard-token</code>:</p>
     <form onsubmit="unlockWithToken(event)" class="form-row">
       <div class="form-group" style="margin-bottom:0">
-        <label class="form-label" for="lock-token">Dashboard token</label>
+        <label class="form-label" for="lock-token">Token do painel</label>
         <input type="password" class="form-input" id="lock-token" autocomplete="off" spellcheck="false">
       </div>
-      <button class="btn btn-primary" type="submit">Unlock</button>
+      <button class="btn btn-primary" type="submit">Desbloquear</button>
     </form>
   </div>
 </div>
@@ -72,49 +70,49 @@
 <aside class="sidebar">
   <div class="brand">
     <h1 class="brand-lockup"><a href="https://sellbird.ai" target="_blank" rel="noopener" title="sellbird.ai"><svg viewBox="0 0 1040 640" aria-hidden="true"><path fill="currentColor" d="M83 0C246 47 417 91 562 157C676 209 759 258 744 314C813 257 896 239 954 301L1034 324L944 359C837 473 731 548 563 524C506 516 464 513 427 519L0 631L407 406L224 213L555 300L420 428L663 315L630 281C407 229 264 237 83 0Z"/></svg><span>sellbird</span></a></h1>
-    <div class="tagline">Make the first move.</div>
+    <div class="tagline">Dê o primeiro passo.</div>
   </div>
 
-  <nav aria-label="Sections">
+  <nav aria-label="Seções">
     <div class="nav-group">
-      <div class="nav-label">Work</div>
-      <button class="active" onclick="showTab('today', this)"><svg class="icon" aria-hidden="true"><use href="#i-today"/></svg><span class="label">Today</span><span class="nav-count" id="nav-today"></span></button>
-      <button onclick="showTab('company', this)"><svg class="icon" aria-hidden="true"><use href="#i-company"/></svg><span class="label">Your company</span><span class="nav-count" id="nav-company"></span></button>
-      <button onclick="showTab('outbox', this)"><svg class="icon" aria-hidden="true"><use href="#i-outbox"/></svg><span class="label">Outbox</span><span class="nav-count" id="nav-outbox"></span></button>
-      <button onclick="showTab('inboxes', this)"><svg class="icon" aria-hidden="true"><use href="#i-inboxes"/></svg><span class="label">Inboxes</span></button>
-      <button onclick="showTab('conversations', this)"><svg class="icon" aria-hidden="true"><use href="#i-conversations"/></svg><span class="label">Conversations</span><span class="nav-count" id="nav-conversations"></span></button>
+      <div class="nav-label">Trabalho</div>
+      <button class="active" onclick="showTab('today', this)"><svg class="icon" aria-hidden="true"><use href="#i-today"/></svg><span class="label">Hoje</span><span class="nav-count" id="nav-today"></span></button>
+      <button onclick="showTab('company', this)"><svg class="icon" aria-hidden="true"><use href="#i-company"/></svg><span class="label">Sua empresa</span><span class="nav-count" id="nav-company"></span></button>
+      <button onclick="showTab('outbox', this)"><svg class="icon" aria-hidden="true"><use href="#i-outbox"/></svg><span class="label">Caixa de saída</span><span class="nav-count" id="nav-outbox"></span></button>
+      <button onclick="showTab('inboxes', this)"><svg class="icon" aria-hidden="true"><use href="#i-inboxes"/></svg><span class="label">Caixas de e-mail</span></button>
+      <button onclick="showTab('conversations', this)"><svg class="icon" aria-hidden="true"><use href="#i-conversations"/></svg><span class="label">Conversas</span><span class="nav-count" id="nav-conversations"></span></button>
     </div>
     <div class="nav-group">
-      <div class="nav-label">Pipeline</div>
-      <button onclick="showTab('signals', this)"><svg class="icon" aria-hidden="true"><use href="#i-signals"/></svg><span class="label">Signals</span><span class="nav-count" id="nav-signals"></span></button>
-      <button onclick="showTab('discover', this)"><svg class="icon" aria-hidden="true"><use href="#i-discover"/></svg><span class="label">Discover</span></button>
-      <button onclick="showTab('companies', this)"><svg class="icon" aria-hidden="true"><use href="#i-companies"/></svg><span class="label">Companies</span></button>
-      <button onclick="showTab('prospects', this)"><svg class="icon" aria-hidden="true"><use href="#i-contacts"/></svg><span class="label">Contacts</span></button>
-      <button onclick="showTab('campaigns', this)"><svg class="icon" aria-hidden="true"><use href="#i-campaigns"/></svg><span class="label">Campaigns</span></button>
+      <div class="nav-label">Funil</div>
+      <button onclick="showTab('signals', this)"><svg class="icon" aria-hidden="true"><use href="#i-signals"/></svg><span class="label">Sinais</span><span class="nav-count" id="nav-signals"></span></button>
+      <button onclick="showTab('discover', this)"><svg class="icon" aria-hidden="true"><use href="#i-discover"/></svg><span class="label">Descobrir</span></button>
+      <button onclick="showTab('companies', this)"><svg class="icon" aria-hidden="true"><use href="#i-companies"/></svg><span class="label">Empresas</span></button>
+      <button onclick="showTab('prospects', this)"><svg class="icon" aria-hidden="true"><use href="#i-contacts"/></svg><span class="label">Contatos</span></button>
+      <button onclick="showTab('campaigns', this)"><svg class="icon" aria-hidden="true"><use href="#i-campaigns"/></svg><span class="label">Campanhas</span></button>
     </div>
     <div class="nav-group">
-      <div class="nav-label">System</div>
-      <button onclick="showTab('activity', this)"><svg class="icon" aria-hidden="true"><use href="#i-activity"/></svg><span class="label">Activity</span></button>
-      <button onclick="showTab('usage', this)"><svg class="icon" aria-hidden="true"><use href="#i-usage"/></svg><span class="label">Usage</span></button>
-      <button onclick="showTab('controls', this)"><svg class="icon" aria-hidden="true"><use href="#i-controls"/></svg><span class="label">Controls</span></button>
-      <button onclick="showTab('settings', this)"><svg class="icon" aria-hidden="true"><use href="#i-settings"/></svg><span class="label">Settings</span></button>
-      <button onclick="showTab('help', this)"><svg class="icon" aria-hidden="true"><use href="#i-help"/></svg><span class="label">Help</span></button>
+      <div class="nav-label">Sistema</div>
+      <button onclick="showTab('activity', this)"><svg class="icon" aria-hidden="true"><use href="#i-activity"/></svg><span class="label">Atividade</span></button>
+      <button onclick="showTab('usage', this)"><svg class="icon" aria-hidden="true"><use href="#i-usage"/></svg><span class="label">Uso</span></button>
+      <button onclick="showTab('controls', this)"><svg class="icon" aria-hidden="true"><use href="#i-controls"/></svg><span class="label">Controles</span></button>
+      <button onclick="showTab('settings', this)"><svg class="icon" aria-hidden="true"><use href="#i-settings"/></svg><span class="label">Configurações</span></button>
+      <button onclick="showTab('help', this)"><svg class="icon" aria-hidden="true"><use href="#i-help"/></svg><span class="label">Ajuda</span></button>
     </div>
   </nav>
 
   <div class="sidebar-foot">
     <div class="sellbird-status" id="header-status">
       <span class="status-dot stopped" id="header-dot"></span>
-      <span id="header-status-text">Checking…</span>
+      <span id="header-status-text">Verificando…</span>
     </div>
     <div class="foot-actions">
-      <div class="theme-switch" role="group" aria-label="Appearance">
-        <button data-theme-opt="auto" onclick="setTheme('auto')" title="Match your computer" aria-label="Match your computer"><svg class="icon" aria-hidden="true"><use href="#i-monitor"/></svg></button>
-        <button data-theme-opt="light" onclick="setTheme('light')" title="Light" aria-label="Light"><svg class="icon" aria-hidden="true"><use href="#i-sun"/></svg></button>
-        <button data-theme-opt="dark" onclick="setTheme('dark')" title="Dark" aria-label="Dark"><svg class="icon" aria-hidden="true"><use href="#i-moon"/></svg></button>
+      <div class="theme-switch" role="group" aria-label="Aparência">
+        <button data-theme-opt="auto" onclick="setTheme('auto')" title="Igual ao computador" aria-label="Igual ao computador"><svg class="icon" aria-hidden="true"><use href="#i-monitor"/></svg></button>
+        <button data-theme-opt="light" onclick="setTheme('light')" title="Claro" aria-label="Claro"><svg class="icon" aria-hidden="true"><use href="#i-sun"/></svg></button>
+        <button data-theme-opt="dark" onclick="setTheme('dark')" title="Escuro" aria-label="Escuro"><svg class="icon" aria-hidden="true"><use href="#i-moon"/></svg></button>
       </div>
-      <button class="refresh-btn" onclick="loadCurrentTab()" title="Refresh this page">
-        <svg class="icon" style="width:13px;height:13px"><use href="#i-refresh"/></svg>Refresh</button>
+      <button class="refresh-btn" onclick="loadCurrentTab()" title="Atualizar esta página">
+        <svg class="icon" style="width:13px;height:13px"><use href="#i-refresh"/></svg>Atualizar</button>
     </div>
   </div>
 </aside>
@@ -126,8 +124,8 @@
 <div id="today" class="section active">
   <div class="section-head">
     <div>
-      <h2>Today</h2>
-      <p>What's waiting on you, and how the pipeline is moving.</p>
+      <h2>Hoje</h2>
+      <p>O que está esperando por você e como o funil está andando.</p>
     </div>
   </div>
 
@@ -138,22 +136,22 @@
 
   <div class="grid-main">
     <div>
-      <div class="subhead">Needs you</div>
+      <div class="subhead">Precisa de você</div>
       <div id="today-queue"></div>
 
-      <div class="subhead">Pipeline right now</div>
+      <div class="subhead">Funil agora</div>
       <div class="card" id="live-status"></div>
 
-      <div class="subhead">Recent activity <span class="hint"><a href="#" onclick="goTab('activity');return false">See all</a></span></div>
+      <div class="subhead">Atividade recente <span class="hint"><a href="#" onclick="goTab('activity');return false">Ver tudo</a></span></div>
       <div class="card" id="today-activity"></div>
     </div>
 
     <aside>
-      <div class="subhead">Contacts by stage</div>
+      <div class="subhead">Contatos por etapa</div>
       <div class="card" id="today-figures"></div>
       <div class="facts" id="today-facts"></div>
       <div id="today-runs-block">
-        <div class="subhead">Collector runs</div>
+        <div class="subhead">Execuções dos coletores</div>
         <div class="card" id="today-runs" style="padding-top:8px;padding-bottom:8px"></div>
       </div>
     </aside>
@@ -165,29 +163,26 @@
 <div id="company" class="section">
   <div class="section-head">
     <div>
-      <h2>Your company</h2>
-      <p>Everything Sellbird writes from: what you sell, who you sell to, the offer every first email ends with, and who it's from. Edit any of it here, or talk it through with your coding agent.</p>
+      <h2>Sua empresa</h2>
+      <p>Tudo o que o Sellbird usa para escrever: o que você vende, para quem vende, a oferta que fecha todo primeiro e-mail e quem assina. Edite qualquer item aqui ou converse com o seu agente de código.</p>
     </div>
   </div>
-  <div id="company-body" class="company-body"><p class="desc">Loading...</p></div>
+  <div id="company-body" class="company-body"><p class="desc">Carregando...</p></div>
 </div>
 
 <div id="signals" class="section">
   <div class="section-head">
     <div>
-      <h2>Signals</h2>
-      <p>Sellbird proposes what it knows how to look for. You decide what actually
-         defines a good prospect &mdash; nothing is collected until you confirm it.</p>
+      <h2>Sinais</h2>
+      <p>O Sellbird propõe o que sabe procurar. Você decide o que realmente define um bom prospect: nada é coletado até você confirmar.</p>
     </div>
   </div>
   <div id="signals-summary"></div>
   <div id="signals-groups"></div>
 
-  <div class="subhead">Cohort builder</div>
+  <div class="subhead">Montador de grupos</div>
   <div class="card">
-    <p class="lede">A prospect list is a query, not a file. Pick the signals a
-      good prospect must have &mdash; and any that disqualify them &mdash; and see
-      how many companies match right now.</p>
+    <p class="lede">Uma lista de prospects é uma consulta, não um arquivo. Escolha os sinais que um bom prospect precisa ter (e os que desqualificam) e veja quantas empresas encaixam agora.</p>
     <div id="cohort-builder"></div>
     <div id="cohort-result"></div>
   </div>
@@ -197,53 +192,52 @@
 <div id="discover" class="section">
   <div class="section-head">
     <div>
-      <h2>Discover</h2>
-      <p>Find businesses matching your ICP. Pick a source, see what it will cost,
-         then run it &mdash; nothing is called until you press the button.</p>
+      <h2>Descobrir</h2>
+      <p>Encontre empresas que encaixam no seu ICP. Escolha uma fonte, veja quanto vai custar e rode: nada é chamado até você apertar o botão.</p>
     </div>
   </div>
   <div id="discover-profile"></div>
 
-  <div class="subhead">Source</div>
+  <div class="subhead">Fonte</div>
   <div id="discover-providers"></div>
 
-  <div class="subhead">Run</div>
+  <div class="subhead">Rodar</div>
   <div class="card">
     <div class="form-row" style="margin-bottom:4px">
       <div class="form-group">
-        <label class="form-label" for="disc-preset">Look for</label>
-        <select class="form-input" id="disc-preset" title="Startup and hiring searches, run by web search (TinyFish, Serper or DataForSEO SERP). YC startups and Accelerator startups: companies whose own site says Y Combinator or another accelerator (Techstars, Antler, Entrepreneur First and others) backed them; turn on YC_BACKED or ACCELERATOR to tag them. Recently funded: companies announcing their own raise in the last 18 months; turn on FUNDING_ROUND to record the round, amount and date. Hiring for your roles: companies whose own careers pages list one of your hiring_signals roles (or ICP titles); turn on HIRING_ROLE and profiling reads the job board their site links to.">
-          <option value="">Your ICP's industries</option>
-          <option value="yc">YC startups</option>
-          <option value="accelerator">Accelerator startups</option>
-          <option value="funding">Recently funded</option>
-          <option value="hiring">Companies hiring for your roles</option>
+        <label class="form-label" for="disc-preset">Procurar</label>
+        <select class="form-input" id="disc-preset" title="Buscas de startups e de vagas, feitas por pesquisa na web (TinyFish, Serper ou DataForSEO SERP). Startups da YC e de aceleradoras: empresas cujo próprio site diz que a Y Combinator ou outra aceleradora (Techstars, Antler, Entrepreneur First e outras) investiu nelas; ligue YC_BACKED ou ACCELERATOR para marcá-las. Captação recente: empresas que anunciaram a própria captação nos últimos 18 meses; ligue FUNDING_ROUND para gravar a rodada, o valor e a data. Contratando para os seus cargos: empresas cuja página de vagas lista um dos cargos de hiring_signals (ou do ICP); ligue HIRING_ROLE e a análise lê o site de vagas linkado.">
+          <option value="">Segmentos do seu ICP</option>
+          <option value="yc">Startups da YC</option>
+          <option value="accelerator">Startups de aceleradoras</option>
+          <option value="funding">Captação recente</option>
+          <option value="hiring">Empresas contratando para os seus cargos</option>
         </select>
       </div>
       <div class="form-group" style="flex:2">
-        <label class="form-label" for="disc-cities">Cities</label>
-        <input class="form-input" id="disc-cities" placeholder="From your ICP, or override: Denver, CO; Boulder, CO">
+        <label class="form-label" for="disc-cities">Cidades</label>
+        <input class="form-input" id="disc-cities" placeholder="Do seu ICP, ou troque: Curitiba, PR; Londrina, PR">
       </div>
       <div class="form-group">
-        <label class="form-label" for="disc-limit">Results per query</label>
+        <label class="form-label" for="disc-limit">Resultados por busca</label>
         <input class="form-input" id="disc-limit" type="number" value="100" min="1" max="1000">
       </div>
       <div class="form-group">
-        <label class="form-label" for="disc-depth">Search depth</label>
+        <label class="form-label" for="disc-depth">Profundidade da busca</label>
         <input class="form-input" id="disc-depth" type="number" value="30" min="10" max="100" step="10">
       </div>
       <div class="form-group">
-        <label class="form-label" for="disc-cap">Spend cap ($)</label>
+        <label class="form-label" for="disc-cap">Limite de gasto (US$)</label>
         <input class="form-input" id="disc-cap" type="number" value="1.00" min="0" step="0.25">
       </div>
     </div>
     <div id="discover-estimate"></div>
     <div class="btn-group">
-      <button class="btn btn-secondary" onclick="estimateDiscovery()">Estimate cost</button>
+      <button class="btn btn-secondary" onclick="estimateDiscovery()">Estimar custo</button>
       <button class="btn btn-primary" id="disc-run" onclick="runDiscovery()" disabled>
-        Estimate first</button>
+        Estime primeiro</button>
       <button class="btn btn-danger" id="disc-stop" onclick="stopDiscovery()" style="display:none">
-        Stop</button>
+        Parar</button>
     </div>
   </div>
   <div id="discover-result"></div>
@@ -251,18 +245,18 @@
 
 <!-- Companies -->
 <div id="companies" class="section">
-  <div class="section-head"><div><h2>Companies</h2><p>Organizations Sellbird has researched, best fit first. Click a row to see its contacts.</p></div>
-    <div><button class="btn btn-secondary btn-sm" onclick="downloadCsv('/api/export/companies.csv', 'company-register.csv', this)"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Export register</button></div></div>
+  <div class="section-head"><div><h2>Empresas</h2><p>Empresas que o Sellbird pesquisou, as que mais encaixam primeiro. Clique numa linha para ver os contatos.</p></div>
+    <div><button class="btn btn-secondary btn-sm" onclick="downloadCsv('/api/export/companies.csv', 'company-register.csv', this)"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Exportar registro</button></div></div>
   <div id="companies-list"></div>
 </div>
 
 <!-- Contacts -->
 <div id="prospects" class="section">
   <div class="section-head">
-    <div><h2>Contacts</h2><p>People Sellbird has found, how sure it is of their address, and where each one stands.</p></div>
+    <div><h2>Contatos</h2><p>Pessoas que o Sellbird encontrou, quanta certeza ele tem do e-mail de cada uma e em que pé cada uma está.</p></div>
     <div class="page-actions">
-      <button class="btn btn-secondary btn-sm" onclick="downloadCsv('/api/export/prospects.csv', 'prospects.csv', this)"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Export deliverable</button>
-      <button class="btn btn-ghost btn-sm" onclick="downloadCsv('/api/export/prospects.csv?all=true', 'prospects-all.csv', this)">Export all</button>
+      <button class="btn btn-secondary btn-sm" onclick="downloadCsv('/api/export/prospects.csv', 'prospects.csv', this)"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Exportar só os válidos</button>
+      <button class="btn btn-ghost btn-sm" onclick="downloadCsv('/api/export/prospects.csv?all=true', 'prospects-all.csv', this)">Exportar tudo</button>
     </div>
   </div>
   <div id="prospects-table"></div>
@@ -270,7 +264,7 @@
 
 <!-- Campaigns -->
 <div id="campaigns" class="section">
-  <div class="section-head"><div><h2>Campaigns</h2><p>Email sequences Sellbird has written, and how far each one has got.</p></div></div>
+  <div class="section-head"><div><h2>Campanhas</h2><p>Sequências de e-mail que o Sellbird escreveu e até onde cada uma chegou.</p></div></div>
   <div id="campaigns-list"></div>
 </div>
 
@@ -278,9 +272,9 @@
 <div id="outbox" class="section">
   <div class="section-head">
     <div>
-      <h2>Outbox</h2>
-      <p>Emails waiting for you. Read one, decide, move on &mdash;
-         <kbd>A</kbd> approve, <kbd>R</kbd> reject, <kbd>E</kbd> edit, <kbd>J</kbd>/<kbd>K</kbd> to move.</p>
+      <h2>Caixa de saída</h2>
+      <p>E-mails esperando por você. Leia, decida, siga em frente:
+         <kbd>A</kbd> aprovar, <kbd>R</kbd> rejeitar, <kbd>E</kbd> editar, <kbd>J</kbd>/<kbd>K</kbd> para navegar.</p>
     </div>
     <div class="page-actions" id="outbox-actions"></div>
   </div>
@@ -291,7 +285,7 @@
 
 <!-- Conversations -->
 <div id="conversations" class="section">
-  <div class="section-head"><div><h2>Conversations</h2><p>Every reply, and how Sellbird handled it.</p></div></div>
+  <div class="section-head"><div><h2>Conversas</h2><p>Todas as respostas e como o Sellbird lidou com cada uma.</p></div></div>
   <div id="conversations-list"></div>
 </div>
 
@@ -299,8 +293,8 @@
 <div id="inboxes" class="section">
   <div class="section-head">
     <div>
-      <h2>Inboxes</h2>
-      <p>The email addresses Sellbird sends from. Each one sends a limited number of cold emails a day, so more inboxes means more emails out. Replies stay on the inbox that started the thread.</p>
+      <h2>Caixas de e-mail</h2>
+      <p>Os endereços de e-mail de onde o Sellbird envia. Cada um manda um número limitado de e-mails frios por dia, então mais caixas significa mais e-mails saindo. As respostas ficam na caixa que começou a conversa.</p>
     </div>
     <div class="page-actions" id="inboxes-actions"></div>
   </div>
@@ -311,13 +305,13 @@
 
 <!-- Activity -->
 <div id="activity" class="section">
-  <div class="section-head"><div><h2>Activity</h2><p>A running log of every action Sellbird's agents have taken.</p></div></div>
+  <div class="section-head"><div><h2>Atividade</h2><p>O registro de cada ação que os agentes do Sellbird fizeram.</p></div></div>
   <div id="activity-list"></div>
 </div>
 
 <!-- Usage -->
 <div id="usage" class="section">
-  <div class="section-head"><div><h2>Usage</h2><p>Model usage on your subscription (Claude or Codex): calls and tokens by provider, agent and task. Subscription plans aren't billed per token, so there are no dollar costs here.</p></div></div>
+  <div class="section-head"><div><h2>Uso</h2><p>Uso do modelo na sua assinatura (Claude ou Codex): chamadas e tokens por provedor, agente e tarefa. Planos de assinatura não cobram por token, então não há custos em dinheiro aqui.</p></div></div>
   <div id="usage-quota" class="card" style="display:none"></div>
   <div class="stats-grid" id="usage-stats"></div>
   <div class="card" id="usage-daily" style="display:none"></div>
@@ -326,148 +320,148 @@
 
 <!-- Settings -->
 <div id="settings" class="section">
-  <div class="section-head"><div><h2>Settings</h2><p>Credentials are stored locally in <code>.env</code> and never sent anywhere except the services themselves.</p></div></div>
+  <div class="section-head"><div><h2>Configurações</h2><p>As credenciais ficam guardadas no seu computador, em <code>.env</code> e nunca são enviadas para nenhum lugar além dos próprios serviços.</p></div></div>
 
-  <div class="subhead">Sending</div>
+  <div class="subhead">Envio</div>
   <div id="sending-mode-card"></div>
 
-  <div class="subhead">Email provider <span class="hint">Active: <b id="active-provider">…</b> &middot; set <code>channels.email.provider</code> in <code>sellbird.yaml</code> to gmail, microsoft, smtp or instantly</span></div>
+  <div class="subhead">Provedor de e-mail <span class="hint">Ativo: <b id="active-provider">…</b> &middot; defina <code>channels.email.provider</code> em <code>sellbird.yaml</code> como gmail, microsoft, smtp ou instantly</span></div>
   <div class="card">
     <div class="settings-row">
       <div>
-        <h3>Gmail / Google Workspace <span class="tag accent">Recommended</span> <span id="gmail-status" class="email-tag"></span></h3>
-        <p class="desc">Use a mailbox on a dedicated secondary domain. Create an OAuth client (type "Desktop app") in Google Cloud Console → Gmail API, paste the id and secret, save, then sign in on the Inboxes tab (or run <code>sellbird gmail auth</code>).</p>
+        <h3>Gmail / Google Workspace <span class="tag accent">Recomendado</span> <span id="gmail-status" class="email-tag"></span></h3>
+        <p class="desc">Use uma caixa num domínio secundário só para isso. Crie um cliente OAuth (tipo "App para computador") no Google Cloud Console → Gmail API, cole o ID e o segredo, salve e depois entre na aba Caixas de e-mail (ou rode <code>sellbird gmail auth</code>).</p>
       </div>
       <div class="fields">
-        <div class="form-group"><label class="form-label" for="gmail-id">Client ID</label>
+        <div class="form-group"><label class="form-label" for="gmail-id">ID do cliente</label>
           <input type="text" class="form-input" id="gmail-id" placeholder="xxxx.apps.googleusercontent.com" autocomplete="off"></div>
-        <div class="form-group"><label class="form-label" for="gmail-secret">Client secret</label>
-          <div class="with-btn"><input type="password" class="form-input" id="gmail-secret" placeholder="Enter client secret" autocomplete="off">
-            <button class="btn btn-secondary" onclick="toggleVisibility('gmail-secret')">Show</button></div></div>
-        <button class="btn btn-primary btn-sm" onclick="saveGmail()">Save Gmail</button>
+        <div class="form-group"><label class="form-label" for="gmail-secret">Segredo do cliente</label>
+          <div class="with-btn"><input type="password" class="form-input" id="gmail-secret" placeholder="Digite o segredo do cliente" autocomplete="off">
+            <button class="btn btn-secondary" onclick="toggleVisibility('gmail-secret')">Mostrar</button></div></div>
+        <button class="btn btn-primary btn-sm" onclick="saveGmail()">Salvar Gmail</button>
       </div>
     </div>
 
     <div class="settings-row">
       <div>
-        <h3>SMTP + IMAP mailbox</h3>
-        <p class="desc">Any real mailbox (AgentMail, Fastmail, a Workspace app password). IMAP defaults to the SMTP host and login if left blank.</p>
+        <h3>Caixa SMTP + IMAP</h3>
+        <p class="desc">Qualquer caixa de e-mail de verdade (Hostinger, Locaweb, Zoho, AgentMail, uma senha de app do Workspace). Se ficar em branco, o IMAP usa o mesmo servidor e login do SMTP.</p>
       </div>
       <div class="fields">
         <div class="form-row">
-          <div class="form-group"><label class="form-label" for="smtp-host">SMTP host</label>
+          <div class="form-group"><label class="form-label" for="smtp-host">Servidor SMTP</label>
             <input type="text" class="form-input" id="smtp-host" placeholder="smtp.example.com" autocomplete="off"></div>
-          <div class="form-group" style="max-width:120px"><label class="form-label" for="smtp-port">Port</label>
+          <div class="form-group" style="max-width:120px"><label class="form-label" for="smtp-port">Porta</label>
             <input type="text" class="form-input" id="smtp-port" placeholder="587" autocomplete="off"></div>
         </div>
-        <div class="form-group"><label class="form-label" for="smtp-user">Username</label>
-          <input type="text" class="form-input" id="smtp-user" placeholder="you@example.com" autocomplete="off"></div>
-        <div class="form-group"><label class="form-label" for="smtp-pass">Password</label>
-          <div class="with-btn"><input type="password" class="form-input" id="smtp-pass" placeholder="Enter password / app password" autocomplete="off">
-            <button class="btn btn-secondary" onclick="toggleVisibility('smtp-pass')">Show</button></div></div>
+        <div class="form-group"><label class="form-label" for="smtp-user">Usuário</label>
+          <input type="text" class="form-input" id="smtp-user" placeholder="voce@exemplo.com.br" autocomplete="off"></div>
+        <div class="form-group"><label class="form-label" for="smtp-pass">Senha</label>
+          <div class="with-btn"><input type="password" class="form-input" id="smtp-pass" placeholder="Digite a senha / senha de app" autocomplete="off">
+            <button class="btn btn-secondary" onclick="toggleVisibility('smtp-pass')">Mostrar</button></div></div>
         <details class="more-fields">
-          <summary>Reading replies from a different IMAP server or login</summary>
+          <summary>Ler respostas de outro servidor ou login IMAP</summary>
           <div class="form-row">
-            <div class="form-group"><label class="form-label" for="imap-host">IMAP host</label>
-              <input type="text" class="form-input" id="imap-host" placeholder="Same as SMTP host" autocomplete="off"></div>
-            <div class="form-group" style="max-width:120px"><label class="form-label" for="imap-port">Port</label>
+            <div class="form-group"><label class="form-label" for="imap-host">Servidor IMAP</label>
+              <input type="text" class="form-input" id="imap-host" placeholder="Igual ao servidor SMTP" autocomplete="off"></div>
+            <div class="form-group" style="max-width:120px"><label class="form-label" for="imap-port">Porta</label>
               <input type="text" class="form-input" id="imap-port" placeholder="993" autocomplete="off"></div>
           </div>
-          <div class="form-group"><label class="form-label" for="imap-user">IMAP username</label>
-            <input type="text" class="form-input" id="imap-user" placeholder="Same as SMTP username" autocomplete="off"></div>
-          <div class="form-group"><label class="form-label" for="imap-pass">IMAP password</label>
-            <div class="with-btn"><input type="password" class="form-input" id="imap-pass" placeholder="Same as SMTP password" autocomplete="off" oninput="if (this.value) document.getElementById('imap-same-pass').checked = false">
-              <button class="btn btn-secondary" onclick="toggleVisibility('imap-pass')">Show</button></div></div>
-          <label class="check-line"><input type="checkbox" id="imap-same-pass"> Use the SMTP password for IMAP</label>
+          <div class="form-group"><label class="form-label" for="imap-user">Usuário IMAP</label>
+            <input type="text" class="form-input" id="imap-user" placeholder="Igual ao usuário SMTP" autocomplete="off"></div>
+          <div class="form-group"><label class="form-label" for="imap-pass">Senha IMAP</label>
+            <div class="with-btn"><input type="password" class="form-input" id="imap-pass" placeholder="Igual à senha SMTP" autocomplete="off" oninput="if (this.value) document.getElementById('imap-same-pass').checked = false">
+              <button class="btn btn-secondary" onclick="toggleVisibility('imap-pass')">Mostrar</button></div></div>
+          <label class="check-line"><input type="checkbox" id="imap-same-pass"> Usar a senha do SMTP no IMAP</label>
         </details>
-        <button class="btn btn-primary btn-sm" onclick="saveSmtp()">Save SMTP</button>
+        <button class="btn btn-primary btn-sm" onclick="saveSmtp()">Salvar SMTP</button>
       </div>
     </div>
 
     <div class="settings-row">
       <div>
         <h3>Microsoft 365 / Outlook <span id="m365-status" class="email-tag"></span></h3>
-        <p class="desc">Microsoft turned off password sign-in for IMAP, so Outlook mailboxes connect with OAuth. In <a href="https://entra.microsoft.com" target="_blank" rel="noopener noreferrer">Entra</a> → App registrations, register an app for your organization only and add the redirect URI <code>http://localhost:8766</code> as "Public client/native". Paste both IDs here, save, then sign in on the Inboxes tab (or run <code>sellbird microsoft auth</code>). No client secret is needed.</p>
+        <p class="desc">A Microsoft desligou o login por senha no IMAP, então caixas do Outlook se conectam com OAuth. No <a href="https://entra.microsoft.com" target="_blank" rel="noopener noreferrer">Entra</a> → Registros de aplicativo, registre um app só para a sua organização e adicione a URI de redirecionamento <code>http://localhost:8766</code> como "Cliente público/nativo". Cole os dois IDs aqui, salve e depois entre na aba Caixas de e-mail (ou rode <code>sellbird microsoft auth</code>). Não precisa de segredo do cliente.</p>
       </div>
       <div class="fields">
-        <div class="form-group"><label class="form-label" for="m365-client">Application (client) ID</label>
+        <div class="form-group"><label class="form-label" for="m365-client">ID do aplicativo (cliente)</label>
           <input type="text" class="form-input" id="m365-client" placeholder="00000000-0000-0000-0000-000000000000" autocomplete="off"></div>
-        <div class="form-group"><label class="form-label" for="m365-tenant">Directory (tenant) ID</label>
+        <div class="form-group"><label class="form-label" for="m365-tenant">ID do diretório (locatário)</label>
           <input type="text" class="form-input" id="m365-tenant" placeholder="00000000-0000-0000-0000-000000000000" autocomplete="off"></div>
-        <button class="btn btn-primary btn-sm" onclick="saveMicrosoft()">Save Microsoft 365</button>
+        <button class="btn btn-primary btn-sm" onclick="saveMicrosoft()">Salvar Microsoft 365</button>
       </div>
     </div>
 
     <div class="settings-row">
       <div>
-        <h3>Instantly <span class="tag">Legacy</span></h3>
-        <p class="desc">Get your API key from <a href="https://app.instantly.ai/app/settings/integrations" target="_blank" rel="noopener">Instantly Settings → Integrations</a> (Growth plan or higher for API).</p>
+        <h3>Instantly <span class="tag">Antigo</span></h3>
+        <p class="desc">Pegue sua chave de API em <a href="https://app.instantly.ai/app/settings/integrations" target="_blank" rel="noopener">Configurações do Instantly → Integrações</a> (plano Growth ou superior para ter API).</p>
       </div>
       <div class="fields">
-        <div class="form-group"><label class="form-label" for="instantly-key">API key</label>
-          <div class="with-btn"><input type="password" class="form-input" id="instantly-key" placeholder="Enter your Instantly API key" autocomplete="off">
-            <button class="btn btn-secondary" onclick="toggleVisibility('instantly-key')">Show</button>
-            <button class="btn btn-secondary" onclick="testInstantly()">Test</button></div>
+        <div class="form-group"><label class="form-label" for="instantly-key">Chave de API</label>
+          <div class="with-btn"><input type="password" class="form-input" id="instantly-key" placeholder="Digite sua chave de API do Instantly" autocomplete="off">
+            <button class="btn btn-secondary" onclick="toggleVisibility('instantly-key')">Mostrar</button>
+            <button class="btn btn-secondary" onclick="testInstantly()">Testar</button></div>
           <div id="instantly-test-result"></div></div>
-        <button class="btn btn-primary btn-sm" onclick="saveInstantly()">Save Instantly</button>
+        <button class="btn btn-primary btn-sm" onclick="saveInstantly()">Salvar Instantly</button>
       </div>
     </div>
   </div>
 
-  <div class="subhead">Email verification <span class="hint">Strongly recommended</span></div>
+  <div class="subhead">Verificação de e-mail <span class="hint">Muito recomendado</span></div>
   <div class="card">
     <div class="settings-row">
       <div>
-        <h3>Verifiers</h3>
-        <p class="desc">Add at least one so found emails get verified. Without any, addresses stay <span class="email-tag guess" style="margin:0">guess</span> and are never sent. Reoon has the best free tier (600 a month).</p>
+        <h3>Verificadores</h3>
+        <p class="desc">Adicione pelo menos um para os e-mails encontrados serem verificados. Sem nenhum, os endereços ficam como <span class="email-tag guess" style="margin:0">palpite</span> e nunca são enviados. O Reoon tem o melhor plano grátis (600 por mês).</p>
       </div>
       <div class="fields">
-        <div class="form-group"><label class="form-label" for="reoon-key">Reoon API key <span id="reoon-status" class="email-tag"></span></label>
-          <div class="with-btn"><input type="password" class="form-input" id="reoon-key" placeholder="600 free/mo — reoon.com/email-verifier" autocomplete="off">
-            <button class="btn btn-secondary" onclick="toggleVisibility('reoon-key')">Show</button></div></div>
-        <div class="form-group"><label class="form-label" for="zerobounce-key">ZeroBounce API key <span id="zerobounce-status" class="email-tag"></span></label>
-          <input type="password" class="form-input" id="zerobounce-key" placeholder="100 free/mo — best for M365/Workspace catch-alls" autocomplete="off"></div>
-        <div class="form-group"><label class="form-label" for="hunter-key">Hunter API key <span id="hunter-status" class="email-tag"></span></label>
-          <input type="password" class="form-input" id="hunter-key" placeholder="50 free/mo + email-pattern lookup" autocomplete="off"></div>
-        <button class="btn btn-primary btn-sm" onclick="saveVerifiers()">Save verification keys</button>
+        <div class="form-group"><label class="form-label" for="reoon-key">Chave de API do Reoon <span id="reoon-status" class="email-tag"></span></label>
+          <div class="with-btn"><input type="password" class="form-input" id="reoon-key" placeholder="600 grátis/mês, reoon.com/email-verifier" autocomplete="off">
+            <button class="btn btn-secondary" onclick="toggleVisibility('reoon-key')">Mostrar</button></div></div>
+        <div class="form-group"><label class="form-label" for="zerobounce-key">Chave de API do ZeroBounce <span id="zerobounce-status" class="email-tag"></span></label>
+          <input type="password" class="form-input" id="zerobounce-key" placeholder="100 grátis/mês, melhor para domínios "aceita tudo" do M365/Workspace" autocomplete="off"></div>
+        <div class="form-group"><label class="form-label" for="hunter-key">Chave de API do Hunter <span id="hunter-status" class="email-tag"></span></label>
+          <input type="password" class="form-input" id="hunter-key" placeholder="50 grátis/mês + busca de padrão de e-mail" autocomplete="off"></div>
+        <button class="btn btn-primary btn-sm" onclick="saveVerifiers()">Salvar chaves de verificação</button>
       </div>
     </div>
   </div>
 
-  <div class="subhead">Optional</div>
+  <div class="subhead">Opcional</div>
   <div class="card">
     <div class="settings-row">
       <div>
         <h3>LinkedIn</h3>
-        <p class="desc">For automated LinkedIn prospecting. Sellbird logs in and searches like a human.</p>
+        <p class="desc">Para prospecção automática no LinkedIn. O Sellbird entra e pesquisa como uma pessoa.</p>
       </div>
       <div class="fields">
         <div class="form-group">
-          <label class="form-label" for="linkedin-email">Email or username</label>
-          <input type="text" class="form-input" id="linkedin-email" placeholder="your@email.com" autocomplete="off">
+          <label class="form-label" for="linkedin-email">E-mail ou usuário</label>
+          <input type="text" class="form-input" id="linkedin-email" placeholder="seu@email.com.br" autocomplete="off">
         </div>
         <div class="form-group">
-          <label class="form-label" for="linkedin-password">Password</label>
-          <input type="password" class="form-input" id="linkedin-password" placeholder="Enter password" autocomplete="new-password">
+          <label class="form-label" for="linkedin-password">Senha</label>
+          <input type="password" class="form-input" id="linkedin-password" placeholder="Digite a senha" autocomplete="new-password">
         </div>
-        <button class="btn btn-primary btn-sm" onclick="saveLinkedIn()">Save LinkedIn</button>
+        <button class="btn btn-primary btn-sm" onclick="saveLinkedIn()">Salvar LinkedIn</button>
       </div>
     </div>
     <div class="settings-row">
       <div>
         <h3>Cloudflare</h3>
-        <p class="desc">Deep website crawling with JavaScript rendering during product training. About $5 a month.</p>
+        <p class="desc">Leitura profunda de sites com JavaScript durante o treinamento do produto. Cerca de US$ 5 por mês.</p>
       </div>
       <div class="fields">
         <div class="form-group">
-          <label class="form-label" for="cf-account-id">Account ID</label>
-          <input type="text" class="form-input" id="cf-account-id" placeholder="Your Cloudflare Account ID" autocomplete="off">
+          <label class="form-label" for="cf-account-id">ID da conta</label>
+          <input type="text" class="form-input" id="cf-account-id" placeholder="Seu ID da conta Cloudflare" autocomplete="off">
         </div>
         <div class="form-group">
-          <label class="form-label" for="cf-api-token">API token</label>
-          <input type="password" class="form-input" id="cf-api-token" placeholder="Your Cloudflare API Token" autocomplete="off">
+          <label class="form-label" for="cf-api-token">Token de API</label>
+          <input type="password" class="form-input" id="cf-api-token" placeholder="Seu token de API da Cloudflare" autocomplete="off">
         </div>
-        <button class="btn btn-primary btn-sm" onclick="saveCloudflare()">Save Cloudflare</button>
+        <button class="btn btn-primary btn-sm" onclick="saveCloudflare()">Salvar Cloudflare</button>
       </div>
     </div>
   </div>
@@ -475,123 +469,121 @@
 
 <!-- Controls -->
 <div id="controls" class="section">
-  <div class="section-head"><div><h2>Controls</h2><p>Start and stop Sellbird's heartbeat loop, and watch what it's doing.</p></div></div>
+  <div class="section-head"><div><h2>Controles</h2><p>Ligue e desligue o ciclo do Sellbird e acompanhe o que ele está fazendo.</p></div></div>
   <div class="control-panel">
     <div class="card">
-      <h2>Agent</h2>
+      <h2>Agente</h2>
       <div class="status-big" id="control-status">
         <div class="dot stopped" id="control-dot"></div>
-        <span class="label stopped" id="control-label">Stopped</span>
+        <span class="label stopped" id="control-label">Parado</span>
       </div>
       <div class="status-meta" id="control-meta"></div>
       <div class="btn-group">
-        <button class="btn btn-primary" id="btn-start" onclick="startSellbird()">Start Sellbird</button>
-        <button class="btn btn-danger" id="btn-stop" onclick="stopSellbird()" style="display:none">Stop Sellbird</button>
+        <button class="btn btn-primary" id="btn-start" onclick="startSellbird()">Ligar o Sellbird</button>
+        <button class="btn btn-danger" id="btn-stop" onclick="stopSellbird()" style="display:none">Parar o Sellbird</button>
       </div>
     </div>
     <div class="card">
-      <h2>Recent logs <button class="btn btn-ghost btn-sm" onclick="loadLogs()" style="margin-left:auto"><svg class="icon" aria-hidden="true"><use href="#i-refresh"/></svg>Refresh</button></h2>
-      <div class="log-viewer" id="log-viewer">No logs yet. Start Sellbird to see activity.</div>
+      <h2>Registros recentes <button class="btn btn-ghost btn-sm" onclick="loadLogs()" style="margin-left:auto"><svg class="icon" aria-hidden="true"><use href="#i-refresh"/></svg>Atualizar</button></h2>
+      <div class="log-viewer" id="log-viewer">Nenhum registro ainda. Ligue o Sellbird para ver a atividade.</div>
     </div>
   </div>
 </div>
 
 <!-- Help -->
 <div id="help" class="section">
-  <div class="section-head"><div><h2>Help</h2><p>What Sellbird is, how it works, and how to fix the usual problems.</p></div></div>
+  <div class="section-head"><div><h2>Ajuda</h2><p>O que é o Sellbird, como ele funciona e como resolver os problemas mais comuns.</p></div></div>
 
   <div class="help-section">
-    <h2>What is Sellbird?</h2>
-    <p>Sellbird is an open-source outreach platform. Once set up, Sellbird runs on its own: finds people who match your ideal customer, writes personalized cold emails, sends them through your email platform, reads every reply, handles objections, and works toward booking a meeting. You review everything through this dashboard.</p>
-    <p>Sellbird runs on your Claude Max subscription (or, if you opt in, your ChatGPT plan through Codex), so there are no extra AI costs. Everything stays on your machine in one folder.</p>
+    <h2>O que é o Sellbird?</h2>
+    <p>O Sellbird é uma plataforma de prospecção de código aberto. Depois de configurado, ele roda sozinho: encontra pessoas que encaixam no seu cliente ideal, escreve e-mails frios personalizados (em português para empresas do Brasil, em inglês para as de fora), envia pela sua plataforma de e-mail, lê todas as respostas, lida com objeções e trabalha para marcar uma reunião. Você revisa tudo por este painel.</p>
+    <p>O Sellbird roda na sua assinatura do Claude Max (ou, se você escolher, no seu plano do ChatGPT pelo Codex), então não há custos extras de IA. Tudo fica no seu computador, numa pasta só.</p>
   </div>
 
   <div class="help-section">
-    <h2>Getting started</h2>
-    <p>There are three things to do:</p>
-    <pre>1. Go to the Settings tab and connect an email provider (Gmail recommended)
-2. Train Sellbird on your product (through Claude or the command line)
-3. Go to the Controls tab and click Start</pre>
-    <p>Today shows exactly what's done and what still needs to happen.</p>
+    <h2>Primeiros passos</h2>
+    <p>São três coisas para fazer:</p>
+    <pre>1. Vá na aba Configurações e conecte um provedor de e-mail (Gmail recomendado) 2. Treine o Sellbird no seu produto (pelo Claude ou pela linha de comando) 3. Vá na aba Controles e clique em Ligar</pre>
+    <p>A aba Hoje mostra exatamente o que já foi feito e o que ainda falta.</p>
   </div>
 
   <div class="help-section">
-    <h2>Where everything lives</h2>
-    <p>Everything Sellbird needs is inside this one project folder. Nothing is stored elsewhere.</p>
+    <h2>Onde fica cada coisa</h2>
+    <p>Tudo de que o Sellbird precisa está dentro desta pasta do projeto. Nada fica guardado em outro lugar.</p>
     <div class="table-card">
     <table class="file-table">
-      <tr><td>.env</td><td>Your API keys and credentials (never shared or committed)</td></tr>
-      <tr><td>sellbird.yaml</td><td>Your product info, target customers, and behavior settings</td></tr>
-      <tr><td>skills/</td><td>Sales knowledge files. Edit these to change how Sellbird writes and sells.</td></tr>
-      <tr><td>skills/product_knowledge.md</td><td>Everything Sellbird knows about your product (auto-generated from training)</td></tr>
-      <tr><td>prompts/</td><td>Prompt templates for each agent. Advanced customization.</td></tr>
-      <tr><td>data/sellbird.db</td><td>Database with all prospects, campaigns, and conversations</td></tr>
-      <tr><td>data/sellbird.log</td><td>Log file showing what Sellbird is doing</td></tr>
+      <tr><td>.env</td><td>Suas chaves de API e credenciais (nunca compartilhadas nem enviadas ao git)</td></tr>
+      <tr><td>sellbird.yaml</td><td>As informações do seu produto, clientes-alvo e configurações de comportamento</td></tr>
+      <tr><td>skills/</td><td>Arquivos de conhecimento de vendas. Edite para mudar como o Sellbird escreve e vende.</td></tr>
+      <tr><td>skills/product_knowledge.md</td><td>Tudo o que o Sellbird sabe sobre o seu produto (gerado no treinamento)</td></tr>
+      <tr><td>prompts/</td><td>Modelos de prompt de cada agente. Personalização avançada.</td></tr>
+      <tr><td>data/sellbird.db</td><td>Banco de dados com todos os prospects, campanhas e conversas</td></tr>
+      <tr><td>data/sellbird.log</td><td>Arquivo de registro mostrando o que o Sellbird está fazendo</td></tr>
     </table>
     </div>
   </div>
 
   <div class="help-section">
-    <h2>Getting your API keys</h2>
+    <h2>Pegando suas chaves de API</h2>
 
     <details>
-      <summary>Instantly API key (legacy)</summary>
+      <summary>Chave de API do Instantly (antigo)</summary>
       <div class="faq-body">
-        <p>Instantly is the legacy sending option; Gmail or SMTP is recommended.</p>
-        <p>1. Sign up at <a href="https://instantly.ai" target="_blank" rel="noopener">instantly.ai</a> (you need the Growth plan for API access)</p>
-        <p>2. Go to Settings &gt; Integrations</p>
-        <p>3. Copy your API key</p>
-        <p>4. Paste it in the Settings tab here</p>
+        <p>O Instantly é a opção de envio antiga; Gmail ou SMTP são os recomendados.</p>
+        <p>1. Cadastre-se em <a href="https://instantly.ai" target="_blank" rel="noopener">instantly.ai</a> (você precisa do plano Growth para ter acesso à API)</p>
+        <p>2. Vá em Settings &gt; Integrations</p>
+        <p>3. Copie sua chave de API</p>
+        <p>4. Cole na aba Configurações aqui</p>
       </div>
     </details>
 
     <details>
-      <summary>LinkedIn credentials (optional)</summary>
+      <summary>Credenciais do LinkedIn (opcional)</summary>
       <div class="faq-body">
-        <p>If you want Sellbird to find prospects on LinkedIn, enter your LinkedIn email and password. Sellbird uses a real browser to search LinkedIn like a human would, with random delays and rate limits to avoid detection.</p>
-        <p>If you skip this, Sellbird will find prospects through Google searches and company website scraping instead.</p>
+        <p>Se você quer que o Sellbird encontre prospects no LinkedIn, informe seu e-mail e senha do LinkedIn. O Sellbird usa um navegador de verdade para pesquisar como uma pessoa faria, com pausas aleatórias e limites de uso.</p>
+        <p>Se você pular isto, o Sellbird encontra prospects por buscas no Google e lendo os sites das empresas.</p>
       </div>
     </details>
 
     <details>
-      <summary>Cloudflare Browser Rendering (optional)</summary>
+      <summary>Cloudflare Browser Rendering (opcional)</summary>
       <div class="faq-body">
-        <p>This is only used during product training (when Sellbird crawls your website to learn about your product). It handles JavaScript-heavy websites that a basic crawler can't read.</p>
-        <p>1. Sign up at <a href="https://dash.cloudflare.com" target="_blank" rel="noopener">Cloudflare</a> (paid Workers plan, ~$5/month)</p>
-        <p>2. Go to Workers &amp; Pages &gt; Browser Rendering</p>
-        <p>3. Create an API token with Browser Rendering Edit permissions</p>
-        <p>4. Enter your Account ID and API Token in the Settings tab</p>
-        <p>Without this, Sellbird uses a built-in crawler that works fine for most websites but can't render JavaScript.</p>
+        <p>Só é usado no treinamento do produto (quando o Sellbird lê o seu site para aprender sobre o produto). Ele lida com sites cheios de JavaScript que um leitor simples não consegue ler.</p>
+        <p>1. Cadastre-se em <a href="https://dash.cloudflare.com" target="_blank" rel="noopener">Cloudflare</a> (plano Workers pago, ~US$ 5/mês)</p>
+        <p>2. Vá em Workers &amp; Pages &gt; Browser Rendering</p>
+        <p>3. Crie um token de API com permissão de edição no Browser Rendering</p>
+        <p>4. Informe seu ID da conta e o token de API na aba Configurações</p>
+        <p>Sem isso, o Sellbird usa um leitor próprio que funciona bem na maioria dos sites, mas não roda JavaScript.</p>
       </div>
     </details>
   </div>
 
   <div class="help-section">
-    <h2>Common issues</h2>
+    <h2>Problemas comuns</h2>
 
     <details>
-      <summary>"command not found: sellbird"</summary>
-      <div class="faq-body">You need to activate the virtual environment first: <code>source .venv/bin/activate</code></div>
+      <summary>"command not found: sellbird" (comando não encontrado)</summary>
+      <div class="faq-body">Você precisa ativar o ambiente virtual primeiro: <code>source .venv/bin/activate</code></div>
     </details>
 
     <details>
-      <summary>Instantly API returns 401</summary>
-      <div class="faq-body">Your API key is wrong, or you need the Growth plan (the free plan doesn't include API access). Double-check the key in Settings &gt; Integrations in your Instantly dashboard.</div>
+      <summary>A API do Instantly devolve 401</summary>
+      <div class="faq-body">Sua chave de API está errada ou você precisa do plano Growth (o plano grátis não inclui API). Confira a chave em Settings &gt; Integrations no painel do Instantly.</div>
     </details>
 
     <details>
-      <summary>Claude headless mode fails</summary>
-      <div class="faq-body">Make sure you've run <code>claude login</code> in your terminal and have an active Claude Max subscription. Sellbird uses your existing subscription, not a separate API key.</div>
+      <summary>O modo sem interface do Claude falha</summary>
+      <div class="faq-body">Confira se você rodou <code>claude login</code> no terminal e tem uma assinatura Claude Max ativa. O Sellbird usa a assinatura que você já tem, não uma chave de API separada.</div>
     </details>
 
     <details>
-      <summary>Codex calls fail</summary>
-      <div class="faq-body">With <code>brain.provider: codex</code>, set <code>brain.model</code> to an available model ID, including Luna, Sol, or Terra (for example <code>gpt-6.1-sol</code>), or leave it blank to select a listed model. Sellbird runs these models without tools; <code>gpt-5.5</code> also remains supported when present in your account's catalog. Run <code>codex login</code> and choose "Sign in with ChatGPT" (API-key logins are refused). Sellbird never renews your Codex login: if the log says it has expired or is due for renewal, use Codex once or run <code>codex login</code>. Sellbird needs Codex CLI 0.159.3 on macOS or Linux (Codex isn't supported on Windows; use Claude there) and refuses other versions. While Codex can't be used, Sellbird pauses (Today shows "Codex is paused" and why), leaves replies and queued emails untouched, and resumes once it's fixed; <code>sellbird status --check</code> checks on demand. If the log says isolation could not be verified, a Codex config layer is forcing a tool, hook, MCP server or custom endpoint back on — Sellbird refuses to send prompts until it is removed. Sellbird never falls back to Claude on its own.</div>
+      <summary>As chamadas ao Codex falham</summary>
+      <div class="faq-body">Com <code>brain.provider: codex</code>, defina <code>brain.model</code> como um ID de modelo disponível, incluindo Luna, Sol ou Terra (por exemplo <code>gpt-6.1-sol</code>), ou deixe em branco para escolher um modelo da lista. O Sellbird roda esses modelos sem ferramentas; <code>gpt-5.5</code> também continua aceito quando está no catálogo da sua conta. Rode <code>codex login</code> e escolha "Sign in with ChatGPT" (login por chave de API é recusado). O Sellbird nunca renova seu login do Codex: se o registro disser que expirou ou precisa renovar, use o Codex uma vez ou rode <code>codex login</code>. O Sellbird precisa do Codex CLI 0.159.3 no macOS ou Linux (o Codex não funciona no Windows; use o Claude lá) e recusa outras versões. Enquanto o Codex não puder ser usado, o Sellbird pausa (a aba Hoje mostra "Codex pausado" e o motivo), não mexe nas respostas e e-mails na fila, e volta quando for resolvido; <code>sellbird status --check</code> confere na hora. Se o registro disser que o isolamento não pôde ser verificado, alguma configuração do Codex está forçando uma ferramenta, hook, servidor MCP ou endereço próprio de volta; o Sellbird se recusa a mandar prompts até isso ser removido. O Sellbird nunca volta para o Claude sozinho.</div>
     </details>
 
     <details>
-      <summary>Sellbird isn't finding prospects</summary>
-      <div class="faq-body">Check that your ICP (ideal customer profile) in sellbird.yaml has realistic titles, industries, and geography. If LinkedIn is set up, check that the credentials are correct. Check the Activity tab to see what Sellbird has been trying to do.</div>
+      <summary>O Sellbird não está encontrando prospects</summary>
+      <div class="faq-body">Confira se o seu ICP (perfil de cliente ideal) no sellbird.yaml tem cargos, segmentos e regiões realistas. Para a busca grátis no Brasil, use segmentos como "clínica odontológica", "contabilidade" ou "imobiliária" e cidades como "Curitiba, PR". Se o LinkedIn estiver configurado, confira as credenciais. Veja a aba Atividade para saber o que o Sellbird tentou fazer.</div>
     </details>
   </div>
 </div>
