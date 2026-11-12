@@ -25,6 +25,17 @@ BANNED_PHRASES = (
     "cutting-edge solution", "revolutionize your", "unlock your",
     "supercharge your", "as an ai", "i'm an ai", "i am an ai",
     "as a language model",
+    # Português (Sellbird PT-BR): gatilhos de spam e frases de IA.
+    "clique aqui", "clique abaixo", "compre agora", "compre já", "aproveite agora",
+    "por tempo limitado", "tempo limitado", "oferta imperdível", "oferta exclusiva",
+    "promoção exclusiva", "oferta especial", "100% grátis", "100% gratuito",
+    "ganhe dinheiro", "dinheiro fácil", "dobre seu", "dobre o seu", "dobre sua",
+    "resultados garantidos", "resultado garantido", "você ganhou", "você foi selecionado",
+    "parabéns, você", "espero que este e-mail o encontre bem",
+    "espero que este email o encontre bem", "imagine só", "e se eu te dissesse",
+    "nos dias de hoje", "solução revolucionária", "revolucione seu", "revolucione sua",
+    "desbloqueie seu", "desbloqueie sua", "turbine seu", "turbine sua",
+    "como uma ia", "sou uma ia", "como inteligência artificial", "como um modelo de linguagem",
 )
 
 MAX_SUBJECT_LEN = 90
@@ -449,7 +460,12 @@ _PAYMENT_RE = re.compile(
     r"\b(?:wire\s+transfer|bank\s+(?:account|details|transfer|wire)|routing\s+number|"
     r"account\s+number|sort\s+code|iban|swift\s+code|bitcoin|btc\s+address|ethereum|"
     r"usdt|crypto(?:currency)?\s+(?:wallet|address|payment)|wallet\s+address|"
-    r"gift\s+cards?|western\s+union|moneygram|zelle|venmo|cash\s*app|paypal\.me)\b",
+    r"gift\s+cards?|western\s+union|moneygram|zelle|venmo|cash\s*app|paypal\.me|"
+    # Português (Sellbird PT-BR): Pix, dados bancários, boleto, depósito.
+    r"chave\s+pix|(?:fa[cç]a|fazer|mande|manda|envie)\s+(?:um\s+)?pix|pix\s+para|"
+    r"dados\s+banc[aá]rios|conta\s+banc[aá]ria|transfer[eê]ncia\s+banc[aá]ria|"
+    r"dep[oó]sito\s+(?:na|em)\s+conta|ag[eê]ncia\s+e\s+conta|boleto\s+(?:em\s+anexo|segue)|"
+    r"cart[aã]o[- ]presente|vale[- ]presente)\b",
     re.IGNORECASE)
 
 

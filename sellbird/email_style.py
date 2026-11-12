@@ -22,6 +22,8 @@ rewrite should spend a model call on: ``tidy`` straightens them.
 
 import re
 
+from sellbird.language import looks_portuguese
+
 # Word caps for the built-in cold-email shape, by sequence step. Every word
 # costs replies, so these are ceilings, not targets: the prompt aims lower.
 FIRST_EMAIL_MAX_WORDS = 60
@@ -29,14 +31,24 @@ FOLLOW_UP_MAX_WORDS = 50
 BREAKUP_MAX_WORDS = 30
 REPLY_MAX_WORDS = 120
 
+# Sellbird PT-BR: o português usa mais palavras que o inglês para dizer a
+# mesma coisa (artigos, preposições), então os limites são um pouco maiores
+# quando o e-mail está em português.
+PT_FIRST_EMAIL_MAX_WORDS = 70
+PT_FOLLOW_UP_MAX_WORDS = 60
+PT_BREAKUP_MAX_WORDS = 35
+PT_REPLY_MAX_WORDS = 140
 
-def max_words(step: int) -> int:
-    """The cap for sequence step ``step`` (1-based)."""
+
+def max_words(step: int, portuguese: bool = False) -> int:
+    """The cap for sequence step ``step`` (1-based).
+
+    portuguese: True usa os limites do português (um pouco maiores)."""
     if step <= 1:
-        return FIRST_EMAIL_MAX_WORDS
+        return PT_FIRST_EMAIL_MAX_WORDS if portuguese else FIRST_EMAIL_MAX_WORDS
     if step == 2:
-        return FOLLOW_UP_MAX_WORDS
-    return BREAKUP_MAX_WORDS
+        return PT_FOLLOW_UP_MAX_WORDS if portuguese else FOLLOW_UP_MAX_WORDS
+    return PT_BREAKUP_MAX_WORDS if portuguese else BREAKUP_MAX_WORDS
 
 
 # Dashes: the single most-noticed AI tell. A hyphen inside a word
@@ -76,16 +88,53 @@ AI_TELLS = (
     # staged contrasts
     "it's not about", "it is not about", "isn't about", "this isn't just",
     "it's not just", "it isn't just", "not just a",
+    # ── Português (Sellbird PT-BR) ──
+    # aberturas e enrolação
+    "espero que esteja bem", "espero que estejam bem", "espero que voce esteja bem",
+    "espero que você esteja bem", "espero que este e-mail", "espero que este email",
+    "espero que tudo esteja bem", "espero encontra-lo bem", "espero encontrá-lo bem",
+    "venho por meio deste", "venho por meio desta", "gostaria de me apresentar",
+    "me chamo", "meu nome é", "sei que você é ocupado", "sei que você está ocupado",
+    "sei que sua agenda", "estou entrando em contato", "entrando em contato para",
+    "só passando para", "so passando para", "só queria", "só gostaria de",
+    "dando um follow", "fazendo um follow", "retomando o contato", "voltando a falar",
+    "imagine só", "imagine se", "e se eu te dissesse", "a verdade é que",
+    "nos dias de hoje", "no mundo de hoje", "mundo acelerado",
+    # pedidos fracos
+    "uma pergunta rápida", "pergunta rápida", "sem compromisso", "sem pressão",
+    "você estaria aberto", "você estaria aberta", "estaria disponível para um bate-papo",
+    "um bate-papo rápido", "um papo rápido", "você é a pessoa certa",
+    "me avise se tiver interesse", "caso tenha interesse",
+    # palavras infladas
+    "revolucionar", "revolucionário", "revolucionária", "inovador", "inovadora",
+    "solução inovadora", "de ponta", "próximo nível", "outro nível",
+    "potencializar", "alavancar", "alavanque", "sinergia", "sinergias",
+    "agregar valor", "transformar o seu", "transformar seu", "transformar sua",
+    "transformador", "transformadora", "disruptivo", "disruptiva",
+    "robusto", "robusta", "crucial", "fundamental para o seu", "de classe mundial",
+    "dor do cliente", "dores do cliente", "sem complicação", "descomplicar",
+    "no fim do dia", "game changer",
+    # contrastes encenados
+    "não se trata de", "não é só sobre", "não é apenas sobre", "não é apenas um",
+    "não é só um",
 )
 _TELL_RES = tuple(
     (phrase, re.compile(r"(?<![\w-])" + re.escape(phrase).replace("'", "['’]") + r"(?![\w-])"))
     for phrase in AI_TELLS
 )
 _NOT_ONLY_BUT_RE = re.compile(r"\bnot (?:only|just|merely) [^.?!\n]{1,60}?\bbut\b", re.IGNORECASE)
+# "não só X, mas (também) Y" / "não apenas X, mas Y": o mesmo vício em português.
+_NOT_ONLY_BUT_PT_RE = re.compile(r"\bn[ãa]o (?:s[óo]|apenas|somente) [^.?!\n]{1,60}?\bmas\b", re.IGNORECASE)
 
-_GREETING_RE = re.compile(r"^(?:hi|hey|hello|dear|good (?:morning|afternoon))\b[^\n]{0,40}$|^\w[\w .'-]{0,30},$",
+# Saudações também em português: "Oi Ana,", "Olá, equipe,", "Bom dia, Marcos,".
+_GREETING_RE = re.compile(r"^(?:hi|hey|hello|dear|good (?:morning|afternoon)"
+                          r"|oi|ol[áa]|e a[íi]|prezad[oa]s?|caro|cara|bom dia|boa tarde|boa noite)\b[^\n]{0,40}$"
+                          r"|^\w[\w .'-]{0,30},$",
                           re.IGNORECASE)
-_SELF_OPENING_RE = re.compile(r"^(?:i|we|i'm|we're|i've|we've|i'd|we'd|my|our)\b", re.IGNORECASE)
+# Abrir falando de si: "Eu...", "Nós...", "Sou...", "Somos...", "Meu nome...".
+_SELF_OPENING_RE = re.compile(r"^(?:i|we|i'm|we're|i've|we've|i'd|we'd|my|our"
+                              r"|eu|n[óo]s|sou|somos|meu|minha|nosso|nossa|aqui [ée]|trabalho|trabalhamos)\b",
+                              re.IGNORECASE)
 
 _TIDY = str.maketrans({
     "‘": "'", "’": "'", "‚": "'", "‛": "'", "′": "'",
@@ -159,12 +208,16 @@ def style_problems(subject: str, body: str, *, kind: str = "cold", step: int = 1
     hits = [phrase for phrase, rx in _TELL_RES if rx.search(lowered)]
     if _NOT_ONLY_BUT_RE.search(lowered):
         hits.append("not just X but Y")
+    if _NOT_ONLY_BUT_PT_RE.search(lowered):
+        hits.append("não só X, mas Y")
+    # Sellbird PT-BR: e-mail em português usa os limites de palavras do português.
+    portuguese = looks_portuguese(f"{subject}\n{body}")
     if hits:
         shown = ", ".join(f'"{h}"' for h in hits[:4])
         reasons.append(f"sounds AI-written or salesy: {shown}")
 
     if kind == "cold" and shape:
-        cap = max_words(step)
+        cap = max_words(step, portuguese)
         count = words(body)
         if count > cap:
             reasons.append(f"is {count} words; email {step} must be {cap} or fewer")
@@ -174,14 +227,19 @@ def style_problems(subject: str, body: str, *, kind: str = "cold", step: int = 1
             reasons.append('opens with "I" or "we"; open with them, not you')
         if words(subject) > 6:
             reasons.append(f"subject is {words(subject)} words; keep it to 2-5")
-    elif kind == "reply" and words(body) > REPLY_MAX_WORDS:
-        reasons.append(f"is {words(body)} words; a reply must be {REPLY_MAX_WORDS} or fewer")
+    elif kind == "reply":
+        reply_cap = PT_REPLY_MAX_WORDS if portuguese else REPLY_MAX_WORDS
+        if words(body) > reply_cap:
+            reasons.append(f"is {words(body)} words; a reply must be {reply_cap} or fewer")
     return reasons
 
 
 _SIGN_OFF_RE = re.compile(
     r"^(?:best|best wishes|thanks|thank you|thanks again|many thanks|cheers|regards|best regards|"
-    r"kind regards|warm regards|warmly|talk soon|speak soon|all the best|sincerely|take care)[,.]?$",
+    r"kind regards|warm regards|warmly|talk soon|speak soon|all the best|sincerely|take care"
+    # Despedidas em português: "Abraço,", "Abs", "Atenciosamente,", "Att.", "Obrigado,"
+    r"|abra[çc]os?|um abra[çc]o|grande abra[çc]o|abs|att|atenciosamente|cordialmente|sauda[çc][õo]es"
+    r"|obrigad[oa]|muito obrigad[oa]|grat[oa]|valeu|at[ée] mais|at[ée] breve|um forte abra[çc]o)[,.]?$",
     re.IGNORECASE)
 
 

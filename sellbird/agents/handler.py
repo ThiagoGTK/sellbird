@@ -23,6 +23,7 @@ from sellbird.config import (
 from sellbird.gate import autopilot_review, do_not_contact_match, pre_send_check
 from sellbird.email_style import style_problems, tidy
 from sellbird.humanize import humanize, humanizer_enabled
+from sellbird.language import REPLY_LANGUAGE_RULE
 from sellbird.integrations.instantly import InstantlyClient
 from sellbird.integrations.mail_provider import (
     NATIVE_PROVIDERS, get_mail_provider, strip_quoted_reply,
@@ -95,15 +96,25 @@ BARE_OPT_OUTS = {"stop", "unsubscribe", "remove", "remove me", "opt out",
                  "non merci", "arret", "arreter", "desabonner", "desabonnement",
                  "desabonnez-moi", "desinscrire", "desinscription", "desinscrivez-moi",
                  "retirer", "retirez-moi",
+                 # Português (Sellbird PT-BR), comparado sem acentos.
+                 "sair", "descadastrar", "descadastre", "descadastre-me", "me descadastre",
+                 "descadastro", "remover", "remova", "me remova", "remova-me", "pare", "parar",
+                 "cancelar", "nao obrigado", "nao obrigada", "nao, obrigado", "nao, obrigada",
+                 "sem interesse", "nao tenho interesse", "nao temos interesse",
+                 "me tire da lista", "me tirem da lista",
                  "הסר", "הסירו", "הסירי", "תסיר", "תסירו", "להסיר", "הסרה", "להסרה"}
 # Said around a bare opt-out without changing it ("הסר בבקשה", "הסר, תודה").
 _BARE_COURTESIES = {"בבקשה", "נא", "תודה", "רבה", "por", "favor", "gracias", "saludos",
-                    "merci", "svp", "sil", "vous", "plait"}
+                    "merci", "svp", "sil", "vous", "plait",
+                    # Português: "sair, por favor", "descadastrar, obrigado", "abs".
+                    "obrigado", "obrigada", "grato", "grata", "abs", "att", "abraco", "abracos"}
 _MOBILE_SIGNATURE_RE = re.compile(
     r"^[ \t\u200e\u200f]*(?:sent from my \w[^\n]*|get outlook for \w[^\n]*"
     r"|sent from \w+ mail[^\n]*|נשלח מ[^\n]*|קבל(?:ו)? את outlook[^\n]*"
     r"|enviado desde mi \w[^\n]*|obt[eé]n outlook para \w[^\n]*"
-    r"|envoy[eé] de mon \w[^\n]*|obtenez outlook pour \w[^\n]*)$",
+    r"|envoy[eé] de mon \w[^\n]*|obtenez outlook pour \w[^\n]*"
+    r"|enviado do meu \w[^\n]*|enviado de meu \w[^\n]*|enviado do outlook[^\n]*"
+    r"|obtenha o outlook para \w[^\n]*|baixe o outlook para \w[^\n]*)$",
     re.IGNORECASE | re.MULTILINE)
 
 # Hebrew opt-outs. Each needs a verb aimed at the sender and its object
@@ -334,6 +345,88 @@ def _french_opt_out(text: str):
     return None
 
 
+# ── Português (Sellbird PT-BR) ──
+# Descadastros em português, comparados sem acentos e uma linha por vez, como
+# os de espanhol. Cada um precisa do verbo dirigido a quem enviou: "me tira
+# uma dúvida" é uma pergunta, "remover o cliente do sistema" é assunto do
+# negócio, "ele não me escreve mais" é uma notícia.
+_PT_US = r"(?:me|nos)"
+_PT_LIST = (r"(?:(?:d[aeo]s?|dessa|desta|desse|deste|sua|seu|suas|seus|vossa|essa|esta|esse|este)\s+)*"
+            r"(?:lista|base|cadastro|mailing|envio|banco\s+de\s+dados|contato|disparo|newsletter)\w*")
+_PT_MY_ADDRESS = (r"(?:o\s+|os\s+)?(?:meu|meus|nosso|nossos|minha|minhas|nossa|nossas)\s+"
+                  r"(?:e-?mails?|emails?|contatos?|enderecos?|cadastros?|dados|informacoes|nomes?)")
+_PT_MAIL = (r"(?:mais(?!\s+(?:de|do|da|informac|detalh|sobre|um|uma)\b)|e-?mails?|emails?|mensagens?"
+            r"|propagandas?|publicidade|ofertas?|nada|isso|spam|contatos?|newsletters?)")
+_PT_WRITE = r"(?:enviar|mandar|escrever|contatar|contactar|incomodar|importunar|perturbar|procurar)"
+# O pensamento termina aqui: pontuação, fim da linha, ou vírgula que não
+# continua com "mas", "a não ser", "se", "exceto", "porém".
+_PT_SAY_END = (r"(?=[ \t]*(?:[.!;]|$|,(?![ \t]*(?:mas|porem|exceto|salvo|a[ \t]+nao[ \t]+ser|se|caso"
+               r"|contudo|entretanto|so[ \t]+que)(?!\w))))")
+_PT_REMOVE = r"(?:remov|tir|retir|exclu|apag|delet|descadastr)"
+_PT_REMOVE_IMP = _PT_REMOVE + r"(?:a|am|e|em|ar|ue|uam|i)"
+PORTUGUESE_OPT_OUT_PATTERNS = (
+    # Me descadastre / quero me descadastrar / pode me descadastrar.
+    r"(?:" + _PT_US + r"\s+)?descadastr(?:e|em|ar|a|em-me|e-me|e-nos)(?:-me|-nos)?"
+    r"(?:\s+(?:d[aeo]s?\s+)?" + _PT_LIST + "|" + _PT_SAY_END + ")",
+    r"(?:quero|queremos|gostaria\s+de|pode|podem|favor|por\s+favor)\s+(?:me\s+|nos\s+)?descadastr\w*",
+    # Me remova / me tirem da lista / remova-me / retire meu e-mail.
+    _PT_US + r"\s+" + _PT_REMOVE_IMP + r"(?:\s+(?:d[aeo]s?\s+)?" + _PT_LIST + "|" + _PT_SAY_END + ")",
+    _PT_REMOVE_IMP + r"[- ]" + _PT_US + r"(?:\s+(?:d[aeo]s?\s+)?" + _PT_LIST + "|" + _PT_SAY_END + ")",
+    _PT_REMOVE + r"\w*\s+" + _PT_MY_ADDRESS + r"(?:\s+(?:d[aeo]s?\s+)?" + _PT_LIST + "|" + _PT_SAY_END + ")",
+    # Parem de me enviar / deixe de me escrever / chega de e-mails.
+    r"(?:pare|parem|para|parar|deixe|deixem|deixar)\s+de\s+(?:" + _PT_US + r"\s+)?" + _PT_WRITE,
+    r"chega\s+de\s+(?:e-?mails|emails|mensagens|propagandas?|spam|contatos?)",
+    # Não me envie(m) mais / não me escreva / não entre mais em contato.
+    r"nao\s+" + _PT_US + r"\s+(?:escrev(?:a|am)|contat(?:e|em)|procur(?:e|em)|incomod(?:e|em)|perturb(?:e|em)"
+    r"|importun(?:e|em))(?:\s+mais)?(?!\w)" + r"(?:\s+" + _PT_MAIL + r"(?!\w)|" + _PT_SAY_END + ")",
+    r"nao\s+" + _PT_US + r"\s+(?:envi(?:e|em)|mand(?:e|em))(?!\w)(?:\s+" + _PT_MAIL + r"(?!\w)|" + _PT_SAY_END + ")",
+    r"nao\s+(?:entre|entrem|volte|voltem)\s+(?:mais\s+)?(?:em\s+contato|a\s+(?:me\s+|nos\s+)?" + _PT_WRITE + ")",
+    r"nao\s+(?:quero|queremos|desejo|desejamos)\s+(?:mais\s+)?(?:continuar\s+)?(?:a\s+)?receber"
+    r"(?:\s+(?:mais|seus|suas|esses|essas|estes|estas|nenhum|nenhuma)){0,2}(?:\s+" + _PT_MAIL + r"(?!\w)|" + _PT_SAY_END + ")",
+    r"cancel(?:ar|e|em)\s+(?:a\s+|o\s+|minha\s+|meu\s+)?(?:inscricao|cadastro|assinatura)",
+    # Sem interesse, como o pensamento inteiro: não "não temos interesse no plano anual".
+    r"(?:nao\s+(?:tenho|temos|ha)\s+(?:nenhum\s+)?interesse|sem\s+interesse|nao\s+(?:me|nos)\s+interessa"
+    r"|nao\s+(?:estou|estamos)\s+interessad[oa]s?)"
+    r"(?:,?\s+(?:por\s+enquanto|no\s+momento|neste\s+momento|agora|obrigad[oa]))?" + _PT_SAY_END,
+)
+PORTUGUESE_OPT_OUT_RE = re.compile(r"(?<!\w)(?:" + "|".join(PORTUGUESE_OPT_OUT_PATTERNS) + r")(?!\w)",
+                                   re.MULTILINE)
+# A palavra antes do trecho que nega ou condiciona ("se não tiver interesse",
+# "porque não me interessa", "ainda não..."), ou o resto da frase que limita
+# a um período ou pede outro canal ("até março", "pelo WhatsApp"): o modelo
+# lê esses casos.
+_PT_NOT_FINAL_BEFORE = {"nao", "se", "porque", "quando", "ainda", "como", "caso", "talvez", "voce",
+                        "ele", "ela", "eles", "elas"}
+_PT_LAST_WORD_RE = re.compile(r"(\S+)[ \t]*\Z")
+_PT_NOT_FINAL_AFTER_RE = re.compile(
+    r"(?<!\w)(?:ate|antes\s+de|depois\s+de|a\s+partir\s+de|melhor|prefiro|whatsapp|zap|por\s+telefone"
+    r"|pelo\s+telefone|lig(?:ue|uem|a)(?:-me|\s+pra\s+mim)?|me\s+lig(?:ue|uem|a)|me\s+cham(?:e|em|a)"
+    r"|segunda|terca|quarta|quinta|sexta|sabado|domingo|semana|mes|janeiro|fevereiro|marco"
+    r"|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro|ano\s+que\s+vem)(?!\w)")
+# "Não, obrigado": como o "no thanks". Não "sim ou não, obrigado", "por que
+# não", "se não", "ainda não", nem "não, obrigado a você" / "obrigado pelo".
+PORTUGUESE_NO_THANKS_RE = re.compile(
+    r"(?<!\bou )(?<!por que )(?<!porque )(?<!se )(?<!ainda )(?<!como )"
+    r"\bnao,?[ \t]+(?:muito[ \t]+)?obrigad[oa]\b(?![ \t]+(?:a|pel[oa]s?|por)\b)")
+
+
+def _portuguese_opt_out(text: str):
+    """O primeiro pedido de descadastro em português (texto já sem acentos,
+    de _accent_free_lines) que vale de fato, ou None."""
+    for m in PORTUGUESE_OPT_OUT_RE.finditer(text):
+        line_start = text.rfind("\n", 0, m.start()) + 1
+        last = _PT_LAST_WORD_RE.search(text[max(line_start, m.start() - 40):m.start()])
+        before = last.group(1).strip("\"'(-,") if last else ""
+        if before in _PT_NOT_FINAL_BEFORE and not (before == "nao" and m.group(0).startswith("nao")):
+            continue
+        sentence_end = re.search(r"[.!?;\n]", text[m.end():])
+        after = text[m.end():m.end() + sentence_end.start()] if sentence_end else text[m.end():]
+        if _PT_NOT_FINAL_AFTER_RE.search(after):
+            continue
+        return m
+    return None
+
+
 def _no_accents(text: str) -> str:
     """Accents dropped, for matching Spanish typed with or without them. Only
     Latin letters: combining marks are what spell Hebrew and others' words."""
@@ -454,10 +547,15 @@ def _opt_out_reason(their_text: str, own_words: str) -> dict | None:
     if m:
         return {"rule": "phrase", "matched": m.group(0),
                 "why": f'Their reply contains "{m.group(0)}".'}
+    m = _portuguese_opt_out(_accent_free_lines(their_text))
+    if m:
+        return {"rule": "phrase", "matched": m.group(0),
+                "why": f'Their reply contains "{m.group(0)}".'}
     for line in their_text.split("\n"):
         line = _flat(line)
         m = (SPANISH_NO_THANKS_RE.search(_no_accents(line))
-             or FRENCH_NO_THANKS_RE.search(_no_accents(line)))
+             or FRENCH_NO_THANKS_RE.search(_no_accents(line))
+             or PORTUGUESE_NO_THANKS_RE.search(_no_accents(line)))
         if m:
             return {"rule": "no_thanks", "matched": m.group(0),
                     "why": f'Their reply says "{m.group(0)}" (no thanks).'}
@@ -564,12 +662,24 @@ HEBREW_ESCALATION_RE = re.compile(
     r"(?<!\w)[ובכלמשה]{0,2}(?:" + "|".join(HEBREW_ESCALATION_PATTERNS) + r")(?!\w)")
 
 
+# Português (Sellbird PT-BR), comparado sem acentos: ameaça jurídica,
+# órgãos de defesa (Procon, ANPD), LGPD, denúncia de spam, assédio.
+PORTUGUESE_ESCALATION_RE = re.compile(
+    r"(?<!\w)(?:advogad[oa]s?|acao\s+judicial|processo\s+judicial|medidas?\s+(?:judicia(?:l|is)|legal|legais|cabiveis)"
+    r"|(?:vou|vamos|irei|iremos)\s+(?:te\s+|lhe\s+|os\s+|las\s+)?processar|processar\s+(?:voces|vcs|a\s+sua|sua|sua\s+empresa)"
+    r"|procon|anpd|lgpd|lei\s+geral\s+de\s+protecao|reclame\s+aqui|notificacao\s+extrajudicial"
+    r"|denunci(?:ar|ei|arei|aremos|a-los|ar\s+voces)|vou\s+denunciar|(?:marquei|marcar|marcarei|denunciar)\s+como\s+spam"
+    r"|(?:isso|isto|isso\s+aqui)\s+e\s+spam|e\s+(?:um\s+)?spam(?!\w)|assedio|assediando|lista\s+negra"
+    r"|policia|ministerio\s+publico|codigo\s+de\s+defesa\s+do\s+consumidor)(?!\w)")
+
+
 def _escalates(flat: str) -> bool:
     """Whether their words (flattened, our text removed) need a human."""
     # "עורך-דין" and "בית־המשפט" are the same words as with a space.
     spaced = re.sub(r"(?<=[\u05d0-\u05ea])[-\u05be](?=[\u05d0-\u05ea])", " ", flat)
     return (any(p in flat for p in ESCALATION_PATTERNS)
-            or HEBREW_ESCALATION_RE.search(spaced) is not None)
+            or HEBREW_ESCALATION_RE.search(spaced) is not None
+            or PORTUGUESE_ESCALATION_RE.search(_no_accents(flat)) is not None)
 
 
 # The conversation a reply is written from. Cold-email threads are short, so
@@ -1387,13 +1497,21 @@ Respond with ONLY the category label, nothing else."""
         # Stage advancement rules
         if intent == "interested":
             # Meeting/call signals from an interested prospect → closing
-            if any(w in text_lower for w in ["let's meet", "schedule", "calendar", "book a call", "free on", "available"]):
+            if any(w in text_lower for w in ["let's meet", "schedule", "calendar", "book a call", "free on", "available",
+                                             # Português (Sellbird PT-BR)
+                                             "vamos marcar", "podemos marcar", "agendar", "agenda", "reunião",
+                                             "reuniao", "uma call", "ligação", "disponível", "disponivel",
+                                             "posso na", "pode ser na", "pode ser amanhã", "horário"]):
                 return "closing"
             if current_stage == "initial_outreach":
                 return "engaged"
             if current_stage == "engaged":
                 # Check if they're asking about specifics → presenting
-                if any(w in text_lower for w in ["price", "cost", "how much", "pricing", "demo", "trial"]):
+                if any(w in text_lower for w in ["price", "cost", "how much", "pricing", "demo", "trial",
+                                                 # Português (Sellbird PT-BR)
+                                                 "preço", "preco", "valor", "quanto custa", "quanto fica",
+                                                 "orçamento", "orcamento", "demonstração", "demonstracao",
+                                                 "teste grátis", "teste gratis", "período de teste"]):
                     return "presenting"
                 return "qualifying"
             if current_stage in ("qualifying", "presenting"):
@@ -1545,6 +1663,8 @@ Write a reply that:"""
 - Makes it easy for them to refer (one-line ask)
 - Under 50 words"""
 
+        # Sellbird PT-BR: responder no idioma em que o prospect escreveu.
+        prompt += "\n" + REPLY_LANGUAGE_RULE
         prompt += "\n\nWrite ONLY the email body. No subject line, no greeting label, no signature block, no markdown."
 
         response = await self.brain.think(
@@ -1560,7 +1680,10 @@ Write a reply that:"""
             return ""
         response = response.strip()
         # Guard against the model returning meta-text instead of an email
-        if response.lower().startswith(("i can't", "i cannot", "as an ai", "sorry,")):
+        if response.lower().startswith(("i can't", "i cannot", "as an ai", "sorry,",
+                                         # Português: o modelo explicando em vez de escrever o e-mail.
+                                         "não posso", "nao posso", "como uma ia", "como ia,",
+                                         "desculpe,", "sinto muito, mas não")):
             logger.warning("Handler: Model returned meta-text instead of an email. Discarding.")
             return ""
         polished = await humanize(
@@ -1584,7 +1707,8 @@ Write a reply that:"""
 
 Rewrite it so it breaks none of them. Keep what it says and every fact; add
 nothing. Make it shorter, never longer. Plain text, no dash between words (use a
-period or a comma), no exclamation marks.
+period or a comma), no exclamation marks. Keep it in the same language it is
+written in (Portuguese stays Portuguese, English stays English).
 
 {fence(body, "reply draft")}
 

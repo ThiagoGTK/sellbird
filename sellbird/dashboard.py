@@ -1513,10 +1513,12 @@ def _compliance_view() -> dict:
     try:
         from sellbird.config import compliance_footer_lines, compliance_notice, load_config
         config = load_config()
+        # footer_pt: o rodapé dos e-mails escritos em português (Sellbird PT-BR).
         return {"footer": "\n".join(compliance_footer_lines(config)),
+                "footer_pt": "\n".join(compliance_footer_lines(config, "pt-BR")),
                 "compliance_notice": compliance_notice(config)}
     except Exception:
-        return {"footer": "", "compliance_notice": ""}
+        return {"footer": "", "footer_pt": "", "compliance_notice": ""}
 
 
 async def _sellbird_committed_ids() -> set[str]:
@@ -1639,8 +1641,10 @@ async def mark_prospect_sent(prospect_id: str, request: Request):
                 prospect_id, reason=HAND_SENT_REASON)
         if sent:
             # Open in Gmail adds today's footer; remember it as Sellbird's text.
-            footer = _compliance_view()["footer"]
-            await state.remember_footer_lines(footer.split("\n"))
+            view = _compliance_view()
+            # Lembra os rodapés dos dois idiomas (inglês e português).
+            await state.remember_footer_lines(
+                view["footer"].split("\n") + view.get("footer_pt", "").split("\n"))
         await state.log_action(
             action_type="manual_send" if sent else "manual_send_undone",
             agent="user",

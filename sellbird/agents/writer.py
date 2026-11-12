@@ -22,6 +22,7 @@ from sellbird.email_style import (
 )
 from sellbird.humanize import humanize, humanizer_enabled
 from sellbird.integrations.mail_provider import NATIVE_PROVIDERS
+from sellbird.language import EN, default_language, language_rule, prospect_language
 from sellbird.models.campaign import Campaign, EmailStep
 from sellbird.state import WRITABLE_EMAIL_STATUSES, StateManager
 from sellbird.sending_mode import sync_sending_mode
@@ -274,6 +275,12 @@ class Writer:
             if not prospects_with_email:
                 return
 
+        # Sellbird PT-BR: o idioma de cada prospect (Brasil em português,
+        # exterior em inglês). Cada campanha fica com um idioma só.
+        self._languages = {}
+        for p in prospects_with_email:
+            self._languages[p.id] = await self._language(p)
+
         # Batch prospects into campaign groups (by industry/title for relevance)
         batches = self._group_prospects(prospects_with_email)
 
@@ -464,6 +471,18 @@ class Writer:
                 f"({'awaiting approval' if require_approval else 'approved'})."
             )
 
+    async def _language(self, prospect) -> str:
+        """O idioma do e-mail para este prospect ("pt-BR", "pt-PT" ou "en").
+        Uma falha na consulta nunca impede o rascunho: usa o idioma padrão."""
+        known = getattr(self, "_languages", {}) or {}
+        if getattr(prospect, "id", None) in known:
+            return known[prospect.id]
+        try:
+            return await prospect_language(getattr(self, "state", None), prospect, self.config)
+        except Exception as e:
+            logger.debug(f"Writer: idioma não identificado para {getattr(prospect, 'email', '')}: {e}")
+            return default_language(self.config)
+
     async def _startup(self, company_id) -> list[str] | None:
         """Fact lines when the company is a startup (YC, another accelerator,
         a raise it announced; see sellbird.startups), else None."""
@@ -608,7 +627,7 @@ Requirements:
 {shape}
 {footer_rule(self.config, rules)}
 {strict}{inbox_rule}
-
+{language_rule(await self._language(prospect))}
 Return ONLY JSON: {{"subject": "...", "body": "..."}}"""
 
         result = await self.brain.think_json(
@@ -705,7 +724,7 @@ Requirements:
 {merge_rule}{style}
 {footer_rule(self.config, rules)}
 {strict}
-
+{language_rule(await self._language(prospects[0]) if prospects else EN)}
 Return ONLY a JSON array (no markdown fences, no commentary):
 [
   {{"step": 1, "subject": "...", "body": "...", "delay_days": 0}},
@@ -794,7 +813,8 @@ Rewrite it so it breaks none of them. Keep its facts, its one question and every
 merge variable such as {{{{first_name}}}} exactly as written; add no fact, name or claim.
 Make it shorter, never longer: cut words instead of adding them. Plain text, no
 dash between words (use a period or a comma), no exclamation marks, no sign-off
-and no name at the end.
+and no name at the end. Keep it in the language it is written in (Portuguese stays
+Portuguese, English stays English).
 
 Draft:
 {fence(json.dumps(payload, ensure_ascii=False, indent=2), "draft")}
@@ -882,6 +902,11 @@ Return ONLY a JSON object: {{"subject": "...", "body": "..."}}"""
             # greet anyone by name.
             kind = "inbox-outreach" if prospect.is_company_inbox else "outreach"
             key = f"{industry}-{kind}"
+            # Sellbird PT-BR: uma campanha por idioma ("dentistas-outreach-pt-BR"),
+            # porque o mesmo modelo de e-mail vai para o lote inteiro.
+            lang = (getattr(self, "_languages", {}) or {}).get(prospect.id, EN)
+            if lang != EN:
+                key = f"{key}-{lang}"
 
             if key not in batches:
                 batches[key] = []

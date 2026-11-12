@@ -34,7 +34,9 @@ SKILL_PATH = Path(
 MERGE_VAR = re.compile(r"\{\{\s*\w+\s*\}\}")
 MAX_GROWTH_WORDS = 2  # a rewrite may not be more than two words longer
 # A rewrite that talks about itself instead of being the email.
-META_PREFIXES = ("i can't", "i cannot", "as an ai", "sorry,", "here is", "here's")
+META_PREFIXES = ("i can't", "i cannot", "as an ai", "sorry,", "here is", "here's",
+                 # Português (Sellbird PT-BR)
+                 "não posso", "como uma ia", "desculpe,", "aqui está", "segue o e-mail", "segue a versão")
 
 
 def humanizer_enabled(config) -> bool:

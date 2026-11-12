@@ -479,6 +479,12 @@ OPT_OUT_WORDS = ("no thanks", "no thank you", "unsubscribe", "stop", "remove me"
                  "opt out")
 HEBREW_OPT_OUT_WORDS = ("הסר", "הסירו", "הסרה", "לא תודה", "הסירו אותי", "תורידו אותי")
 SPANISH_OPT_OUT_WORDS = ("no gracias", "baja", "darme de baja")
+# Versão em português (adicionada no Sellbird PT-BR): vai no rodapé dos
+# e-mails escritos em português. Pede uma resposta simples, como a LGPD e o
+# código de autorregulamentação de e-mail marketing (CAPEM) recomendam.
+DEFAULT_OPT_OUT_LINE_PT = "Não faz sentido pra você? É só me avisar que não envio mais e-mails."
+PORTUGUESE_OPT_OUT_WORDS = ("não, obrigado", "não obrigado", "descadastrar", "sair",
+                            "remover", "parar")
 FRENCH_OPT_OUT_WORDS = ("non merci", "non, merci", "arrêt", "désabonner", "désabonnement",
                         "désabonnez-moi", "retirez-moi")
 # Wording that tells people the emails can stop, in any phrasing. An
@@ -522,6 +528,18 @@ _SAYS_IT_STOPS_FR_RE = re.compile(
     r"|\blaiss\w*\s+tranquilles?"
     r"|\bplus\s+(?:jamais\s+)?(?:de\s+)?(?:courriels?|messages?|nouvelles)\s+de\s+(?:ma|notre)\s+part)",
     re.IGNORECASE)
+# Português, comparado sem acentos (ver _fold_accents): "Não tem interesse?
+# É só me avisar que não envio mais", "Responda SAIR para se descadastrar".
+_SAYS_IT_STOPS_PT_RE = re.compile(
+    r"(?:descadastr\w*|\bsair\b|\bremov\w+|\bparar\b|\bpare\b|nao,?\s+obrigad[oa]"
+    r"|nao\s+(?:tem|tenho|tiver)\s+interesse|sem\s+interesse"
+    r"|nao\s+(?:te\s+|lhe\s+|vos\s+)?(?:envio|enviarei|vou\s+enviar|mando|mandarei|vou\s+mandar"
+    r"|escrevo|escreverei|vou\s+escrever|incomodo|vou\s+incomodar|contato|vou\s+contatar)"
+    r"|nao\s+(?:quer|quiser|deseja|desejar)\s+(?:mais\s+)?receber"
+    r"|cancelar\s+(?:o\s+)?(?:envio|cadastro|inscricao))",
+    re.IGNORECASE)
+# "Clique" em português: "clique aqui para sair" (o rodapé não tem link).
+_PORTUGUESE_CLICK_RE = re.compile(r"\bcliqu(?:e|em|ar)\b", re.IGNORECASE)
 # "Click" in French: "cliquez ici pour vous désabonner".
 _FRENCH_CLICK_RE = re.compile(r"\bcliqu(?:ez|er|e)\b", re.IGNORECASE)
 
@@ -547,6 +565,9 @@ class ComplianceConfig(BaseModel):
     # Any wording that tells people they can opt out by replying. "" leaves it
     # off (and sellbird warns).
     opt_out_line: str = DEFAULT_OPT_OUT_LINE
+    # A mesma linha em português, usada nos e-mails escritos em português
+    # (Sellbird PT-BR). "" usa a linha em inglês acima também para eles.
+    opt_out_line_pt: str = DEFAULT_OPT_OUT_LINE_PT
     # Companies this operator will never email: competitors, existing
     # customers, anyone under a legal hold, a partner you agreed not to
     # approach. An entry is an address ("jane@acme.example") or a domain
@@ -555,7 +576,7 @@ class ComplianceConfig(BaseModel):
     # replies as well as cold mail — "never contact" means never.
     do_not_contact: list[str] = []
 
-    @field_validator("postal_address", "opt_out_line", mode="before")
+    @field_validator("postal_address", "opt_out_line", "opt_out_line_pt", mode="before")
     @classmethod
     def _blank_is_empty(cls, v):
         return "" if v is None else v
@@ -588,7 +609,7 @@ class ComplianceConfig(BaseModel):
                     seen.append(cleaned)
         return seen
 
-    @field_validator("opt_out_line")
+    @field_validator("opt_out_line", "opt_out_line_pt")
     @classmethod
     def _recognisable_opt_out(cls, v: str) -> str:
         v = v.strip()
@@ -597,14 +618,15 @@ class ComplianceConfig(BaseModel):
             return v
         folded = _fold_accents(v)
         if (any(bit in lowered for bit in ("http", "www.", "click", "@"))
-                or _HEBREW_CLICK_RE.search(v) or _FRENCH_CLICK_RE.search(folded)):
+                or _HEBREW_CLICK_RE.search(v) or _FRENCH_CLICK_RE.search(folded)
+                or _PORTUGUESE_CLICK_RE.search(folded)):
             raise ValueError(
                 "opt_out_line can't contain a link or an email address: cold email "
                 "allows one link, and opting out must be as simple as replying."
             )
         if not (_SAYS_IT_STOPS_RE.search(v) or _SAYS_IT_STOPS_HE_RE.search(v)
                 or _SAYS_IT_STOPS_ES_RE.search(v) or _SAYS_IT_STOPS_IT_RE.search(v)
-                or _SAYS_IT_STOPS_FR_RE.search(folded)):
+                or _SAYS_IT_STOPS_FR_RE.search(folded) or _SAYS_IT_STOPS_PT_RE.search(folded)):
             raise ValueError(
                 "opt_out_line doesn't tell people they can stop these emails. Say so in "
                 "any words (\"Not interested? Just let me know and I won't email you "
@@ -619,11 +641,28 @@ def compliance_of(config) -> ComplianceConfig:
     return found if isinstance(found, ComplianceConfig) else ComplianceConfig()
 
 
-def compliance_footer_lines(config) -> list[str]:
-    """The lines added under every cold email: address, then opt-out line."""
+def compliance_footer_lines(config, language: str = "") -> list[str]:
+    """The lines added under every cold email: address, then opt-out line.
+
+    language: "pt-BR"/"pt-PT" usa a linha de descadastro em português
+    (compliance.opt_out_line_pt), quando ela existe. Vazio ou "en": a linha
+    original, em inglês."""
     compliance = compliance_of(config)
-    return [line for line in (compliance.postal_address.strip(),
-                              compliance.opt_out_line.strip()) if line]
+    opt_out = compliance.opt_out_line.strip()
+    if str(language or "").startswith("pt") and compliance.opt_out_line_pt.strip():
+        opt_out = compliance.opt_out_line_pt.strip()
+    return [line for line in (compliance.postal_address.strip(), opt_out) if line]
+
+
+def all_footer_lines(config) -> list[str]:
+    """Todas as linhas de rodapé que o Sellbird pode ter enviado (inglês e
+    português), para reconhecer o nosso texto citado numa resposta."""
+    found = []
+    for lang in ("en", "pt-BR"):
+        for line in compliance_footer_lines(config, lang):
+            if line not in found:
+                found.append(line)
+    return found
 
 
 def compliance_notice(config) -> str:
@@ -830,6 +869,30 @@ class HandoffConfig(BaseModel):
     arguments: dict = {}
 
 
+class LanguageConfig(BaseModel):
+    """Idioma dos e-mails (adicionado no Sellbird PT-BR).
+
+    default: o idioma quando não dá para saber o país do prospect.
+        "pt-BR", "pt-PT" ou "en". O padrão no código é "en" (igual ao
+        Sellbird original); o sellbird.yaml em português vem com "pt-BR".
+    by_country: True escreve conforme o país da empresa (Brasil em
+        português, exterior em inglês). False usa sempre ``default``.
+    """
+    default: str = "en"
+    by_country: bool = True
+
+    @field_validator("default", mode="before")
+    @classmethod
+    def _known_language(cls, v):
+        from sellbird.language import LANGUAGES, normalize_language
+        if v is None or str(v).strip() == "":
+            return "en"
+        code = normalize_language(v, "")
+        if code not in LANGUAGES:
+            raise ValueError('use "pt-BR", "pt-PT" ou "en"')
+        return code
+
+
 class SellbirdConfig(BaseModel):
     persona: PersonaConfig
     product: ProductConfig
@@ -840,6 +903,7 @@ class SellbirdConfig(BaseModel):
     compliance: ComplianceConfig = ComplianceConfig()
     writer: WriterConfig = WriterConfig()
     handoff: HandoffConfig = HandoffConfig()
+    language: LanguageConfig = LanguageConfig()
     # The file it was loaded from, so a running Sellbird can re-read the
     # sending mode from that same file (refresh_sending_mode).
     _source_path: str | None = PrivateAttr(default=None)

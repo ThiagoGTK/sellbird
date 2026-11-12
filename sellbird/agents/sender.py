@@ -20,9 +20,11 @@ from datetime import datetime, timedelta, timezone
 from sellbird.brain import Brain
 from sellbird.config import (
     SellbirdConfig, EnvConfig, cold_daily_cap, compliance_footer_lines, compliance_notice,
+    all_footer_lines,
     compliance_of, live_do_not_contact, operator_timezone, send_window_of,
 )
 from sellbird import extensions
+from sellbird.language import looks_portuguese
 from sellbird.gate import autopilot_review, do_not_contact_match, pre_send_check
 from sellbird.send_hooks import NO_HEADERS_HOLD, SendCheck, SendHookError, extra_headers, first_verdict
 from sellbird.send_window import in_window, next_send_time, recipient_country, recipient_zone
@@ -418,7 +420,9 @@ class Sender:
             for step in campaign.sequence
         ]
 
-        await self.state.remember_footer_lines(compliance_footer_lines(self.config))
+        # Lembra as linhas de rodapé dos dois idiomas, para reconhecer o nosso
+        # texto quando ele vier citado numa resposta.
+        await self.state.remember_footer_lines(all_footer_lines(self.config))
         result = await self.instantly.set_campaign_emails(campaign_id, sequences)
         if result is None:
             logger.error(f"Sender: Failed to set emails for campaign {campaign_id}")
@@ -747,7 +751,10 @@ class Sender:
         underneath (CAN-SPAM). Added at send time, so a changed address
         applies to mail already queued; not added again when the body already
         ends with it."""
-        footer = "\n".join(compliance_footer_lines(self.config))
+        # Sellbird PT-BR: e-mail escrito em português recebe a linha de
+        # descadastro em português (compliance.opt_out_line_pt).
+        language = "pt-BR" if looks_portuguese(body) else "en"
+        footer = "\n".join(compliance_footer_lines(self.config, language))
         if not footer or body.rstrip().endswith(footer):
             return body
         return body.rstrip() + "\n\n" + footer
@@ -1299,7 +1306,7 @@ class Sender:
             else:
                 logger.info(f"Sender: cold email cap reached for today ({cold_cap}).")
         if sent_cold:
-            await self.state.remember_footer_lines(compliance_footer_lines(self.config))
+            await self.state.remember_footer_lines(all_footer_lines(self.config))
             notice = compliance_notice(self.config)
             if notice:
                 logger.warning(f"Sender: {notice}")
