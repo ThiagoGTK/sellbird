@@ -286,7 +286,8 @@ class Scout:
         headers = {
             "User-Agent": random.choice(USER_AGENTS),
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "Accept-Language": "en-US,en;q=0.9",
+            # Sellbird PT-BR: pede a versão em português quando o site tiver.
+            "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
         }
         if extra:
             headers.update(extra)

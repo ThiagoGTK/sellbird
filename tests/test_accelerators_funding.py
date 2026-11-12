@@ -544,7 +544,8 @@ async def test_a_mixed_sequence_batch_gets_no_founder_framing(state):
 def test_the_playbook_covers_accelerators_and_raises():
     from sellbird.paths import PROJECT_ROOT
     text = (PROJECT_ROOT / "skills" / "selling_to_startups.md").read_text(encoding="utf-8").lower()
-    for topic in ("accelerator", "techstars", "recently funded", "18 months", "amount"):
+    # Sellbird PT-BR: o playbook está em português.
+    for topic in ("aceleradora", "techstars", "captação recente", "18 meses", "valor"):
         assert topic in text
 
 

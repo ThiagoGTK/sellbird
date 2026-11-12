@@ -1,82 +1,82 @@
-# Lead Qualification Skills
+# Qualificação de leads
 
-Sellbird uses a hybrid qualification approach: BANT for initial screening, enhanced with ICP scoring for prioritization.
-
----
-
-## BANT Framework (Initial Qualification)
-
-### Budget
-- Can they afford the solution?
-- Signals: company size, funding stage, job postings for related roles
-- Green flags: recently funded, hiring in your product's domain
-- Red flags: very small team with no budget indicators
-
-### Authority
-- Is this person a decision-maker or influencer?
-- Decision-maker titles: VP, Director, Head of, C-suite, Founder
-- Influencer titles: Manager, Lead, Senior — can champion internally
-- If not the authority: ask for the right person (don't waste sequences)
-
-### Need
-- Do they have the problem you solve?
-- Signals: tech stack, industry challenges, LinkedIn posts about pain points
-- Validate by: checking their current tools, recent job posts, company stage
-
-### Timeline
-- Are they likely to buy soon?
-- Signals: active evaluation (G2/Capterra reviews), recent vendor changes
-- "Not now" is okay — schedule a future touchpoint
+O Sellbird usa uma qualificação híbrida: BANT na triagem inicial, reforçado com pontuação de ICP para priorizar.
 
 ---
 
-## ICP Scoring System
+## Método BANT (qualificação inicial)
 
-Score every prospect 1-10 before outreach:
+### Budget (orçamento)
+- A empresa consegue pagar pela solução?
+- Sinais: porte da empresa, estágio de investimento, vagas abertas em áreas relacionadas
+- Sinais verdes: captou investimento recentemente, está contratando na área do seu produto
+- Sinais vermelhos: equipe muito pequena sem nenhum indício de verba
 
-| Criteria | Points | Details |
-|----------|--------|---------|
-| **Title match** | 0-3 | Exact ICP title = 3, adjacent = 2, related = 1 |
-| **Company fit** | 0-3 | Right industry + size = 3, one match = 2, tangential = 1 |
-| **Engagement signals** | 0-2 | Active on LinkedIn = 1, posts about relevant topics = 2 |
-| **Reachability** | 0-2 | Verified email = 2, LinkedIn only = 1, no contact = 0 |
+### Authority (autoridade)
+- Essa pessoa decide ou influencia?
+- Cargos que decidem: dono, sócio, fundador, diretor, "head de", diretoria executiva
+- Cargos que influenciam: gerente, coordenador, líder, sênior; podem defender a ideia internamente
+- Se não for quem decide: peça a pessoa certa (não gaste a sequência)
 
-### Priority Tiers
-- **Score 8-10**: High priority — personalized outreach immediately
-- **Score 5-7**: Medium priority — include in batch campaigns
-- **Score 3-4**: Low priority — only if pipeline needs volume
-- **Score 1-2**: Skip — not worth the outreach
+### Need (necessidade)
+- Eles têm o problema que você resolve?
+- Sinais: ferramentas que usam, desafios do segmento, posts no LinkedIn sobre as dores
+- Confirme olhando: as ferramentas atuais, vagas recentes, o estágio da empresa
 
----
-
-## MEDDIC (For Complex Deals — Future Use)
-
-When Sellbird handles enterprise prospects or multi-stakeholder deals:
-
-- **Metrics**: What quantifiable outcomes does the buyer care about?
-- **Economic Buyer**: Who controls the budget?
-- **Decision Criteria**: What factors will they use to decide?
-- **Decision Process**: What steps do they go through to buy?
-- **Identify Pain**: What's the core problem driving urgency?
-- **Champion**: Is there an internal advocate for your solution?
+### Timeline (prazo)
+- Devem comprar em breve?
+- Sinais: avaliação ativa (avaliações em sites de comparação), troca recente de fornecedor
+- "Agora não" tudo bem: marque um contato futuro
 
 ---
 
-## Disqualification Signals
+## Pontuação de ICP
 
-Sellbird should NOT pursue prospects who:
-- Have fewer employees than the minimum ICP threshold
-- Are in a completely unrelated industry
-- Have no discoverable contact information
-- Already use a deeply entrenched competitor (unless switching signals exist)
-- Explicitly opted out of communications
+Dê uma nota de 1 a 10 para cada prospect antes da abordagem:
 
-## Enrichment Priorities
+| Critério | Pontos | Detalhes |
+|----------|--------|----------|
+| **Cargo** | 0-3 | Cargo exato do ICP = 3, próximo = 2, relacionado = 1 |
+| **Encaixe da empresa** | 0-3 | Segmento + porte certos = 3, um dos dois = 2, tangencial = 1 |
+| **Sinais de engajamento** | 0-2 | Ativo no LinkedIn = 1, posta sobre temas relevantes = 2 |
+| **Alcance** | 0-2 | E-mail verificado = 2, só LinkedIn = 1, nenhum contato = 0 |
 
-When qualifying, gather in this order:
-1. Company domain + size (free: LinkedIn, website)
-2. Decision-maker name + title (free: LinkedIn search)
-3. Email address (free: pattern guessing + SMTP verification)
-4. Recent company news (free: Google search)
-5. Tech stack (free: BuiltWith, Wappalyzer)
-6. Personalization angles (free: LinkedIn posts, company blog)
+### Faixas de prioridade
+- **Nota 8-10**: prioridade alta; abordagem personalizada imediata
+- **Nota 5-7**: prioridade média; entra nas campanhas em lote
+- **Nota 3-4**: prioridade baixa; só se o funil precisar de volume
+- **Nota 1-2**: descartar; não vale a abordagem
+
+---
+
+## MEDDIC (para negócios complexos, uso futuro)
+
+Quando o Sellbird lidar com empresas grandes ou negócios com várias pessoas envolvidas:
+
+- **Metrics (métricas)**: que resultados mensuráveis importam para o comprador?
+- **Economic Buyer (comprador econômico)**: quem controla o orçamento?
+- **Decision Criteria (critérios de decisão)**: o que eles vão usar para decidir?
+- **Decision Process (processo de decisão)**: que etapas eles seguem para comprar?
+- **Identify Pain (identificar a dor)**: qual é o problema central que gera urgência?
+- **Champion (defensor)**: existe alguém lá dentro defendendo sua solução?
+
+---
+
+## Sinais de desqualificação
+
+O Sellbird NÃO deve seguir com prospects que:
+- Têm menos funcionários que o mínimo do ICP
+- Estão num segmento sem nenhuma relação
+- Não têm nenhuma informação de contato encontrável
+- Já usam um concorrente muito enraizado (a não ser que haja sinais de troca)
+- Pediram explicitamente para não receber contato
+
+## Ordem de enriquecimento
+
+Na qualificação, levante nesta ordem:
+1. Domínio + porte da empresa (grátis: LinkedIn, site)
+2. Nome + cargo de quem decide (grátis: busca no LinkedIn, página "Quem somos")
+3. E-mail (grátis: padrão de e-mail + verificação SMTP)
+4. Notícias recentes da empresa (grátis: busca no Google)
+5. Ferramentas que usam (grátis: BuiltWith, Wappalyzer)
+6. Ângulos de personalização (grátis: posts no LinkedIn, blog da empresa)

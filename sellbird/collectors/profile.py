@@ -105,28 +105,42 @@ META_PIXEL = (r"connect\.facebook\.net/[^\"']*fbevents\.js", r"fbq\s*\(\s*['\"]i
 BOOKING_HINTS = (r"calendly\.com", r"acuityscheduling", r"schedulicity",
                  r"squareup\.com/appointments", r"setmore", r"book(ing)?[-_]?now",
                  r"schedule[-_]?(an?[-_])?(appointment|estimate|consultation)",
-                 r"housecallpro", r"getjobber\.com", r"servicetitan")
+                 r"housecallpro", r"getjobber\.com", r"servicetitan",
+                 # Brasil (Sellbird PT-BR): agendamento online em sites brasileiros.
+                 r"doctoralia\.com\.br", r"agende[-_]?(?:ja|online|sua|seu|agora)",
+                 r"agendamento[-_]?online", r"marque[-_]?(?:sua|seu)[-_]?(?:consulta|horario|avaliacao)",
+                 r"agendar[-_]?(?:consulta|horario|avaliacao|online)", r"simplesagenda", r"agendor",
+                 r"clinicorp", r"feegow", r"iclinic", r"trinks\.com", r"avec\.app")
 
 AI_CRAWLERS = ("gptbot", "google-extended", "ccbot", "anthropic-ai", "claudebot",
                "perplexitybot", "bytespider")
 
 TEAM_PATHS = ("/team", "/about", "/about-us", "/our-team", "/staff",
-              "/leadership", "/meet-the-team", "/company/team")
+              "/leadership", "/meet-the-team", "/company/team",
+              # Brasil (Sellbird PT-BR)
+              "/equipe", "/nossa-equipe", "/sobre", "/sobre-nos", "/quem-somos",
+              "/institucional", "/corpo-clinico")
 CAREERS_PATHS = ("/careers", "/jobs", "/join-us", "/employment", "/hiring",
-                 "/about/careers", "/careers/")
+                 "/about/careers", "/careers/",
+                 # Brasil (Sellbird PT-BR)
+                 "/trabalhe-conosco", "/carreiras", "/vagas")
 # A homepage link to the careers page beats guessing paths: careers.acme.com
 # and /company/jobs are as common as /careers. Whole path segments and whole
 # anchors only: "/scheduling/hiring-marketplaces" is a product page.
 _CAREERS_HOST = re.compile(r"^(careers?|jobs|join)\.", re.I)
 _CAREERS_SEGMENTS = frozenset("""careers career jobs join join-us joinus work-with-us
-open-roles open-positions hiring""".split())
+open-roles open-positions hiring trabalhe-conosco trabalheconosco carreiras carreira vagas""".split())
 _CAREERS_ANCHOR = re.compile(r"^(careers?|jobs|join us|join (our|the) team|we['’]?re hiring"
-                             r"|open (roles|positions)|work with us)$", re.I)
+                             r"|open (roles|positions)|work with us"
+                             # Brasil: "Trabalhe conosco", "Vagas", "Carreiras", "Estamos contratando"
+                             r"|trabalhe conosco|vagas|carreiras?|estamos contratando|venha trabalhar conosco)$", re.I)
 # Roles recorded per company from a board. The first few say it; twenty rows
 # of "Account Executive, <city>" don't say more.
 MAX_BOARD_ROLES = 5
 CONTACT_PATHS = ("/contact", "/contact-us", "/get-a-quote", "/free-estimate",
-                 "/request-estimate", "/quote")
+                 "/request-estimate", "/quote",
+                 # Brasil (Sellbird PT-BR)
+                 "/contato", "/fale-conosco", "/orcamento", "/solicite-um-orcamento")
 
 # Accented letters folded to their base letter one for one ("é" -> "e",
 # "Ç" -> "C"), so French text matches ASCII patterns and a match's span is
@@ -236,6 +250,10 @@ DECISION_MAKER_TITLES = (
     # fondateur/fondatrice, directeur/directrice, gérant(e), associé(e).
     "proprietaire", "president", "pdg", "fondat", "directeur", "directrice",
     "gerant", "associe",
+    # Português (Brasil), sem acentos: proprietário(a), dono(a), sócio(a),
+    # fundador(a), diretor(a), gerente, gestor(a).
+    "proprietari", "dono", "dona", "socio", "socia", "fundador", "diretor",
+    "gerente", "gestor", "administrador",
 )
 
 
@@ -253,7 +271,13 @@ ROLE_HINT = re.compile(
     r"estimat(?:eur|rice)|representante?|conseill(?:er|ere)|coordonnat(?:eur|rice)|contremaitre|"
     r"superviseure?|responsable|chargee?|ventes|comptable|administrat(?:eur|rice)|ingenieure?|"
     r"frigoriste|mecanicien(?:ne)?|installat(?:eur|rice)|repartit(?:eur|rice)|secretaire|"
-    r"receptionniste)\b", re.I)
+    r"receptionniste|"
+    # Português (Brasil), sem acentos
+    r"proprietari[oa]|dono|dona|s[oó]ci[oa](?:[- ](?:fundador[a]?|diretor[a]?|propriet\w+|administrador[a]?|gerente))?|"
+    r"co-?fundador[a]?|fundador[a]?|diretor[a]?|gerente|gestor[a]?|coordenador[a]?|supervisor[a]?|"
+    r"vendedor[a]?|consultor[a]?|administrador[a]?|dentista|ortodontista|advogad[oa]|medic[oa]|"
+    r"engenheir[oa]|secretari[oa]|recepcionista|tecnic[oa]|analista|especialista|atendimento|"
+    r"comercial|financeiro|marketing|responsavel tecnic[oa])\b", re.I)
 
 
 def title_looks_like_role(text: str) -> bool:

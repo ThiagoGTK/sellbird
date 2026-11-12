@@ -46,14 +46,30 @@ PERSON_VAR = re.compile(r"\{\{\s*(first_?name|last_?name|title)\s*\}\}", re.IGNO
 
 # Which signal_playbook sections a prospect's facts call for, by heading
 # prefix and the words in the facts that point to them.
+# Sellbird PT-BR: cada seção aceita o título em inglês (playbook original) ou
+# em português (playbook traduzido), e palavras dos fatos nos dois idiomas.
 _SIGNAL_SECTIONS = (
-    ("### Hiring signal", ("hiring", "job post", "is hiring", "open role", "careers")),
-    ("#### Using a job posting", ("hiring", "job post", "open role")),
-    ("### Tech-stack signal", ("tools detected", "uses ", "built on", "shopify", "hubspot", "wordpress")),
-    ("### Funding signal", ("raised", "funding", "seed", "series a", "series b", "y combinator", "accelerator")),
-    ("### New-domain", ("new domain", "registered", "just launched", "new business")),
-    ("### Search-rank signal", ("searched", "search", "came up", "ranks", "google", "maps", "local pack")),
+    (("### Hiring signal", "### Sinal de contratação"),
+     ("hiring", "job post", "is hiring", "open role", "careers",
+      "contratando", "vaga", "trabalhe conosco")),
+    (("#### Using a job posting", "#### Usando uma vaga"),
+     ("hiring", "job post", "open role", "contratando", "vaga")),
+    (("### Tech-stack signal", "### Sinal de ferramentas"),
+     ("tools detected", "uses ", "built on", "shopify", "hubspot", "wordpress",
+      "ferramentas detectadas", "usa ")),
+    (("### Funding signal", "### Sinal de investimento"),
+     ("raised", "funding", "seed", "series a", "series b", "y combinator", "accelerator",
+      "captou", "investimento", "rodada", "aceleradora")),
+    (("### New-domain", "### Sinal de domínio novo"),
+     ("new domain", "registered", "just launched", "new business",
+      "domínio novo", "acabou de abrir", "empresa nova")),
+    (("### Search-rank signal", "### Sinal de posição na busca"),
+     ("searched", "search", "came up", "ranks", "google", "maps", "local pack",
+      "pesquis", "busca", "aparece")),
 )
+# Títulos fixos do playbook, em inglês e em português.
+_CORE_RULE = ("## The core rule", "## A regra principal")
+_NO_SIGNAL = ("## When you have no real signal", "## Quando não há sinal de verdade")
 
 
 def _sections(markdown: str) -> dict[str, str]:
@@ -501,12 +517,12 @@ class Writer:
             return ""
         sections = _sections(text)
         low = facts.lower()
-        wanted = ["## The core rule"]
+        wanted = [h for h in sections if h.startswith(_CORE_RULE)][:1] or [_CORE_RULE[0]]
         for heading, words in _SIGNAL_SECTIONS:
             if any(w in low for w in words):
                 wanted += [h for h in sections if h.startswith(heading)]
         if len(wanted) == 1:
-            wanted.append("## When you have no real signal")
+            wanted += [h for h in sections if h.startswith(_NO_SIGNAL)][:1] or [_NO_SIGNAL[0]]
         body = "\n\n".join(f"{h}\n{sections[h]}" for h in dict.fromkeys(wanted) if h in sections)
         body = body.replace(" \u2014 ", ", ").replace("\u2014", ", ")
         return "\n\nUSING THEIR SIGNAL\n" + body if body else ""

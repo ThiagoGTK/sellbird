@@ -1,12 +1,14 @@
-# Skills
+# Skills (playbooks de vendas)
 
-Skills are editable Markdown files that give Sellbird foundational sales knowledge. Each agent loads the skills it needs before making decisions.
+Skills são arquivos Markdown editáveis que dão ao Sellbird o conhecimento de vendas básico. Cada agente carrega as skills de que precisa antes de tomar decisões.
 
-## How Skills Work
+> Versão em português (Sellbird PT-BR): os playbooks foram traduzidos e adaptados para o mercado brasileiro. O Sellbird escreve em português para empresas do Brasil e em inglês para empresas de fora; estas instruções valem para os dois idiomas.
 
-When an agent runs, it calls `brain.load_skills_for_agent("agent_name")` which concatenates the relevant skill files and injects them into the prompt. This means you can change Sellbird's behavior by editing these files — no code changes needed.
+## Como as skills funcionam
 
-## Skill → Agent Mapping
+Quando um agente roda, ele chama `brain.load_skills_for_agent("nome_do_agente")`, que junta os arquivos de skill relevantes e coloca no prompt. Ou seja: você muda o comportamento do Sellbird editando estes arquivos, sem mexer em código.
+
+## Qual skill vai para qual agente
 
 | Skill | Scout | Writer | Handler | Sender | LinkedIn |
 |-------|-------|--------|---------|--------|----------|
@@ -23,30 +25,30 @@ When an agent runs, it calls `brain.load_skills_for_agent("agent_name")` which c
 | `competitive_intel.md` | | x | x | | |
 | `selling_to_startups.md` | | x* | x* | | |
 
-\* Only for prospects whose company is a startup by its own site's account (the `YC_BACKED` or `ACCELERATOR` signal, or a `FUNDING_ROUND` from the last 18 months), not loaded for everyone.
+\* Só para prospects cuja empresa é uma startup segundo o próprio site (sinal `YC_BACKED` ou `ACCELERATOR`, ou um `FUNDING_ROUND` dos últimos 18 meses); não é carregada para todo mundo.
 
-## Built-in Skills
+## Skills que já vêm prontas
 
-- **`prospecting_tactics.md`** — Google dorking queries, company website scraping, trigger events, referral mining
-- **`lead_qualification.md`** — BANT screening, ICP scoring, MEDDIC framework, disqualification criteria
-- **`account_navigation.md`** — Multi-contact handling, entry point strategy, multi-threading rules
-- **`selling_to_startups.md`** — Writing to early-stage founders: who reads, timing around a YC or accelerator batch and Demo Day, writing to companies that just raised (and when a raise is too old to mention), what not to do, handling their replies. Used automatically for YC-backed, accelerator-backed and recently funded prospects.
-- **`signal_playbook.md`** — Turning buying signals (hiring, tech stack, funding) into the email's first line; which signal wins when there are several; using a job posting as the hook without guessing or implying inside knowledge
-- **`email_frameworks.md`** — Cold email copywriting rules, banned AI patterns, 2026 reply-rate data (length, offer CTAs, cadence, no tracking), the 3-email sequence (Observation, Angle, Breakup), subject lines, personalization
-- **`sales_methodology.md`** — ABC Loop, conversation flow, tone calibration, ethical guidelines
-- **`offer_strategy.md`** — Offer ladder by engagement level, closing mechanics, timing rules
-- **`objection_handling.md`** — LAARC framework, 4 objection categories with responses
-- **`linkedin_outreach.md`** — Connection sequences, messaging templates, rate limits
+- **`prospecting_tactics.md`**: buscas avançadas no Google, leitura do site da empresa, eventos-gatilho, indicações
+- **`lead_qualification.md`**: triagem BANT, pontuação de ICP, MEDDIC, critérios de desqualificação
+- **`account_navigation.md`**: várias pessoas na mesma empresa, por onde entrar, multithreading
+- **`selling_to_startups.md`**: como escrever para fundadores de startups: quem lê, timing de aceleradoras e Demo Day, empresas que acabaram de captar (e quando a captação é velha demais para citar), o que não fazer, como lidar com as respostas. Usada automaticamente para prospects com aceleradora ou captação recente.
+- **`signal_playbook.md`**: transformar sinais de compra (contratação, ferramentas, investimento) na primeira linha do e-mail; qual sinal vence quando há vários; usar uma vaga como gancho sem chutar nem insinuar informação de dentro
+- **`email_frameworks.md`**: regras de texto para e-mail frio, padrões de IA proibidos, dados de taxa de resposta (tamanho, oferta como pedido, cadência, sem rastreamento), a sequência de 3 e-mails (Observação, Ângulo, Encerramento), assuntos, personalização
+- **`sales_methodology.md`**: ciclo ABC, fluxo da conversa, ajuste de tom, ética
+- **`offer_strategy.md`**: escada de ofertas por nível de engajamento, mecânica de fechamento, regras de timing
+- **`objection_handling.md`**: método LAARC, 4 categorias de objeção com respostas
+- **`linkedin_outreach.md`**: sequências de conexão, modelos de mensagem, limites de uso
 
-## Auto-Generated Skills
+## Skills geradas automaticamente
 
-These are created by `sellbird train <url>` and are specific to your product:
+Criadas pelo `sellbird train <url>`, específicas do seu produto:
 
-- **`product_knowledge.md`** — Features, benefits, pricing, use cases, pain points, buying triggers
-- **`competitive_intel.md`** — Battle cards for each competitor, differentiation angles, migration paths
+- **`product_knowledge.md`**: recursos, benefícios, preço, casos de uso, dores, gatilhos de compra
+- **`competitive_intel.md`**: comparativos com cada concorrente, ângulos de diferenciação, caminhos de migração
 
-## Adding or Editing Skills
+## Adicionar ou editar skills
 
-1. Edit any `.md` file in this directory
-2. Changes take effect on the next heartbeat cycle (no restart needed)
-3. To add a new skill, create the file and add it to the `skill_map` in `sellbird/brain.py`
+1. Edite qualquer arquivo `.md` desta pasta
+2. As mudanças valem no próximo ciclo (não precisa reiniciar)
+3. Para criar uma skill nova, crie o arquivo e adicione no `skill_map` em `sellbird/brain.py`

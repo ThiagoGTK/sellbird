@@ -184,7 +184,8 @@ def test_the_skill_ships_with_sellbird():
     from sellbird.paths import PROJECT_ROOT
     text = (PROJECT_ROOT / "skills" / "selling_to_startups.md").read_text(encoding="utf-8")
     assert len(text.split()) > 300
-    for topic in ("founder", "batch", "Demo Day"):
+    # Sellbird PT-BR: o playbook está em português.
+    for topic in ("fundador", "turma", "Demo Day"):
         assert topic.lower() in text.lower()
 
 
