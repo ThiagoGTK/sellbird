@@ -67,7 +67,7 @@ def register(subparsers) -> None:
 
     pause = actions.add_parser("pause", help="Stop sending from one inbox")
     pause.add_argument("address")
-    pause.add_argument("--reason", default="paused by you")
+    pause.add_argument("--reason", default="pausada por você")
     resume = actions.add_parser("resume", help="Send from a paused inbox again")
     resume.add_argument("address")
 

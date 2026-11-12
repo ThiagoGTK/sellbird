@@ -1055,7 +1055,7 @@ def cmd_sending(args):
         state = StateManager()
         await state.init_db()
         if args.sending_action == "pause":
-            await state.set_setting("sending_paused", "paused manually")
+            await state.set_setting("sending_paused", "pausado manualmente")
             print("\n  Envio pausado. Nada sai da caixa de saída.\n")
         elif args.sending_action == "resume":
             await state.set_setting("sending_paused", "")

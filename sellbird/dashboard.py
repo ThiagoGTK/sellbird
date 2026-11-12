@@ -1678,7 +1678,7 @@ async def sending_toggle(action: str):
         state = _state()
         await state.init_db()
         if action == "pause":
-            await state.set_setting("sending_paused", "paused from dashboard")
+            await state.set_setting("sending_paused", "pausado pelo painel")
         else:
             await state.set_setting("sending_paused", "")
             await state.set_setting("bounce_count", "0")
