@@ -7,185 +7,117 @@
   </a>
 </p>
 
-<p align="center"><strong>The open-source outreach platform that runs on your Claude or ChatGPT plan.</strong></p>
+<p align="center"><strong>Sellbird em português (PT-BR): a plataforma de prospecção de código aberto que roda no seu plano do Claude ou do ChatGPT.</strong></p>
 
 <p align="center">
-Sellbird finds companies that need what you sell, finds the person who decides, checks their email address, writes each one a personal cold email, sends it and handles the replies.
-It runs on your own machine, and by default nothing goes out until you approve it.
+O Sellbird encontra empresas que precisam do que você vende, descobre quem decide, confere o e-mail, escreve um e-mail frio personalizado para cada pessoa, envia e cuida das respostas.
+Ele roda no seu computador e, por padrão, nada sai sem a sua aprovação.
 </p>
 
-<p align="center">
-  <a href="https://github.com/ethanplusai/sellbird/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/ethanplusai/sellbird?style=flat&logo=github&label=stars&color=244b62&cacheSeconds=3600"></a>
-  <a href="https://github.com/ethanplusai/sellbird/actions/workflows/tests.yml"><img alt="Tests" src="https://github.com/ethanplusai/sellbird/actions/workflows/tests.yml/badge.svg"></a>
-  <a href="LICENSE"><img alt="License: AGPL-3.0" src="https://img.shields.io/badge/license-AGPL--3.0-244b62"></a>
-  <img alt="Python 3.11+" src="https://img.shields.io/badge/python-3.11%2B-244b62?logo=python&logoColor=white">
-  <a href="https://sellbird.ai"><img alt="Hosted at sellbird.ai" src="https://img.shields.io/badge/hosted-sellbird.ai-244b62"></a>
-  <a href="https://sellbird.ai/harvey/"><img alt="Formerly Harvey" src="https://img.shields.io/badge/formerly-Harvey-8aa0ad"></a>
-</p>
+> **Esta é uma versão traduzida e adaptada para o Brasil** do projeto original
+> [ethanplusai/sellbird](https://github.com/ethanplusai/sellbird) (licença AGPL-3.0).
+> O README original, em inglês, está em [README.en.md](README.en.md).
+> **Guia completo de instalação e uso em português: [docs/pt-BR/GUIA.md](docs/pt-BR/GUIA.md).**
 
-> **[Harvey is now Sellbird.](https://sellbird.ai/harvey/)** Same project, same history, new name. Already running Harvey? Your setup carries over: see [Upgrading from Harvey](#upgrading-from-harvey).
+## O que muda nesta versão
 
-**Prefer not to run it yourself? [sellbird.ai](https://sellbird.ai) is the hosted version, with sending domains, inboxes and warmup set up for you. It's in early access.**
-
-![Sellbird's dashboard: the Today screen, a conversation that needs you, approving a drafted reply in the Outbox, the signals to confirm, searching contacts, then dark mode](docs/dashboard.gif)
-
-<sub>The demo data is invented: "Bookwell" selling online booking to roofers, dental practices and HVAC shops, on `.test` domains.</sub>
-
-## What it does
-
-Sellbird is a pipeline you can run end to end, or stop at any step.
-
-| | What happens | More |
+| | Original | Esta versão (PT-BR) |
 |---|---|---|
-| **Find companies** | Searches for businesses that match your customer: free on OpenStreetMap, or on a paid source you pick. Every paid search shows its cost before it runs. | [Discovery](docs/signals-and-pipeline.md#1-discover--who-exists) |
-| **Learn why they'd buy** | Reads each company's own website for the buying signals you confirmed, like no online booking, ads running or a role they're hiring for. No model calls, no cost. | [Signals](docs/signals-and-pipeline.md) |
-| **Find who decides** | Finds the owner or manager named on the company's own pages, two people per company at most. | [Enrich](docs/signals-and-pipeline.md#3-enrich--who-decides) |
-| **Check the address** | Learns the company's email pattern and verifies one address. Every address is marked verified, risky, guess or invalid, and only deliverable ones are ever sent to. | [Verify](docs/signals-and-pipeline.md#4-verify--can-you-reach-them) |
-| **Write and send** | Writes a short sequence for each person from what it found, then sends from your Gmail, Microsoft 365 or SMTP mailbox inside your daily limit and their office hours. | [Sending](docs/approval-and-sending.md) |
-| **Handle replies** | Reads every reply, drafts an answer, sets auto-replies aside, honours opt-outs at once, and hands you anything it shouldn't answer alone. | [Dashboard](docs/dashboard.md) |
+| **Idioma dos e-mails** | Inglês | **Português do Brasil para empresas no Brasil**, inglês para empresas de fora (detectado pela localização, fuso, domínio `.br` etc.) |
+| **Respostas** | Inglês | No mesmo idioma em que o prospect escreveu |
+| **Pedido de descadastro** | Inglês, espanhol, francês, hebraico | + **português** ("me descadastre", "não tenho interesse", "sair", "pare de me mandar e-mails"...) |
+| **Ameaça jurídica → humano** | Inglês, hebraico | + **português** (advogado, Procon, LGPD, "isso é spam"...) |
+| **Rodapé** | Linha de descadastro em inglês | Linha em português para e-mails em português (`compliance.opt_out_line_pt`) |
+| **Regras de estilo** | Clichês de IA em inglês | + clichês em português ("espero que esteja bem", "venho por meio deste", "solução inovadora"...) |
+| **Sites brasileiros** | Páginas "team/about" | + "quem somos", "equipe", "corpo clínico", cargos como sócio-fundador, proprietário, Dra. |
+| **Busca grátis (OpenStreetMap)** | Segmentos em inglês | + segmentos em português ("clínica odontológica", "contabilidade", "imobiliária", "academia"...) |
+| **Painel, terminal, prompts e playbooks** | Inglês | **Português** |
 
-Only want the list? Stop after verifying and run `sellbird export` for a sequencer-ready CSV of everything it found.
+## O que ele faz
 
-```
-$ sellbird run
+O Sellbird é um funil que você roda do começo ao fim, ou para em qualquer etapa.
 
-============================================================
-Sellbird is online.
-============================================================
-Checking pipeline state...
-Decision: write_campaign (3 new prospects with no drafts)
-  handler   → Elena Park, Harbor Dental Studio     interested, answer drafted
-  handler   → Priya Nair, Highline Roofing         objection, answer drafted
-  writer    → 2-email sequence: Phoenix HVAC hiring a dispatcher
-  outbox    → 5 emails waiting for your approval
-Cycle complete. Sleeping for 15 minutes.
-```
+| | O que acontece |
+|---|---|
+| **Encontrar empresas** | Procura negócios que encaixam no seu cliente ideal: grátis no OpenStreetMap, ou numa fonte paga que você escolher. Toda busca paga mostra o custo antes de rodar. |
+| **Entender por que comprariam** | Lê o site de cada empresa procurando os sinais de compra que você confirmou (sem agendamento online, anunciando no Google, contratando). Sem chamar o modelo, sem custo. |
+| **Descobrir quem decide** | Encontra o dono ou gestor citado nas páginas da própria empresa, no máximo duas pessoas por empresa. |
+| **Conferir o e-mail** | Descobre o padrão de e-mail da empresa e verifica um endereço. Cada e-mail fica marcado como verificado, arriscado, palpite ou inválido, e só os que entregam recebem envio. |
+| **Escrever e enviar** | Escreve uma sequência curta para cada pessoa a partir do que encontrou e envia do seu Gmail, Microsoft 365 ou SMTP (Hostinger, Locaweb...), dentro do limite diário e do horário comercial dela. |
+| **Cuidar das respostas** | Lê cada resposta, escreve uma resposta, separa respostas automáticas, atende pedidos de saída na hora e passa para você o que não deve responder sozinho. |
 
-## No model API bill
+Só quer a lista? Pare depois da verificação e rode `sellbird export` para ter um CSV de tudo que ele encontrou.
 
-Sellbird thinks through the Claude Code CLI on your Claude Pro or Max plan, or through Codex on a ChatGPT plan. There's no API key and no per-token billing, and Sellbird throttles itself to leave room for your own work.
+## Sem conta de API de modelo
+
+O Sellbird pensa pelo Claude Code no seu plano Claude Pro ou Max, ou pelo Codex num plano do ChatGPT (Codex só no macOS/Linux). Não há chave de API nem cobrança por token, e ele se limita para deixar espaço para o seu próprio uso.
 
 | | |
 |---|---|
-| Claude Pro or Max, or a ChatGPT plan with Codex | the subscription you already have |
-| Finding businesses | **$0** on the default source, or about $0.37 per 1,000 on the cheapest paid one |
-| Reading their websites | **$0**: three HTTP requests each, no model call |
-| Writing and sending | your subscription and a mailbox (about $7 a month for Google Workspace) |
-| Prospecting tools | **None.** No Apollo, ZoomInfo, Clearbit or Clay. |
+| Claude Pro ou Max, ou plano do ChatGPT com Codex | a assinatura que você já tem |
+| Encontrar empresas | **US$ 0** na fonte padrão (OpenStreetMap) |
+| Ler os sites | **US$ 0**: três requisições HTTP por empresa, sem modelo |
+| Escrever e enviar | sua assinatura e uma caixa de e-mail |
+| Ferramentas de prospecção | **Nenhuma.** Sem Apollo, ZoomInfo, Clearbit ou Clay. |
 
-How the loop, the budget and the isolation work: [How Sellbird works](docs/how-it-works.md).
+## Começo rápido
 
-## Quick start
+Você precisa de:
 
-You need:
+- **Python 3.11 ou mais novo.**
+- **Claude Pro ou Max** com o Claude Code instalado e logado (`claude`), ou um **plano do ChatGPT com o Codex CLI** (macOS/Linux).
+- **Uma caixa de e-mail para enviar**, de preferência num domínio secundário só para envio.
+- **Aquecimento nessa caixa.** Recomendamos o [TrulyInbox](https://trulyinbox.com/?via=sellbird) (link de afiliado do projeto original): ele aquece uma caixa nova antes do e-mail frio e mantém ela fora do spam depois.
 
-- **Python 3.11 or newer.** macOS ships 3.9, so run `brew install python@3.13` first if `python3 --version` says so.
-- **Claude Pro or Max** with the CLI signed in (`claude login`), or a **ChatGPT plan with the Codex CLI** ([Codex setup](docs/codex.md)).
-- **A mailbox to send from**, ideally Google Workspace on a separate sending domain. [Microsoft 365](docs/microsoft365.md) and SMTP work too.
-- **Warmup on that mailbox.** We recommend [TrulyInbox](https://trulyinbox.com/?via=sellbird): it warms a new mailbox before cold email and keeps it out of spam after, and Sellbird reads its inbox rate to tell you when you're ready.
-
-### Let Claude set it up
+### Deixe o Claude configurar
 
 ```bash
-git clone https://github.com/ethanplusai/sellbird.git
+git clone https://github.com/ThiagoGTK/sellbird.git
 cd sellbird
 claude
 ```
 
-Then say **"set up Sellbird for me"**. The repo's `CLAUDE.md` turns Claude Code into the setup guide: it checks where you are, installs what's missing, asks what it needs and trains Sellbird on your product.
+Depois diga **"configure o Sellbird para mim"**. O `CLAUDE.md` do repositório transforma o Claude Code no guia de instalação, em português.
 
-### Or do it yourself
+### Ou faça você mesmo
+
+Passo a passo completo (Windows, macOS e Linux) em **[docs/pt-BR/GUIA.md](docs/pt-BR/GUIA.md)**. Resumo:
 
 ```bash
-# 1. Install. Use python3.13, not python3: on macOS bare python3 is 3.9.
-python3.13 -m venv .venv && source .venv/bin/activate && pip install -e .
+# 1. Instalar (no Windows: py -3.13 -m venv .venv  e  .venv\Scripts\activate)
+python3 -m venv .venv && source .venv/bin/activate && pip install -e .
 
-# 2. Add credentials. Every variable is documented inline.
-cp .env.example .env && $EDITOR .env
+# 2. Chaves e senhas (cada variável está explicada no arquivo)
+cp .env.example .env
 
-# 3. Learn your product from your website (writes sellbird.local.yaml).
-sellbird train https://your-company.com
+# 3. Aprender com o seu site (grava sellbird.local.yaml)
+sellbird train https://seusite.com.br
 
-# 4. Confirm what makes a good prospect.
+# 4. Confirmar o que faz um bom prospect
 sellbird signals --confirm free
 
-# 5. Find businesses. The default source is free and needs no account.
-sellbird discover
+# 5. Encontrar empresas (grátis, sem conta)
+sellbird discover --city "Curitiba, PR"
 
-# 6. Open the dashboard and start the loop.
-sellbird dashboard          # prints a private link to http://127.0.0.1:5555
+# 6. Abrir o painel e ligar o ciclo
+sellbird dashboard          # mostra um link privado para http://127.0.0.1:5555
 sellbird run
 ```
 
-On Linux you can also [run it with Docker](docs/docker.md).
+## Nada sai sem você
 
-## Nothing sends without you
+Todo e-mail espera na **Caixa de saída** até você aprovar, a não ser que você ligue o piloto automático. Antes de qualquer envio, uma checagem sem modelo barra variáveis não preenchidas, frases proibidas, e-mails longos demais, links demais e endereços que não entregam. `sellbird sending pause` para tudo na hora.
 
-Every outgoing email waits in the Outbox for your approval until you turn on autopilot yourself. Before anything leaves, a pre-send check with no model involved rejects unfilled merge tags, banned phrases, overlong emails, extra links and undeliverable addresses. Autopilot still holds back any email that links to a domain that isn't yours or quotes Sellbird's own instructions. `sellbird sending pause` stops everything at once.
+> **LGPD e e-mail frio:** este projeto não é aconselhamento jurídico. Veja as boas práticas na seção
+> "LGPD e boas práticas" do [guia](docs/pt-BR/GUIA.md#lgpd-e-boas-práticas).
 
-Details: [Approval and sending](docs/approval-and-sending.md) and [Legal and deliverability](docs/deliverability.md).
+## Documentação
 
-## Upgrading from Harvey
+- **[Guia em português](docs/pt-BR/GUIA.md)**: instalação, configuração, uso diário e problemas comuns.
+- Documentação técnica original (inglês): [docs/](docs/), começando por [How Sellbird works](docs/how-it-works.md).
 
-Harvey was renamed Sellbird in 0.4.0. Your configuration, data and dashboard sign-in carry over:
+## Licença
 
-```bash
-git pull
-pip install -e .        # once, to get the new `sellbird` command
-sellbird dashboard
-```
+O Sellbird é licenciado sob a [GNU Affero General Public License v3.0](LICENSE). Esta tradução segue a mesma licença: você pode usar e modificar à vontade; se oferecer o Sellbird modificado como serviço para outras pessoas pela rede, precisa disponibilizar o código modificado. Versões do Harvey até 0.3.x foram lançadas sob MIT; veja [NOTICE](NOTICE).
 
-- On first run Sellbird renames `harvey.local.yaml` to `sellbird.local.yaml` and `data/harvey.db` (and its log) to `data/sellbird.*`. It never overwrites a file that already exists under the new name, and waits if a Harvey process is still running from the folder. Stop that first.
-- `HARVEY_*` environment variables still work when the `SELLBIRD_*` one isn't set; rename them when convenient.
-- The `harvey` command and `python -m harvey` still work for now and say they moved. They will be removed in a later release.
-- If you edited the tracked `harvey.yaml` directly, `git pull` stops with "your local changes would be overwritten". Run `git stash`, `git pull`, then `git stash pop`. Git carries your edits into `sellbird.yaml`. If it reports a conflict there, keep your lines, delete the conflict markers, and run `git stash drop`. Better still, put your settings in `sellbird.local.yaml`, which git never touches.
-- Docker: the service is now `sellbird`. Run `docker compose down`, `git pull`, `docker compose build`, then `docker compose up -d`. `HARVEY_UID`/`HARVEY_GID` are still read.
-
-Links to `github.com/ethanplusai/harvey` keep working: GitHub redirects them here.
-
-## Where your files live
-
-Your config, knowledge and data live in one home folder. Which one, first match wins:
-
-1. `SELLBIRD_HOME`, if you set it (the Docker image sets it to `/app`).
-2. A checkout: the checkout folder itself, as before.
-3. Otherwise, for an installed package (`pip` or `pipx`), your user data folder:
-
-| | Home folder |
-|---|---|
-| macOS | `~/Library/Application Support/sellbird` |
-| Windows | `%APPDATA%\sellbird` |
-| Linux | `~/.local/share/sellbird` (or `$XDG_DATA_HOME/sellbird`) |
-
-Inside it are `sellbird.yaml` (and `sellbird.local.yaml` once you train), `.env`,
-`prompts/` and `skills/`, all yours to edit. An installed package copies the defaults in on
-first run and never overwrites them, so your edits survive upgrades. `data/` holds the
-database, the logs and the dashboard token.
-
-## Documentation
-
-| Guide | What's in it |
-|---|---|
-| [How Sellbird works](docs/how-it-works.md) | The heartbeat loop, the subscription budget, project structure and the ideas behind it |
-| [Signals and the prospecting pipeline](docs/signals-and-pipeline.md) | The 29 signals, cohorts, and the discover, profile, enrich and verify stages |
-| [Skills and sub-agents](docs/skills-and-agents.md) | The editable sales playbooks and which agent uses which |
-| [Approval and sending](docs/approval-and-sending.md) | The Outbox, autopilot, office hours and email signatures |
-| [The dashboard and the data](docs/dashboard.md) | Every screen, how sign-in works, and how the data is stored |
-| [Configuration and commands](docs/configuration.md) | `.env`, `sellbird.yaml` and every command |
-| [Extensions](docs/extensions.md) | Adding routes, heartbeat steps and commands from a separate package |
-| [Using a ChatGPT plan (Codex)](docs/codex.md) | Running on Codex instead of Claude |
-| [Legal and deliverability](docs/deliverability.md) | The rules you're sending under, and warmup |
-| [Microsoft 365](docs/microsoft365.md) · [Precleared](docs/precleared.md) | Provider setup guides |
-| [Docker](docs/docker.md) · [Troubleshooting](docs/troubleshooting.md) · [Roadmap](docs/roadmap.md) | Running, fixing and what's next |
-
-## Contributing
-
-Pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) first: it covers keeping real contact data out of the repo, test email, and signing off your commits. Found a security problem? Follow [SECURITY.md](SECURITY.md) instead of opening an issue.
-
-See [CHANGELOG.md](CHANGELOG.md) for what changed in each release.
-
-## License
-
-Sellbird is licensed under the [GNU Affero General Public License v3.0](LICENSE). Harvey releases up to 0.3.x were released under MIT, and that code keeps its MIT notice in [NOTICE](NOTICE).
-
-TrulyInbox links in this project are affiliate links: the maintainer may earn a commission, at no extra cost to you.
+Os links do TrulyInbox neste projeto são links de afiliado do mantenedor original: ele pode ganhar uma comissão, sem custo extra para você.

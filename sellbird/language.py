@@ -58,8 +58,9 @@ BR_STATE_NAMES = frozenset({
 })
 # Siglas que também são estados americanos/canadenses/australianos: só
 # valem como Brasil quando nada mais na localização aponta outro país.
-_AMBIGUOUS_STATE_CODES = frozenset({"AL", "MA", "PA", "SC", "ES", "MT", "SE", "PE", "CE",
-                                    "RS", "AC", "TO", "MS", "GO", "DF", "MG", "RO", "RR"})
+# (estados dos EUA/Canadá e códigos de país: Porto Rico, Peru, Espanha...)
+_AMBIGUOUS_STATE_CODES = frozenset({"AL", "AM", "BA", "ES", "MA", "MG", "MS", "MT", "PA",
+                                    "PE", "PR", "RO", "RS", "SC", "SE", "TO"})
 
 
 def _fold(text: str) -> str:

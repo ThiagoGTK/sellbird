@@ -86,7 +86,27 @@ def _lang(state, prospect, config):
 
 
 def test_empresa_no_brasil_recebe_portugues():
-    assert _lang(_State("Curitiba, PR"), _prospect(), _config(default="en")) == PT_BR
+    assert _lang(_State("Curitiba, PR, Brasil"), _prospect(), _config(default="en")) == PT_BR
+    assert _lang(_State("Recife - Pernambuco"), _prospect(), _config(default="en")) == PT_BR
+    # Sigla que também é país (PR = Porto Rico): vale como Paraná quando a
+    # operação é voltada ao Brasil.
+    assert _lang(_State("Curitiba, PR"), _prospect(), _config(default="pt-BR")) == PT_BR
+    assert _lang(_State("San Juan, PR"), _prospect(), _config(default="en")) == EN
+
+
+def test_fuso_de_endereco_brasileiro():
+    from sellbird.send_window import recipient_zone, zone_for
+
+    class St(_State):
+        async def set_prospect_timezone(self, *_):
+            pass
+
+    p = SimpleNamespace(id="p1", company_id="c1", timezone="")
+    assert asyncio.run(recipient_zone(St("Curitiba, PR"), p, _config(default="pt-BR"))) == "America/Sao_Paulo"
+    p.timezone = ""
+    assert asyncio.run(recipient_zone(St("Manaus, AM"), p, _config(default="pt-BR"))) == "America/Manaus"
+    assert zone_for("Curitiba, PR, Brasil") == "America/Sao_Paulo"
+    assert zone_for("Denver, CO") == "America/Denver"
 
 
 def test_empresa_nos_eua_recebe_ingles_mesmo_com_padrao_portugues():

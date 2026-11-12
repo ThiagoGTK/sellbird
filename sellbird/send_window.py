@@ -188,6 +188,8 @@ COUNTRY_ALIASES = {
     "the netherlands": "NL", "holland": "NL", "deutschland": "DE",
     "south korea": "KR", "korea": "KR", "uae": "AE", "czechia": "CZ",
     "republic of ireland": "IE", "eire": "IE",
+    # Sellbird PT-BR: o nome em português.
+    "brasil": "BR",
 }
 # Other spellings of provinces and states, mapped to their codes.
 REGION_ALIASES = {"newfoundland": "NL", "labrador": "NL", "pei": "PE", "yukon territory": "YT"}
@@ -342,6 +344,11 @@ def _codes(part: str) -> list[str]:
 def _country_in(parts: list[str]) -> str:
     """A country the location names without doubt, or ""."""
     names = _country_names()
+    # Sellbird PT-BR: um país escrito por extenso em qualquer parte vence uma
+    # sigla que vem antes ("Curitiba, PR, Brasil" é Brasil, não Porto Rico).
+    for part in parts:
+        if _clean(part) in names:
+            return names[_clean(part)]
     for part in parts:
         name = _clean(part)
         if name in names:
@@ -369,6 +376,46 @@ def _ref_km(point, zone: str) -> float:
     return _km(point, ref) if ref else math.inf
 
 
+# Sellbird PT-BR: o fuso de cada estado brasileiro (sigla e nome sem acento).
+# A maior parte do país segue o horário de Brasília (UTC-3).
+BR_STATES = {
+    "AC": ("acre", "America/Rio_Branco"), "AL": ("alagoas", "America/Maceio"),
+    "AP": ("amapa", "America/Belem"), "AM": ("amazonas", "America/Manaus"),
+    "BA": ("bahia", "America/Bahia"), "CE": ("ceara", "America/Fortaleza"),
+    "DF": ("distrito federal", "America/Sao_Paulo"), "ES": ("espirito santo", "America/Sao_Paulo"),
+    "GO": ("goias", "America/Sao_Paulo"), "MA": ("maranhao", "America/Fortaleza"),
+    "MT": ("mato grosso", "America/Cuiaba"), "MS": ("mato grosso do sul", "America/Campo_Grande"),
+    "MG": ("minas gerais", "America/Sao_Paulo"), "PA": ("para", "America/Belem"),
+    "PB": ("paraiba", "America/Fortaleza"), "PR": ("parana", "America/Sao_Paulo"),
+    "PE": ("pernambuco", "America/Recife"), "PI": ("piaui", "America/Fortaleza"),
+    "RJ": ("rio de janeiro", "America/Sao_Paulo"), "RN": ("rio grande do norte", "America/Fortaleza"),
+    "RS": ("rio grande do sul", "America/Sao_Paulo"), "RO": ("rondonia", "America/Porto_Velho"),
+    "RR": ("roraima", "America/Boa_Vista"), "SC": ("santa catarina", "America/Sao_Paulo"),
+    "SP": ("sao paulo", "America/Sao_Paulo"), "SE": ("sergipe", "America/Maceio"),
+    "TO": ("tocantins", "America/Araguaina"),
+}
+BR_DEFAULT_ZONE = "America/Sao_Paulo"
+
+
+def _brazil_state_zone(parts: list[str]) -> str:
+    """O fuso do estado brasileiro citado (sigla ou nome), ou ""."""
+    names = {name: zone for name, zone in BR_STATES.values()}
+    for part in parts:   # _parts vem do mais geral (estado) para o mais específico
+        name = _clean(part)
+        if name in names:
+            return names[name]
+        for code in _codes(part):
+            if code in BR_STATES:
+                return BR_STATES[code][1]
+    return ""
+
+
+def brazil_zone(location: str) -> str:
+    """O fuso de um endereço no Brasil, pelo estado ("Manaus, AM" ->
+    America/Manaus); o horário de Brasília quando o estado não aparece."""
+    return _brazil_state_zone(_parts(location)) or BR_DEFAULT_ZONE
+
+
 def _region(parts: list[str], text_country: str, hint: str) -> str:
     """The zone of a US state, Canadian province or Australian state named
     in the location, or "".
@@ -379,6 +426,10 @@ def _region(parts: list[str], text_country: str, hint: str) -> str:
     that country.
     """
     context = text_country or hint
+    if context == "BR":
+        # Sellbird PT-BR: no Brasil, a sigla é de estado brasileiro. Sem
+        # estado, as coordenadas (ou o fuso principal do país) decidem.
+        return _brazil_state_zone(parts)
     us_names = {name: zone for name, zone in US_STATES.values()}
     for part in parts:
         name = _clean(part)
@@ -593,6 +644,31 @@ async def _place(state, prospect) -> tuple[str, str]:
     return location, point
 
 
+def _lean_brazil(config) -> bool:
+    """Sellbird PT-BR: a operação é voltada ao Brasil (idioma padrão pt-BR,
+    prospect_country BR ou buscas no Brasil). Aí "Curitiba, PR" é Paraná,
+    não Porto Rico, e "Florianópolis, SC" é Santa Catarina."""
+    try:
+        from sellbird.language import PT_BR, default_language
+        if default_language(config) == PT_BR or _prospect_country(config) == "BR":
+            return True
+        return icp_country(config) == "BR"
+    except Exception:
+        return False
+
+
+def brazilian_location(location: str, config) -> bool:
+    """A localização é no Brasil (lendo siglas de estado como brasileiras
+    quando a operação é voltada ao Brasil e nenhum outro país é citado)."""
+    from sellbird.language import brazil_in_location
+    named = _country_in(_parts(location)) if location else ""
+    if named and named != "BR" and not re.search(r"(?i)\b(?:brasil|brazil)\b", location or ""):
+        # Outro país escrito por extenso ganha; uma sigla como "PR" não conta.
+        if any(_clean(p) in _country_names() for p in _parts(location)):
+            return False
+    return brazil_in_location(location, _lean_brazil(config))
+
+
 async def recipient_country(state, prospect) -> str:
     """The recipient's country when Sellbird is sure of it, for Precleared's
     ``recipient_country``; "" otherwise, since a guess sent as fact would
@@ -618,6 +694,12 @@ async def recipient_zone(state, prospect, config, country: str = "") -> str:
     if getattr(prospect, "timezone", ""):
         return prospect.timezone
     location, point = await _place(state, prospect)
+    # Sellbird PT-BR: endereço no Brasil vai para o fuso do estado.
+    if location.strip() and brazilian_location(location, config):
+        zone = brazil_zone(location)
+        prospect.timezone = zone
+        await state.set_prospect_timezone(prospect.id, zone)
+        return zone
     zone, guessed = _resolve(location, country_code(country), point)
     if zone and not guessed:
         prospect.timezone = zone

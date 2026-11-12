@@ -199,7 +199,7 @@ async def decide_next_action(
     else:
         action, reason = "prospect", f"{new_prospects} new prospect(s), none ready to write for"
 
-    logger.info(f"Decision: {action} ({reason})")
+    logger.info(f"Decisão: {action} ({reason})")
     return action
 
 
@@ -278,7 +278,7 @@ async def heartbeat(stop_event: asyncio.Event | None = None):
         stop_event = asyncio.Event()
 
     logger.info("=" * 60)
-    logger.info("Sellbird is online.")
+    logger.info("Sellbird ligado.")
     logger.info("=" * 60)
 
     try:
@@ -286,7 +286,7 @@ async def heartbeat(stop_event: asyncio.Event | None = None):
     except (ConfigError, Exception) as e:
         if isinstance(e, (KeyboardInterrupt, asyncio.CancelledError)):
             raise
-        logger.error(f"Cannot start — configuration error:\n{e}")
+        logger.error(f"Não dá para ligar: erro na configuração:\n{e}")
         return
     env = load_env()
     state = StateManager()
@@ -335,7 +335,7 @@ async def heartbeat(stop_event: asyncio.Event | None = None):
             send_only = quiet and sender.is_native and sends_through_quiet_hours(config)
             if quiet and not send_only:
                 sleep_for = seconds_until_quiet_hours_end(config)
-                logger.info(f"Quiet hours. Sleeping for {sleep_for // 60} minutes.")
+                logger.info(f"Horário de silêncio. Dormindo por {sleep_for // 60} minutos.")
                 # Sleep in short polled chunks rather than one multi-hour
                 # wait: found in production that a system sleep/wake cycle
                 # during a long asyncio.wait_for left the process silently
@@ -400,7 +400,7 @@ async def heartbeat(stop_event: asyncio.Event | None = None):
                 summary = {}
                 action = "quiet_hours_send"
             else:
-                logger.info("Checking pipeline state...")
+                logger.info("Conferindo o funil...")
                 summary = await state.get_state_summary()
                 action = await decide_next_action(brain, state, config, summary=summary)
 
@@ -479,7 +479,7 @@ async def heartbeat(stop_event: asyncio.Event | None = None):
 
             # 8. Sleep until next heartbeat
             logger.info(
-                f"Cycle complete. Sleeping for {config.usage.heartbeat_interval_minutes} minutes."
+                f"Ciclo concluído. Dormindo por {config.usage.heartbeat_interval_minutes} minutos."
             )
             if await _interruptible_sleep(interval, stop_event):
                 break
@@ -564,9 +564,9 @@ def main():
     if _needs_setup():
         if not sys.stdin.isatty():
             # Started by the dashboard or a service: nobody can answer the wizard.
-            print("Sellbird isn't set up yet. Run `sellbird setup` in a terminal first.")
+            print("O Sellbird ainda não está configurado. Rode `sellbird setup` num terminal primeiro.")
             sys.exit(1)
-        print("\n  First time running Sellbird? Let's get you set up.\n")
+        print("\n  Primeira vez rodando o Sellbird? Vamos configurar.\n")
         from sellbird.setup import run_setup
         asyncio.run(run_setup())
         return
@@ -576,8 +576,8 @@ def main():
     lock = hold_loop_lock(LOCK_FILE)
     if lock is None:
         running = read_pid()
-        print(f"Sellbird is already running{f' (pid {running})' if running else ''}. "
-              "Stop it first, from the dashboard or with Ctrl+C in its terminal.")
+        print(f"O Sellbird já está rodando{f' (pid {running})' if running else ''}. "
+              "Pare primeiro, pelo painel ou com Ctrl+C no terminal dele.")
         sys.exit(1)
     write_pid_file()
     try:

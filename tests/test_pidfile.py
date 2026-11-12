@@ -206,7 +206,7 @@ def test_sellbird_run_refuses_when_a_loop_is_already_running(monkeypatch, tmp_pa
         pidfile.release_loop_lock(held)
     assert exc.value.code == 1
     assert ran == []
-    assert "already running" in capsys.readouterr().out
+    assert "já está rodando" in capsys.readouterr().out
 
 
 # ── Dashboard Start ──
