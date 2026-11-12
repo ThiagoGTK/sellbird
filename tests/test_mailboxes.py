@@ -201,7 +201,7 @@ async def test_a_locked_keychain_connects_nothing(store):
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("address,message", [
-    ("nope", "full email address"), ("ETHAN@main.co", "already your main mailbox")])
+    ("nope", "endereço de e-mail completo"), ("ETHAN@main.co", "já é o endereço da sua caixa principal")])
 async def test_bad_addresses_are_refused(store, address, message):
     with pytest.raises(ConnectRefused, match=message):
         await mailboxes.connect_smtp_mailbox(
@@ -356,7 +356,7 @@ async def test_a_removed_inbox_ends_the_threads_it_started(store, boxes):
         await db.commit()
     await sender._run_native()
     step2 = next(r for r in await store.get_outbox() if r["step"] == 2)
-    assert step2["status"] == "cancelled" and "removed" in step2["error"]
+    assert step2["status"] == "cancelled" and "removida" in step2["error"]
     assert main.sent == []
 
 

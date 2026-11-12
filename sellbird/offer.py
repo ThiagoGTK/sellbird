@@ -87,7 +87,9 @@ async def suggest_offers(brain, config) -> list[dict]:
     """A few offers that fit the product, each with its finding and why."""
     prompt = SUGGEST_PROMPT.format(
         product=fence(_product_text(config), "product info"), icp=_icp_text(config),
-        n=SUGGESTIONS, rule=UNTRUSTED_RULE)
+        n=SUGGESTIONS,
+        # Sellbird PT-BR: as ideias de oferta vêm em português do Brasil.
+        rule=UNTRUSTED_RULE + "\n\nWrite every offer, finding and why in Brazilian Portuguese (pt-BR).")
     result = await brain.think_json(prompt, session_id="sellbird-offer", agent="writer",
                                     task="suggest_offers")
     if isinstance(result, dict):
@@ -126,8 +128,8 @@ async def preview_email(brain, state, config, entry: str) -> dict:
     from sellbird.agents.writer import Writer, _names
     prospect = await preview_prospect(state)
     if prospect is None:
-        return {"ok": False, "message": "No prospects with company facts yet. Find some companies "
-                                        "first, then preview the offer on one of them."}
+        return {"ok": False, "message": "Ainda não há prospects com fatos da empresa. Encontre algumas empresas primeiro e depois veja o exemplo da oferta numa delas."
+                                        ""}
     trial = copy.deepcopy(config)
     trial.product.offer.entry = entry
     writer = Writer(brain, state, trial, None)
@@ -136,8 +138,8 @@ async def preview_email(brain, state, config, entry: str) -> dict:
     draft = await writer._write_personal_email(prospect)
     draft = await writer._keep_to_rules(draft, step=1, names=_names(prospect)) if draft else None
     if not draft:
-        return {"ok": False, "message": "The writer couldn't produce an email that passes the rules. "
-                                        "Try again, or reword the offer."}
+        return {"ok": False, "message": "O Writer não conseguiu escrever um e-mail que passe nas regras. Tente de novo ou reescreva a oferta."
+                                        ""}
     return {"ok": True, "to": f"{prospect.full_name()}, {prospect.title} at {prospect.company}",
             "subject": draft["subject"], "body": draft["body"]}
 

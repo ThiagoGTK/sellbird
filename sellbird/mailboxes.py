@@ -64,7 +64,7 @@ _KEPT_TOKEN_FIELDS = ("refresh_token", "tenant")
 
 
 class MailboxExists(Exception):
-    """That address is already connected."""
+    """Esse endereço já está conectado."""
 
 
 class ConnectRefused(Exception):
@@ -130,9 +130,9 @@ class KeychainTokenSource:
 
     def missing_reason(self) -> str:
         if not self._secrets.available():
-            return ("The keychain is locked or unavailable, so this inbox's sign-in can't be "
-                    "read. Unlock it, or connect the inbox again.")
-        return "This inbox isn't connected. Connect it again: sellbird inboxes connect"
+            return ("O chaveiro do sistema está bloqueado ou indisponível, então o login desta caixa não pode ser lido. Desbloqueie, ou conecte a caixa de novo."
+                    "")
+        return "Esta caixa não está conectada. Conecte de novo: sellbird inboxes connect"
 
     def __repr__(self) -> str:
         return f"KeychainTokenSource({self._ref!r})"
@@ -412,9 +412,8 @@ def check_provider_allows_inboxes(config) -> None:
         return
     name = "Instantly" if provider == "instantly" else (provider or "not set")
     raise ConnectRefused(
-        f"Your sending provider is {name}. Instantly installs send through Instantly "
-        "only. Set channels.email.provider to gmail, microsoft or smtp before "
-        "connecting inboxes.")
+        f"Seu provedor de envio é {name}. Instalações com Instantly enviam só pelo Instantly. "
+        "Defina channels.email.provider como gmail, microsoft ou smtp antes de conectar caixas.")
 
 
 async def _check_address(store: MailboxStore, config, address: str) -> tuple[str, str]:
@@ -422,12 +421,12 @@ async def _check_address(store: MailboxStore, config, address: str) -> tuple[str
     id it had when it was removed before."""
     addr = _norm(address)
     if "@" not in addr:
-        raise ConnectRefused("Enter the inbox's full email address.")
+        raise ConnectRefused("Digite o endereço de e-mail completo da caixa.")
     if addr == _norm(getattr(config.persona, "email", "") or ""):
-        raise ConnectRefused("That's already your main mailbox.")
+        raise ConnectRefused("Esse já é o endereço da sua caixa principal.")
     existing = await store.get_mailbox_by_address(addr)
     if existing and existing.get("state") != "retired":
-        raise ConnectRefused("That inbox is already connected.")
+        raise ConnectRefused("Essa caixa já está conectada.")
     return addr, existing["id"] if existing else _new_id()
 
 
@@ -439,10 +438,10 @@ def check_warmup_start(value: str) -> str:
     try:
         day = date.fromisoformat(value[:10])
     except ValueError:
-        raise ConnectRefused("Give the day this inbox started warming up as YYYY-MM-DD, "
-                             "or leave it out for an established inbox.") from None
+        raise ConnectRefused("Informe o dia em que esta caixa começou a aquecer como AAAA-MM-DD, ou deixe em branco para uma caixa já estabelecida."
+                             "") from None
     if (day - datetime.now(timezone.utc).date()).days > 1:
-        raise ConnectRefused("The warmup start can't be in the future.")
+        raise ConnectRefused("O início do aquecimento não pode ser no futuro.")
     return day.isoformat()
 
 
@@ -450,7 +449,7 @@ async def _insert(store: MailboxStore, **row) -> str:
     try:
         return await store.add_mailbox(**row)
     except MailboxExists:
-        raise ConnectRefused("That inbox is already connected.") from None
+        raise ConnectRefused("Essa caixa já está conectada.") from None
 
 
 async def connect_oauth_mailbox(store: MailboxStore, secrets: SecretStore, config, *,
@@ -475,7 +474,7 @@ async def connect_smtp_mailbox(store: MailboxStore, secrets: SecretStore, config
     addr, mailbox_id = await _check_address(store, config, address)
     warmup = check_warmup_start(warmup_started_at)
     if not settings.host:
-        raise ConnectRefused("Give the SMTP server's host name.")
+        raise ConnectRefused("Informe o endereço do servidor SMTP.")
     ref = smtp_ref(mailbox_id)
     secrets.set(ref, settings.password)
     return await _insert(store, mailbox_id=mailbox_id, address=addr, provider="smtp",
@@ -595,7 +594,7 @@ class Inboxes:
                 if mailbox_id not in {i.id for i in self.eligible(campaign_id)}:
                     moved = await self.assign(campaign_id, item["prospect_id"])
                     if moved is None:
-                        return Route("hold", mailbox_id, "no inbox is available for this campaign")
+                        return Route("hold", mailbox_id, "nenhuma caixa disponível para esta campanha")
                     item["mailbox_id"] = moved
                     return Route("send", moved)
                 return Route("send", mailbox_id)
@@ -607,11 +606,11 @@ class Inboxes:
         item["mailbox_id"] = mailbox_id
         inbox = self.get(mailbox_id)
         if inbox is None:
-            return Route("cancel", mailbox_id, "its inbox was removed")
+            return Route("cancel", mailbox_id, "a caixa dela foi removida")
         if not inbox.connected:
             return Route("hold", mailbox_id, f"{inbox.address or 'the main mailbox'} isn't connected")
         if inbox.paused_reason:
-            return Route("hold", mailbox_id, f"its inbox is paused: {inbox.paused_reason}")
+            return Route("hold", mailbox_id, f"a caixa dela está pausada: {inbox.paused_reason}")
         return Route("send", mailbox_id)
 
 

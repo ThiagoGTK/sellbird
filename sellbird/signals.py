@@ -386,6 +386,142 @@ SIGNAL_CATALOG: list[dict] = [
     },
 ]
 
+# ── Sellbird PT-BR: nome, descrição e custo de cada sinal em português ──
+# O catálogo acima continua igual (códigos e regras); só o texto que aparece
+# no painel é trocado aqui. Formato: código -> (nome, descrição, custo).
+_PT_BR = {
+    "SERP_RANK": ("Posição na busca do Google",
+        "Onde a empresa aparece na busca orgânica por '<serviço> <cidade>' (a frase pesquisada fica guardada). "
+        "É o sinal de prospecção mais útil: posições 11 a 30 são o ponto ideal, visíveis o bastante para estar "
+        "tentando, sem estar ganhando. O top 10 já está ganhando (venda mais difícil); 31+ é mais barato, mas menos "
+        "motivado. A posição depende de onde a pessoa pesquisa: esta é a visão do centro da cidade.",
+        "~US$ 0,006 por busca com profundidade 30 (API de SERP paga, endpoint Live)"),
+    "IN_LOCAL_PACK": ("No bloco local do Google (top 3 do mapa)",
+        "Ocupa um dos três lugares do mapa acima dos resultados orgânicos numa busca por '<serviço> <cidade>' "
+        "(valor = posição 1 a 3; anúncios não contam). Essas empresas já ganham na busca local: exclua para achar "
+        "as que não ganham, ou ofereça outra coisa a elas.",
+        "incluído na busca de posição orgânica acima"),
+    "MAPS_RANK": ("Posição no Google Maps",
+        "Onde a empresa aparece no Google Maps numa busca por '<serviço> <cidade>' feita do centro da cidade (a "
+        "frase pesquisada fica guardada). Fora do top 3 no mapa é fora do bloco local que a maioria vê. Também "
+        "encontra empresas sem site nenhum.",
+        "~US$ 0,002 por busca no Maps de até 100 resultados (API de SERP paga)"),
+    "FOUND_IN_SERP": ("Encontrada pela busca",
+        "A empresa apareceu numa busca do mercado-alvo: foi assim que o Sellbird a encontrou.",
+        "incluído na busca acima"),
+    "NO_WEBSITE": ("Sem site nenhum",
+        "A empresa tem cadastro e telefone, mas não tem site. Se você vende sites, este é o sinal de maior "
+        "intenção que existe, e é um filtro que você consulta direto, não algo deduzido.",
+        "incluído na consulta do cadastro da empresa"),
+    "UNCLAIMED_LISTING": ("Perfil do Google não reivindicado",
+        "Ninguém reivindicou o Perfil da Empresa no Google, então ninguém cuida de como ela aparece na região. "
+        "Sinal forte para quem vende marketing local.",
+        "incluído na consulta do cadastro da empresa"),
+    "REVIEW_RATING": ("Nota das avaliações",
+        "A média de estrelas. Serve nos dois sentidos: nota baixa é um problema de reputação para resolver; nota "
+        "alta com poucas avaliações prova que são bons, mas invisíveis.",
+        "incluído na consulta do cadastro da empresa"),
+    "REVIEW_COUNT": ("Número de avaliações",
+        "Quantas avaliações a empresa tem. Um indicador aproximado de porte e de quanta atenção dão à presença online.",
+        "incluído na consulta do cadastro da empresa"),
+    "INCUMBENT_AGENCY": ("Tem agência de marketing/sites",
+        "Uma agência creditada no rodapé do site ('Desenvolvido por X'). Muito valioso: diz quem você vai "
+        "substituir, e cada detecção monta uma lista de clientes dessa agência. Só é registrado quando o crédito é "
+        "explícito: um concorrente errado é pior que nenhum.",
+        "grátis (HTML da página inicial)"),
+    "RUNNING_GOOGLE_ADS": ("Anuncia no Google Ads",
+        "Tag do Google Ads no site: estão investindo em aquisição HOJE. Sinal forte de verba.",
+        "grátis (HTML da página inicial)"),
+    "RUNNING_META_ADS": ("Anuncia no Meta/Facebook/Instagram",
+        "Pixel da Meta no site: investem ativamente em anúncios nas redes sociais.",
+        "grátis (HTML da página inicial)"),
+    "TECH_STACK": ("Plataforma / ferramentas do site",
+        "Em que o site foi feito e quais ferramentas ele usa (WordPress, Shopify, Wix, RD Station, HubSpot, chat, "
+        "agendamento).",
+        "grátis (HTML da página inicial)"),
+    "NO_SCHEMA_MARKUP": ("Sem dados estruturados",
+        "Sem marcação schema JSON-LD: uma falha de SEO concreta e verificável que você pode citar num e-mail.",
+        "grátis (HTML da página inicial)"),
+    "NO_ONLINE_BOOKING": ("Sem agendamento online",
+        "Nenhum botão ou ferramenta de agendamento encontrado: o cliente precisa ligar, e a procura fora do "
+        "horário se perde.",
+        "grátis (HTML da página inicial)"),
+    "SITE_PAGE_COUNT": ("Tamanho do site",
+        "Número de páginas pelo sitemap.xml. Um site muito pequeno sugere pouco investimento; um grande e "
+        "parado sugere abandono.",
+        "grátis (sitemap.xml)"),
+    "BLOG_STALE": ("Conteúdo parado",
+        "Nada novo há muito tempo: começaram a fazer conteúdo e abandonaram.",
+        "grátis (sitemap.xml)"),
+    "BLOCKS_AI_CRAWLERS": ("Bloqueia robôs de IA",
+        "O robots.txt bloqueia robôs de IA: a empresa fica invisível nas respostas de buscas por IA.",
+        "grátis (robots.txt)"),
+    "YC_BACKED": ("Acelerada pela Y Combinator",
+        "A empresa diz no próprio site que é da YC (uma turma como W24, um selo da YC ou link para a página na "
+        "YC). Combina com a busca de startups da YC e com o playbook de escrita para fundadores.",
+        "grátis (HTML da página inicial)"),
+    "ACCELERATOR": ("Passou por uma aceleradora",
+        "A empresa diz no próprio site que uma aceleradora investiu nela: Techstars, 500 Global, Antler, "
+        "Entrepreneur First, South Park Commons, Neo, AI Grant, a16z speedrun, Pioneer ou Plug and Play, com a "
+        "turma quando informada. YC é o sinal YC_BACKED. Combina com a busca de aceleradoras e com o playbook "
+        "para fundadores.",
+        "grátis (página inicial e página Sobre)"),
+    "FUNDING_ROUND": ("Anunciou uma captação",
+        "A empresa anuncia a própria captação no site (\"captamos\", \"Acme capta R$ 12 mi em Série A\"): rodada, "
+        "valor e data quando informados. Captações com mais de 18 meses não são tratadas como novidade. Combina "
+        "com a busca de captação recente.",
+        "grátis (página inicial, Sobre, imprensa)"),
+    "HIRING_ROLE": ("Contratando para um cargo relevante",
+        "Uma vaga aberta que indica que estão comprando na sua categoria agora: um dos cargos de hiring_signals "
+        "(ou do ICP) no site de vagas linkado (Greenhouse, Lever, Ashby, Workable), com área, local e data, ou "
+        "uma vaga listada na página de carreiras.",
+        "grátis (página de vagas ou feed público de vagas)"),
+    "OPEN_ROLES": ("Vagas abertas",
+        "Quantas vagas estão abertas no site de vagas linkado (Greenhouse, Lever, Ashby ou Workable). Equipe "
+        "crescendo é sinal de verba; zero é um sinal de calmaria.",
+        "grátis (feed público de vagas, uma requisição)"),
+    "CONTACT_FOUND": ("Contato com nome encontrado",
+        "Uma pessoa com nome encontrada na página de equipe/sobre, com o cargo.",
+        "grátis (página de equipe)"),
+    "DECISION_MAKER_TITLE": ("Cargo de quem decide",
+        "O cargo bate com um padrão de dono/decisor (Dono, Sócio, Diretor, Gerente da clínica, Diretor de Marketing).",
+        "grátis (página de equipe)"),
+    "REGISTRY_VERIFIED": ("Confirmado em registro público",
+        "A pessoa foi confirmada num registro público oficial (conselho profissional, registro de classe). "
+        "Também filtra erros de leitura: um nome que não bate com nada normalmente não era uma pessoa.",
+        "grátis (API de registro público)"),
+    "LIKELY_OWNER": ("Provavelmente o dono",
+        "O próprio site da empresa diz que esta pessoa é dona ou fundadora: cargo de Dono/Sócio/Fundador, uma "
+        "frase como 'fundada por' ou o fundador no schema.org. Ex-donos, aposentados e falecidos não contam. A "
+        "prova fica guardada junto com o fato.",
+        "grátis (site da empresa)"),
+    "EMAIL_PATTERN": ("Padrão de e-mail da empresa",
+        "O formato de endereço do domínio (nome.sobrenome@, nsobrenome@). Um endereço real revela o padrão da "
+        "empresa inteira.",
+        "grátis, ou ~1 crédito de consulta"),
+    "EMAIL_STATUS": ("Entregabilidade do e-mail",
+        "Se o endereço é verificado, aceita-tudo/arriscado, um palpite não verificado ou inválido.",
+        "1 crédito de verificação (há planos grátis)"),
+    "CONTACT_FORM_URL": ("Tem formulário de contato",
+        "Um formulário de contato no site. Vale saber porque chega na empresa sem precisar de e-mail, e cerca de "
+        "metade dos domínios não dá para verificar por e-mail.",
+        "grátis (HTML do site)"),
+}
+for _sig in SIGNAL_CATALOG:
+    if _sig["code"] in _PT_BR:
+        _sig["label"], _sig["description"], _sig["cost_note"] = _PT_BR[_sig["code"]]
+
+# Palavras do começo da nota de custo que querem dizer "não custa nada".
+# Em inglês (catálogo original) e em português (Sellbird PT-BR).
+FREE_COST_PREFIXES = ("free", "included", "grátis", "gratis", "incluído", "incluido")
+
+
+def is_free_cost(note: str) -> bool:
+    """True quando a nota de custo diz que coletar o sinal é grátis.
+    Usado pelo `sellbird signals --confirm free` e pelos testes."""
+    return (note or "").strip().lower().startswith(FREE_COST_PREFIXES)
+
+
 
 _SEEDED_FIELDS = ("label", "description", "category", "value_type", "collector", "cost_note")
 

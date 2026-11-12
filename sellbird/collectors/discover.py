@@ -1541,6 +1541,72 @@ PROVIDERS: dict[str, DiscoveryProvider] = {
 
 DEFAULT_PROVIDER = "osm"
 
+# ── Sellbird PT-BR: textos das fontes de busca em português (aba Descobrir) ──
+# Só muda o texto mostrado; chaves, preços e regras continuam os mesmos.
+_PT_BR_PROVIDERS = {
+    "osm": dict(
+        blurb="Dados de mapa públicos e grátis. Sem cadastro, sem chave, sem cartão. Teste o fluxo inteiro "
+              "sem pagar nada. Funciona no Brasil com segmentos como \"clínica odontológica\", "
+              "\"contabilidade\", \"imobiliária\", \"academia\" ou \"salão de beleza\".",
+        cost_note="grátis",
+        free_tier="ilimitado, respeitando a etiqueta de uso da comunidade",
+        caveat="A cobertura é fraca para negócios sem endereço físico: o OSM mapeia estabelecimentos, e "
+               "muitas empresas brasileiras não têm site cadastrado nele. Ótimo para um teste grátis ou para "
+               "cruzar dados; não é uma lista completa."),
+    "tinyfish": dict(
+        blurb="Pesquisa na web grátis com uma chave. Encontra empresas por frase; não registra posição na "
+              "busca, porque a ordem não é a do Google.",
+        cost_note="grátis",
+        free_tier="grátis com uma chave, sem cartão: 30 buscas por minuto, 500 por hora",
+        caveat="Precisa de TINYFISH_API_KEY no .env. O Sellbird se limita a 30 buscas por minuto; uma frase "
+               "com profundidade 30 são 3 buscas, então cabem umas 160 frases por hora nas 500. Sem "
+               "SERP_RANK: use Serper ou DataForSEO SERP para sinais de posição."),
+    "dataforseo_listings": dict(
+        blurb="Lista todas as empresas de um tipo num raio, com telefone, domínio, nota e se o perfil foi "
+              "reivindicado. Melhor escolha para serviços locais, clínicas e prestadores.",
+        cost_note="US$ 0,372 por 1.000 empresas (US$ 0,012/consulta + US$ 0,00036 cada)",
+        free_tier="US$ 1 de crédito no cadastro; depósito mínimo de US$ 50 para usar de verdade",
+        caveat="Sem endereços de e-mail: o Sellbird encontra os e-mails numa etapa seguinte."),
+    "dataforseo_serp": dict(
+        blurb="Pesquisa '<serviço> <cidade>' do centro da cidade e registra a posição de cada empresa, além "
+              "de quem está no top 3 do mapa. Descobre empresas novas E pontua as que você já tinha.",
+        cost_note="US$ 0,002 a cada 10 resultados (Live); profundidade 30 custa US$ 0,006 por busca",
+        free_tier="US$ 1 de crédito no cadastro; sandbox grátis; depósito mínimo de US$ 50 para usar de verdade",
+        caveat="O Google acabou com 100 resultados por página em setembro de 2025, então profundidade 100 "
+               "custa 10x a profundidade 10. 20 a 30 é o ponto ideal; abaixo da posição 30 quase tudo é "
+               "diretório. A posição depende de onde a pessoa pesquisa: esta é a visão do centro da cidade."),
+    "dataforseo_maps": dict(
+        blurb="Pesquisa '<serviço> <cidade>' no Google Maps e registra a posição no mapa, a nota, a categoria "
+              "e se o perfil foi reivindicado, inclusive de empresas sem site nenhum.",
+        cost_note="US$ 0,002 por busca de até 100 resultados (Live)",
+        free_tier="US$ 1 de crédito no cadastro; sandbox grátis; depósito mínimo de US$ 50 para usar de verdade",
+        caveat="A posição no mapa depende muito de onde a pessoa está; o Sellbird pesquisa do centro da "
+               "cidade, com zoom de cidade. Trate como 'quando pesquisamos do centro', não como posição absoluta."),
+    "serper": dict(
+        blurb="Busca rápida no Google com posições. A mais fácil de testar: 2.500 buscas grátis, sem cartão, "
+              "uma chave de API.",
+        cost_note="~US$ 0,30 a US$ 1,00 por 1.000 buscas, conforme o plano",
+        free_tier="2.500 buscas grátis, sem cartão",
+        caveat="Devolve no máximo 10 resultados por busca, mesmo pedindo profundidade maior."),
+    "scavio_maps": dict(
+        blurb="Resultados do Google Maps em volta de cada cidade: telefone, site, categoria, nota e número "
+              "de avaliações de cada lugar. Até 120 empresas por busca.",
+        cost_note="1 crédito por página (até 20 empresas); as estimativas usam US$ 0,01/crédito",
+        free_tier="50 créditos no cadastro, sem cartão",
+        caveat="O Google Maps não diz se o perfil foi reivindicado, então esse sinal fica vazio. Mesma chave "
+               "do Scavio Google Search."),
+    "scavio_search": dict(
+        blurb="Resultados orgânicos do Google com posições. Uma chave do Scavio cobre isto e o Google Maps.",
+        cost_note="1 crédito por página (até 10 resultados); profundidade 30 estimada em US$ 0,03",
+        free_tier="50 créditos no cadastro, sem cartão",
+        caveat="Os resultados vêm do google.com em inglês (EUA), a não ser que a busca cite outro lugar. "
+               "Profundidade 20 a 30 é o ponto ideal."),
+}
+for _key, _fields in _PT_BR_PROVIDERS.items():
+    if _key in PROVIDERS:
+        for _attr, _text in _fields.items():
+            setattr(PROVIDERS[_key], _attr, _text)
+
 
 NO_SEARCH_RESULTS = 40102
 
@@ -1623,7 +1689,7 @@ PRESETS = {
     # ycombinator.com itself, whose terms forbid scraping and harvesting
     # contacts; its pages and the startup databases are excluded too.
     "yc": {
-        "label": "YC startups",
+        "label": "Startups da YC",
         "kinds": ("serp",),
         "term": ('"backed by Y Combinator" {industry} -site:ycombinator.com '
                  "-site:workatastartup.com -site:startupschool.org "
@@ -1636,7 +1702,7 @@ PRESETS = {
     # Profiling then reads the board their site links to and records the
     # role (HIRING_ROLE); the search hit alone records nothing.
     "hiring": {
-        "label": "Companies hiring for your roles",
+        "label": "Empresas contratando para os seus cargos",
         "kinds": ("serp",),
         "term": ('"{role}" careers {industry} -site:greenhouse.io -site:lever.co '
                  "-site:ashbyhq.com -site:workable.com -site:smartrecruiters.com "
@@ -1649,7 +1715,7 @@ PRESETS = {
     # Startups that say on their own site an accelerator backed them. Two
     # searches per industry, because Google reads only the first 32 words.
     "accelerator": {
-        "label": "Accelerator startups",
+        "label": "Startups de aceleradoras",
         "kinds": ("serp",),
         "terms": (
             '{industry} ("backed by Techstars" OR "backed by Antler" OR "backed by Entrepreneur First" '
@@ -1666,7 +1732,7 @@ PRESETS = {
     # Companies announcing their own raise, from the last ~18 months. The
     # news sites and databases are excluded here and filtered as junk.
     "funding": {
-        "label": "Recently funded",
+        "label": "Captação recente",
         "kinds": ("serp",),
         "term": ('{industry} ("we raised" OR "we\'ve raised" OR announces OR raises) '
                  '("seed round" OR "Series A" OR "Series B") after:{since} '

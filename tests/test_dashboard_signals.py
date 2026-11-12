@@ -12,7 +12,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 import sellbird.dashboard as dash
-from sellbird.signals import SIGNAL_CATALOG
+from sellbird.signals import is_free_cost, SIGNAL_CATALOG
 from sellbird.state import StateManager
 
 
@@ -298,15 +298,15 @@ def test_cost_notes_are_machine_classifiable():
     """
     paid = {"SERP_RANK", "MAPS_RANK", "EMAIL_STATUS", "EMAIL_PATTERN", "FOUND_IN_SERP"}
     for sig in SIGNAL_CATALOG:
-        free = sig["cost_note"].lower().startswith(("free", "included"))
+        free = is_free_cost(sig["cost_note"])
         if sig["code"] in paid:
             continue
         assert free, f"{sig['code']} has an unclassifiable cost note: {sig['cost_note']!r}"
 
     serp = next(s for s in SIGNAL_CATALOG if s["code"] == "SERP_RANK")
-    assert not serp["cost_note"].lower().startswith("free")
+    assert not is_free_cost(serp["cost_note"])
     email = next(s for s in SIGNAL_CATALOG if s["code"] == "EMAIL_STATUS")
-    assert not email["cost_note"].lower().startswith("free")
+    assert not is_free_cost(email["cost_note"])
 
 
 def test_every_signal_has_a_category_the_ui_renders():

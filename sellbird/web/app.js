@@ -153,7 +153,7 @@ function formatDate(d) {
     if (/^\d{4}-\d\d-\d\dT/.test(t) && !/[zZ]$|[+-]\d\d:?\d\d$/.test(t)) t += 'Z';  // stored UTC
     const dt = new Date(t);
     if (isNaN(dt)) return escHtml(d);
-    return dt.toLocaleString('en-US', {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+    return dt.toLocaleString('pt-BR', {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
   } catch { return escHtml(d); }
 }
 
@@ -184,15 +184,15 @@ function relTime(d) {
   const dt = parseTs(d);
   if (isNaN(dt)) return escHtml(d);
   const mins = Math.round((Date.now() - dt) / 60000);
-  if (mins < -1 && mins > -60) return 'in ' + -mins + 'm';
-  if (mins < -1 && mins > -60 * 24) return 'in ' + Math.round(-mins / 60) + 'h';
+  if (mins < -1 && mins > -60) return 'em ' + -mins + ' min';
+  if (mins < -1 && mins > -60 * 24) return 'em ' + Math.round(-mins / 60) + ' h';
   if (mins >= -1 && mins < 1) return 'agora mesmo';
   if (mins >= 1 && mins < 60) return 'há ' + mins + ' min';
   if (mins >= 60 && mins < 60 * 24) return 'há ' + Math.round(mins / 60) + ' h';
   if (mins >= 60 * 24 && mins < 60 * 48) return 'Ontem';
   const opts = {month: 'short', day: 'numeric'};
   if (dt.getFullYear() !== new Date().getFullYear()) opts.year = 'numeric';
-  return dt.toLocaleDateString('en-US', opts);
+  return dt.toLocaleDateString('pt-BR', opts);
 }
 
 function dayLabel(d) {
@@ -203,12 +203,12 @@ function dayLabel(d) {
   const diff = Math.round((today - that) / 86400000);
   if (diff === 0) return 'Hoje';
   if (diff === 1) return 'Ontem';
-  return dt.toLocaleDateString('en-US', {weekday: 'long', month: 'short', day: 'numeric'});
+  return dt.toLocaleDateString('pt-BR', {weekday: 'long', month: 'short', day: 'numeric'});
 }
 
 function timeOfDay(d) {
   const dt = parseTs(d);
-  return isNaN(dt) ? '' : dt.toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit'});
+  return isNaN(dt) ? '' : dt.toLocaleTimeString('pt-BR', {hour: 'numeric', minute: '2-digit'});
 }
 
 // Columns of a tiny bar chart; the last day is "today".
@@ -524,7 +524,7 @@ async function loadLiveStatus() {
     (d.next ? '<div class="live-next">' + icon('arrow') + '<span><b>Próximo</b> · ' + escHtml(d.next) + '</span>' +
       (d.next_tab ? '<button class="btn btn-secondary btn-sm" onclick="goTab(' + jsq(d.next_tab) + ')">Ir</button>' : '') +
       '</div>' : '') +
-    '<div class="live-flag">Atualizado ' + new Date().toLocaleTimeString() + ' · refreshes every 10 seconds</div>';
+    '<div class="live-flag">Atualizado ' + new Date().toLocaleTimeString('pt-BR') + ' · atualiza a cada 10 segundos</div>';
 }
 
 // KPI cards. Totals come from /api/today; the 14-day bars from /api/trend.
@@ -551,7 +551,7 @@ function renderFigures(stats) {
   ].filter(Boolean).join(' · ') || 'nada para aprovar';
   const facts = document.getElementById('today-facts');
   if (facts) facts.innerHTML =
-    '<span><b>' + (stats.companies || 0) + '</b> companies</span>' +
+    '<span><b>' + (stats.companies || 0) + '</b> empresas</span>' +
     '<span><b>' + (stats.unprofiled || 0) + '</b> sites ainda não lidos</span>' +
     '<span><b>' + (stats.signals_confirmed || 0) + '</b> sinais ligados</span>';
 
@@ -716,12 +716,12 @@ async function loadSetupStatus() {
     '<div class="card setup-card">' +
       '<div class="setup-head"><div><h3>Termine de configurar o Sellbird</h3>' +
         '<p class="muted">O Sellbird começa a encontrar prospects e enviar assim que isto estiver pronto.</p></div>' +
-        '<span class="setup-pct">' + done + ' of ' + required.length + ' done</span></div>' +
+        '<span class="setup-pct">' + done + ' de ' + required.length + ' feitas</span></div>' +
       '<div class="bar thick" style="margin-bottom:8px"><span style="width:' + pct + '%;background:var(--accent)"></span></div>' +
       required.map(c => renderCheck(c, false)).join('') +
       (optional.length
         ? '<details style="margin-top:10px"><summary class="muted" ' +
-          'style="font-size:12px">' + optional.length + ' optional</summary>' +
+          'style="font-size:12px">' + optional.length + ' opcionais</summary>' +
           '<div style="margin-top:6px">' +
           optional.map(c => renderCheck(c, true)).join('') + '</div></details>'
         : '') +
@@ -812,8 +812,8 @@ async function loadSignals() {
 }
 
 function sigRow(sig) {
-  const free = /free|included/i.test(sig.cost_note || '');
-  const costCls = free ? 'free' : (/\$/.test(sig.cost_note || '') ? 'paid' : '');
+  const free = /free|included|gr[aá]tis|inclu[ií]do/i.test(sig.cost_note || '');   // inglês ou português
+  const costCls = free ? 'free' : (/\$|cr[eé]dito|credit/i.test(sig.cost_note || '') ? 'paid' : '');
   const seen = sig.companies
     ? '<span class="cost-chip">visto em ' + sig.companies +
       (sig.companies === 1 ? ' empresa' : ' empresas') + ' até agora</span>' : '';
@@ -855,9 +855,9 @@ async function setSignals(codes, status) {
   if (data && data.success) {
     showToast(
       status === 'confirmed'
-        ? 'Confirmado ' + data.changed + ' signal' + (data.changed === 1 ? '' : 's') +
+        ? 'Confirmado(s) ' + data.changed + (data.changed === 1 ? ' sinal' : ' sinais') +
           ': o Sellbird vai coletar ' + (data.changed === 1 ? 'este sinal' : 'estes sinais') + ' daqui para frente.'
-        : data.changed + ' signal' + (data.changed === 1 ? '' : 's') + ' desligado(s).',
+        : data.changed + (data.changed === 1 ? ' sinal desligado.' : ' sinais desligados.'),
       'success');
   } else {
     showToast(failMsg(data, 'Não deu para atualizar esse sinal.'), 'error');
@@ -1646,6 +1646,7 @@ async function loadOutbox() {
   const pending = data.pending || [];
   _desk.items = pending;
   _desk.footer = data.footer || '';
+  _desk.footer_pt = data.footer_pt || '';   // rodapé dos e-mails em português
   // Keep the desk on the draft being edited even if the list shifted.
   const editingAt = _desk.editing ? pending.findIndex(p => p.id === _desk.editing) : -1;
   if (editingAt >= 0) _desk.i = editingAt;
@@ -1736,7 +1737,7 @@ function renderDeskContext(ctx) {
         escHtml(ctx.website.replace(/^https?:\/\//i, '')) + ' &#8599;</a>'
     : '';
   const who = [ctx.contact, ctx.contact_title].filter(Boolean).map(escHtml).join(' &middot; ');
-  const email = [ctx.email_status, ctx.score ? 'score ' + ctx.score : '']
+  const email = [ctx.email_status, ctx.score ? 'nota ' + ctx.score : '']
     .filter(Boolean).map(escHtml).join(' &middot; ');
   const signals = Object.entries(ctx.signals || {})
     .map(([k, v]) => escHtml(k) + ': <b>' + escHtml(v) + '</b>').join('<br>');
@@ -1793,7 +1794,7 @@ function sendingModeCard(m) {
       'ou endereço de um site que não é seu, ou quando cita as instruções do próprio Sellbird: textos de ' +
       'sites e respostas podem tentar manipular o que ele escreve. A primeira resposta depois de você desfazer um pedido de saída também espera.</p>' +
     '<p class="muted">Contam como seus: ' + domains + (m.booking_page ? '; sua página de agendamento ' + escHtml(m.booking_page) : '') +
-      '. Adicione outros em <code>channels.email.link_domains</code> in <code>' + escHtml(m.file) + '</code>.</p>';
+      '. Adicione outros em <code>channels.email.link_domains</code> em <code>' + escHtml(m.file) + '</code>.</p>';
   if (auto) {
     html += '<div class="convo-actions"><span class="muted">Desligar vale na hora: e-mails que o piloto automático ' +
       'aprovou e que ainda não saíram voltam para a Caixa de saída.' +
@@ -1895,8 +1896,9 @@ function renderDesk(items, i) {
       '<div class="body">' + escHtml(cur.body) + '</div>';
   // Cold email leaves with the footer underneath; show it as it will go out.
   // Not added again when the body already ends with it, as in the Sender.
-  const added = cur.kind === 'sequence' && !(cur.body || '').trimEnd().endsWith(_desk.footer)
-    ? _desk.footer : '';
+  const deskFooter = footerFor(cur.body, _desk.footer, _desk.footer_pt);
+  const added = cur.kind === 'sequence' && !(cur.body || '').trimEnd().endsWith(deskFooter)
+    ? deskFooter : '';
   const footer = added
     ? '<div class="desk-footer" title="Adicionado no envio (compliance no sellbird.yaml)">' +
         escHtml(added) + '</div>' : '';
@@ -1915,7 +1917,7 @@ function renderDesk(items, i) {
     '<div class="desk-pane">' +
       '<div class="to-line">Para <b>' + escHtml(cur.to_email) + '</b>' +
         '<span class="tag">' + (cur.kind === 'reply' ? 'Resposta' : 'E-mail ' + escHtml(String(cur.step))) + '</span>' +
-        '<span class="muted">sends ' + formatDate(cur.send_at) + '</span></div>' +
+        '<span class="muted">envio ' + formatDate(cur.send_at) + '</span></div>' +
       renderDeskContext(cur.context) +
       (heldReason(cur)
         ? '<div class="banner wait desk-held">' + icon('alert') + '<div><b>O Sellbird segurou este e-mail em vez de enviar</b>' +
@@ -1925,7 +1927,7 @@ function renderDesk(items, i) {
       draft + footer +
       '<div class="desk-actions">' + actions +
         '<span class="muted" style="font-size:12px;margin-left:auto">' +
-          (i + 1) + ' of ' + items.length + '</span>' +
+          (i + 1) + ' de ' + items.length + '</span>' +
       '</div>' +
     '</div></div>';
 }
@@ -2078,13 +2080,13 @@ function renderCompaniesPage(page) {
   const pager = pages > 1
     ? ' &nbsp; <button class="btn btn-ghost btn-sm" ' + (_companiesPage === 0 ? 'disabled ' : '') +
         'onclick="renderCompaniesPage(' + (_companiesPage - 1) + ')">&larr; Anterior</button> ' +
-      'Página ' + (_companiesPage + 1) + ' of ' + pages +
+      'Página ' + (_companiesPage + 1) + ' de ' + pages +
       ' <button class="btn btn-ghost btn-sm" ' + (_companiesPage >= pages - 1 ? 'disabled ' : '') +
         'onclick="renderCompaniesPage(' + (_companiesPage + 1) + ')">Próximo &rarr;</button>'
     : '';
   el.innerHTML = html + '</tbody></table></div>' +
     '<div class="table-foot">' + (start + 1) + '–' + Math.min(start + COMPANIES_PER_PAGE, data.length) +
-    ' of ' + data.length + ' compan' + (data.length === 1 ? 'y' : 'ies') + pager + '</div>';
+    ' de ' + data.length + (data.length === 1 ? ' empresa' : ' empresas') + pager + '</div>';
 }
 
 // Basic facts about one company, above its contacts: where it came from,
@@ -2274,7 +2276,7 @@ function renderContacts() {
     if (_optOut.id === p.id) html += '<tr class="detail-row"><td colspan="8">' + optOutPanel(p) + '</td></tr>';
   }
   rowsEl.innerHTML = html + '</tbody></table></div>' +
-    '<div class="table-foot">' + rows.length + ' of ' + _prospects.length + ' contacts</div>';
+    '<div class="table-foot">' + rows.length + ' de ' + _prospects.length + ' contatos</div>';
 }
 
 // Why someone is opted out, and undoing it. Sellbird never moves anyone off
@@ -2384,6 +2386,21 @@ function fillMergeVars(text, r) {
   });
 }
 
+// Sellbird PT-BR: o rodapé certo para o idioma do e-mail. Mesmo critério do
+// servidor (sellbird/language.py): acentos típicos ou palavras comuns do português.
+function looksPortuguese(text) {
+  const t = String(text || '');
+  if (/[ãõçÃÕÇ]/.test(t)) return true;
+  const words = t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').match(/[a-z]+/g) || [];
+  const common = new Set(['voce', 'nao', 'para', 'com', 'que', 'uma', 'um', 'dos', 'das', 'seu', 'sua',
+    'nosso', 'nossa', 'quer', 'posso', 'pode', 'oi', 'ola', 'obrigado', 'empresa', 'equipe', 'clinica']);
+  const hits = words.filter(w => common.has(w)).length;
+  return hits >= 2 && hits >= words.length * 0.12;
+}
+function footerFor(body, footerEn, footerPt) {
+  return footerPt && looksPortuguese(body) ? footerPt : (footerEn || '');
+}
+
 let _gmailBusy = false;  // one compose window per click, never two
 
 async function openInGmail(ci, si, ri) {
@@ -2394,7 +2411,8 @@ async function openInGmail(ci, si, ri) {
   if (!step || !r) return;
   // Cold email carries the postal address and opt-out line, sent by hand too.
   const filled = fillMergeVars(step.body, r).trimEnd();
-  const body = filled + (c.footer && !filled.endsWith(c.footer) ? '\n\n' + c.footer : '');
+  const foot = footerFor(filled, c.footer, c.footer_pt);
+  const body = filled + (foot && !filled.endsWith(foot) ? '\n\n' + foot : '');
   // authuser picks the Google account Sellbird sends as, not just whichever
   // one the browser happens to be signed into.
   const url = 'https://mail.google.com/mail/?view=cm&fs=1' +
@@ -2522,7 +2540,7 @@ async function loadCampaigns() {
       '<div class="campaign-title"><h3>' + escHtml(c.name || 'Campanha sem nome') + '</h3>' +
         '<button class="btn btn-ghost btn-sm" onclick="fbCampaign(' + i + ')">Comentário</button></div>' +
       '<div class="meta">' + badge(c.status) + '<span>' + pc + ' prospect' + (pc !== 1 ? 's' : '') + '</span>' +
-        '<span>' + (c.sequence || []).length + ' emails</span><span>Criada ' + relTime(c.created_at) + '</span></div>' +
+        '<span>' + (c.sequence || []).length + ' e-mails</span><span>Criada ' + relTime(c.created_at) + '</span></div>' +
       campaignProgress(c) + '</div>' +
       '<div class="sequence">' +
       (stepsHtml || '<p class="muted" style="font-size:13px;padding-top:16px">Nenhuma etapa de e-mail nesta campanha.</p>') + '</div></div>';
@@ -2698,7 +2716,7 @@ function inboxMeter(ib) {
 function inboxDate(iso) {
   if (!iso) return '';
   const d = new Date(iso.length === 10 ? iso + 'T00:00:00' : iso);
-  return isNaN(d) ? iso : d.toLocaleDateString(undefined, {month: 'short', day: 'numeric', year: 'numeric'});
+  return isNaN(d) ? iso : d.toLocaleDateString('pt-BR', {month: 'short', day: 'numeric', year: 'numeric'});
 }
 
 async function loadInboxes() {
@@ -2729,7 +2747,7 @@ async function loadInboxes() {
   const waiting = list.reduce((n, i) => n + (Number(i.first_emails_waiting) || 0), 0);
   html += '<div class="inbox-summary">' +
     '<span><b>' + list.length + '</b> ' + (list.length === 1 ? 'inbox' : 'inboxes') + ', <b>' + sending.length + '</b> sending</span>' +
-    '<span><b>' + sentToday + '</b>' + (capToday ? ' of <b>' + Math.min(capToday, Number(data.max_daily_sends)) + '</b>' : '') + ' e-mails frios enviados hoje</span>' +
+    '<span><b>' + sentToday + '</b>' + (capToday ? ' de <b>' + Math.min(capToday, Number(data.max_daily_sends)) + '</b>' : '') + ' e-mails frios enviados hoje</span>' +
     '<span><b>' + waiting + '</b> primeiros e-mails esperando para sair</span></div>';
 
   html += '<div class="inbox-list">';
@@ -2742,7 +2760,7 @@ async function loadInboxes() {
       '<span class="inbox-who"><div class="addr">' + escHtml(ib.address || '(caixa principal)') + '</div>' +
       '<div class="sub">' + escHtml(sub) + '</div></span>' +
       inboxBadge(ib) + inboxMeter(ib) +
-      '<span class="inbox-waiting"><b>' + Number(ib.first_emails_waiting) + '</b>waiting</span>' +
+      '<span class="inbox-waiting"><b>' + Number(ib.first_emails_waiting) + '</b>esperando</span>' +
       icon('chevron', 'chev') + '</button>';
   });
   html += '</div>';
@@ -2803,7 +2821,7 @@ function openInbox(i) {
   if (!campaigns.length) body += '<p>Nenhuma campanha ainda.</p>';
   else {
     const names = using.concat(everyInbox).map(c => escHtml(c.name || 'Sem nome'));
-    const shown = names.slice(0, 6).join(', ') + (names.length > 6 ? ', and ' + (names.length - 6) + ' more' : '');
+    const shown = names.slice(0, 6).join(', ') + (names.length > 6 ? ' e mais ' + (names.length - 6) : '');
     body += names.length ? '<p>' + shown + '</p>' : '<p>Nenhuma. Todas as campanhas escolheram outras caixas.</p>';
     if (everyInbox.length) body += '<p class="form-hint">Campanhas que não escolheram caixas enviam por todas.</p>';
   }
@@ -2919,7 +2937,7 @@ function openAddInbox(kind) {
   } else if (!can[_addKind]) {
     note = connectSetupNotice(_addKind);
   } else {
-    note = '<p class="form-hint">A ' + INBOX_KINDS[_addKind][0] + ' : o login abre no navegador do computador que roda o Sellbird. Entre com o endereço acima.</p>';
+    note = '<p class="form-hint">O login ' + INBOX_KINDS[_addKind][0] + ' abre no navegador do computador que roda o Sellbird. Entre com o endereço acima.</p>';
   }
   note += '<div class="modal-section"><h4>Ou pelo terminal</h4><div class="cmd-copy"><code id="add-cmd"></code>' +
     '<button class="btn btn-secondary btn-sm" onclick="copyAddCommand()">Copiar</button></div></div>';
@@ -3008,7 +3026,7 @@ async function connectMainMailbox(kind) {
     say('bad', escHtml((r && r.message) || 'Não funcionou.'));
     return;
   }
-  say('wait', 'A ' + (kind === 'gmail' ? 'Google' : 'Microsoft') + ' : login aberto no seu navegador. ' +
+  say('wait', 'Login ' + (kind === 'gmail' ? 'do Google' : 'da Microsoft') + ' aberto no seu navegador. ' +
     'Entre com o endereço de envio e permita o acesso. Esta página atualiza quando terminar.');
   if (_inboxPoll) clearInterval(_inboxPoll);
   _inboxPoll = setInterval(async () => {
@@ -3049,7 +3067,7 @@ async function submitAddInbox() {
     closeInboxDialog(); loadInboxes();
     return;
   }
-  addStatus('wait', 'A ' + (_addKind === 'gmail' ? 'Google' : 'Microsoft') + ' : login aberto no seu navegador. ' +
+  addStatus('wait', 'Login ' + (_addKind === 'gmail' ? 'do Google' : 'da Microsoft') + ' aberto no seu navegador. ' +
     'Entre como <b>' + escHtml(body.address.toLowerCase()) + '</b> e permita o acesso. Esta página atualiza quando terminar.');
   _inboxPoll = setInterval(async () => {
     const s = await api('/api/inboxes/connect/status');

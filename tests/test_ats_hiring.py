@@ -1,3 +1,4 @@
+from sellbird.signals import is_free_cost  # Sellbird PT-BR
 """Open roles from the public job-board feeds a company's ATS publishes.
 
 Greenhouse, Lever, Ashby and Workable each publish a company's open roles as
@@ -374,9 +375,9 @@ async def test_profile_companies_takes_keywords_from_the_config(state, monkeypat
 def test_open_roles_is_a_free_profile_signal():
     sig = next(s for s in SIGNAL_CATALOG if s["code"] == "OPEN_ROLES")
     assert sig["collector"] == "profile" and sig["value_type"] == "num"
-    assert "free" in sig["cost_note"]
+    assert is_free_cost(sig["cost_note"])
     hiring = next(s for s in SIGNAL_CATALOG if s["code"] == "HIRING_ROLE")
-    assert "free" in hiring["cost_note"]
+    assert is_free_cost(hiring["cost_note"])
 
 
 # ── discovery: the "hiring" preset ──

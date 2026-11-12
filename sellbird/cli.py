@@ -736,7 +736,7 @@ def cmd_signals(args):
     prospects against nothing until someone makes these decisions.
     """
     from sellbird.state import StateManager
-    from sellbird.signals import seed_signal_catalog
+    from sellbird.signals import is_free_cost, seed_signal_catalog
 
     async def _signals():
         state = StateManager()
@@ -754,7 +754,7 @@ def cmd_signals(args):
                 # substring match would sweep in "1 credit (free tiers
                 # available)", which is not free.
                 codes = [c["code"] for c in await state.get_signal_codes()
-                         if (c["cost_note"] or "").lower().startswith(("free", "included"))]
+                         if is_free_cost(c["cost_note"])]
             changed = sum(
                 [1 for c in codes if await state.set_signal_status(c, status)]
             )

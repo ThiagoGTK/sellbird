@@ -48,10 +48,10 @@ def _secrets() -> SecretStore:
 
 # How to connect the main mailbox, by provider, when it isn't connected.
 MAIN_CONNECT_HINTS = {
-    "gmail": "Sign in with Google below as this address (or run `sellbird gmail auth`).",
-    "microsoft": "Sign in with Microsoft below as this address (or run `sellbird microsoft auth`).",
-    "smtp": "Fill in the SMTP settings under channels.email in sellbird.yaml and the "
-            "password in .env, then run `sellbird doctor`.",
+    "gmail": "Entre com o Google abaixo usando este endereço (ou rode `sellbird gmail auth`).",
+    "microsoft": "Entre com a Microsoft abaixo usando este endereço (ou rode `sellbird microsoft auth`).",
+    "smtp": "Preencha as configurações SMTP em channels.email no sellbird.yaml e a senha no .env, depois rode `sellbird doctor`."
+            "",
 }
 
 
@@ -136,11 +136,11 @@ async def pause_inbox(mailbox_id: str, request: Request):
     await store.init_db()
     row = await _row(store, mailbox_id)
     if row is None:
-        return _refuse("No connected inbox with that id. The main mailbox pauses with all "
-                       "sending, on the Outbox tab.", 404)
+        return _refuse("Nenhuma caixa conectada com esse id. A caixa principal pausa junto com todo o envio, na aba Caixa de saída."
+                       "", 404)
     principal = getattr(request.state, "principal", "user")
     reason = ((await _body(request)).get("reason") or "").strip()[:200]
-    reason = reason or ("paused by your coding agent" if principal == "agent" else "paused by you")
+    reason = reason or ("pausada pelo seu agente de código" if principal == "agent" else "pausada por você")
     await store.set_pause(row["id"], reason)
     await store.log_action(action_type="inbox_paused", agent="agent" if principal == "agent" else "you",
                            details={"inbox": row["address"], "reason": reason})
@@ -153,7 +153,7 @@ async def resume_inbox(mailbox_id: str):
     await store.init_db()
     row = await _row(store, mailbox_id)
     if row is None:
-        return _refuse("No connected inbox with that id.", 404)
+        return _refuse("Nenhuma caixa conectada com esse id.", 404)
     await store.set_pause(row["id"], "")
     await store.log_action(action_type="inbox_resumed", agent="you",
                            details={"inbox": row["address"]})
@@ -166,8 +166,8 @@ async def set_inbox_cap(mailbox_id: str, request: Request):
     await store.init_db()
     row = await _row(store, mailbox_id)
     if row is None:
-        return _refuse("No connected inbox with that id. The main mailbox's cap is "
-                       "channels.email.per_inbox_daily_cap in sellbird.yaml.", 404)
+        return _refuse("Nenhuma caixa conectada com esse id. O limite da caixa principal é channels.email.per_inbox_daily_cap no sellbird.yaml."
+                       "", 404)
     cap = (await _body(request)).get("cap")
     if cap is not None and (isinstance(cap, bool) or not isinstance(cap, int)
                             or not 1 <= cap <= HARD_MAX_INBOX_CAP):
@@ -185,7 +185,7 @@ async def set_inbox_name(mailbox_id: str, request: Request):
     await store.init_db()
     row = await _row(store, mailbox_id)
     if row is None:
-        return _refuse("No connected inbox with that id.", 404)
+        return _refuse("Nenhuma caixa conectada com esse id.", 404)
     name = (await _body(request)).get("name")
     if not isinstance(name, str) or len(name) > 100 or any(c in name for c in "\r\n<>\""):
         return _refuse("A name is up to 100 characters, on one line, without < > or \".")
@@ -199,9 +199,9 @@ async def remove_inbox(mailbox_id: str, request: Request):
     await store.init_db()
     row = await _row(store, mailbox_id)
     if row is None:
-        return _refuse("No connected inbox with that id.", 404)
+        return _refuse("Nenhuma caixa conectada com esse id.", 404)
     if (await _body(request)).get("confirm") != row["address"]:
-        return _refuse("Type the inbox's address to confirm: threads it started end.")
+        return _refuse("Digite o endereço da caixa para confirmar: as conversas que ela começou terminam.")
     await store.retire(row["id"])
     await store.log_action(action_type="inbox_removed", agent="you",
                            details={"inbox": row["address"]})
@@ -213,7 +213,7 @@ async def set_campaign_inboxes(campaign_id: str, request: Request):
     store = _store()
     await store.init_db()
     if not await store._rows("SELECT 1 FROM campaigns WHERE id = ?", (campaign_id,)):
-        return _refuse("No campaign with that id.", 404)
+        return _refuse("Nenhuma campanha com esse id.", 404)
     ids = (await _body(request)).get("inboxes")
     if not isinstance(ids, list) or not all(isinstance(i, str) for i in ids):
         return _refuse('Expected {"inboxes": ["main", "<inbox id>", ...]} ([] = every inbox).')
@@ -252,8 +252,8 @@ def _connect_problem(kind: str, env) -> str:
     if kind == "gmail":
         client_id = (getattr(env, "gmail_client_id", "") or "").strip()
         if not client_id or not (getattr(env, "gmail_client_secret", "") or "").strip():
-            return ("Google sign-in isn't set up yet. Sellbird signs in to Gmail through "
-                    "your own Google OAuth client, so it needs its Client ID and secret first.")
+            return ("O login do Google ainda não está configurado. O Sellbird entra no Gmail pelo seu próprio cliente OAuth do Google, então precisa do ID e do segredo do cliente primeiro."
+                    "")
         if not _GOOGLE_CLIENT_ID.match(client_id):
             return ("The Google Client ID in Settings isn't a real one. It looks like "
                     "123456789-abc123.apps.googleusercontent.com.")
@@ -261,8 +261,8 @@ def _connect_problem(kind: str, env) -> str:
     if kind == "microsoft":
         client_id = (getattr(env, "m365_client_id", "") or "").strip()
         if not client_id:
-            return ("Microsoft sign-in isn't set up yet. Sellbird signs in through your own "
-                    "Microsoft app registration, so it needs its Application (client) ID first.")
+            return ("O login da Microsoft ainda não está configurado. O Sellbird entra pelo seu próprio registro de app da Microsoft, então precisa do ID do aplicativo (cliente) primeiro."
+                    "")
         if not _GUID.match(client_id):
             return ("The Microsoft Application (client) ID in Settings isn't a real one. It "
                     "looks like 1b2c3d4e-5f60-7182-93a4-b5c6d7e8f901.")
@@ -318,8 +318,8 @@ async def _run_main_connect(kind: str, address: str) -> None:
         done = await asyncio.to_thread(_sign_in, kind, address, env, True)
         if done is None:
             _connect_job.update(state="failed", message=(
-                "The sign-in didn't finish, or you signed in as a different address. "
-                "Nothing changed."))
+                "O login não terminou, ou você entrou com outro endereço. "
+                "Nada mudou."))
             return
         store = _store()
         await store.init_db()
@@ -328,7 +328,7 @@ async def _run_main_connect(kind: str, address: str) -> None:
         _connect_job.update(state="connected", message="")
     except Exception:
         logger.exception("Connecting the main mailbox failed")
-        _connect_job.update(state="failed", message="Connecting failed. See the dashboard log.")
+        _connect_job.update(state="failed", message="A conexão falhou. Veja o registro do painel.")
 
 
 async def _run_oauth_connect(kind: str, address: str, name: str, warmup: str) -> None:
@@ -337,8 +337,8 @@ async def _run_oauth_connect(kind: str, address: str, name: str, warmup: str) ->
         token = await asyncio.to_thread(_sign_in, kind, address, env)
         if token is None:
             _connect_job.update(state="failed", message=(
-                "The sign-in didn't finish, or you signed in as a different address. "
-                "Nothing was connected."))
+                "O login não terminou, ou você entrou com outro endereço. "
+                "Nada foi conectado."))
             return
         store, secrets = _store(), _secrets()
         await store.init_db()
@@ -353,7 +353,7 @@ async def _run_oauth_connect(kind: str, address: str, name: str, warmup: str) ->
         _connect_job.update(state="failed", message=str(e))
     except Exception:
         logger.exception("Connecting an inbox failed")
-        _connect_job.update(state="failed", message="Connecting failed. See the dashboard log.")
+        _connect_job.update(state="failed", message="A conexão falhou. Veja o registro do painel.")
 
 
 def _connect_fields(body: dict) -> tuple[str, str, str]:
@@ -361,11 +361,11 @@ def _connect_fields(body: dict) -> tuple[str, str, str]:
     name = body.get("name") or ""
     warmup = body.get("warmup_started") or ""
     if not isinstance(address, str) or "@" not in address or len(address) > 254:
-        raise ConnectRefused("Enter the inbox's full email address.")
+        raise ConnectRefused("Digite o endereço de e-mail completo da caixa.")
     if not isinstance(name, str) or len(name) > 100 or any(c in name for c in "\r\n<>\""):
         raise ConnectRefused("A name is up to 100 characters, on one line, without < > or \".")
     if not isinstance(warmup, str):
-        raise ConnectRefused("Give the warmup start as YYYY-MM-DD.")
+        raise ConnectRefused("Informe o início do aquecimento como AAAA-MM-DD.")
     return address.strip().lower(), name.strip(), warmup.strip()
 
 
@@ -377,8 +377,8 @@ async def connect_main_mailbox():
     config, env = _config_env()
     provider = (config.channels.email.provider or "").strip().lower()
     if provider not in ("gmail", "microsoft"):
-        return _refuse("The main mailbox signs in with a browser only for Gmail or "
-                       "Microsoft 365. Set channels.email.provider in sellbird.yaml.")
+        return _refuse("A caixa principal só entra pelo navegador no Gmail ou no Microsoft 365. Defina channels.email.provider no sellbird.yaml."
+                       "")
     problem = _connect_problem(provider, env)
     if problem:
         return _refuse(problem)
@@ -396,7 +396,7 @@ async def connect_main_mailbox():
 async def connect_inbox(kind: str, request: Request):
     global _connect_task
     if kind not in ("gmail", "microsoft", "smtp"):
-        return _refuse("Connect gmail, microsoft or smtp.", 404)
+        return _refuse("Conecte gmail, microsoft ou smtp.", 404)
     body = await _body(request)
     config, env = _config_env()
     try:
@@ -434,10 +434,10 @@ async def _connect_smtp(body, address, name, warmup, config, env):
     username = body.get("username") or ""
     ports = (body.get("smtp_port", 587), body.get("imap_port", 993))
     if not isinstance(password, str) or not password or len(password) > 1024:
-        return _refuse("Enter the inbox's SMTP password (or app password).")
+        return _refuse("Digite a senha SMTP da caixa (ou a senha de app).")
     if not isinstance(host, str) or not host.strip() or not isinstance(imap_host, str) \
             or not isinstance(username, str):
-        return _refuse("Enter the SMTP server's host name.")
+        return _refuse("Digite o endereço do servidor SMTP.")
     if any(isinstance(p, bool) or not isinstance(p, int) or not 1 <= p <= 65535 for p in ports):
         return _refuse("A port is a whole number from 1 to 65535.")
     settings = SmtpSettings(host=host.strip(), username=username.strip() or address,
@@ -463,7 +463,7 @@ async def test_inbox(mailbox_id: str):
     await store.init_db()
     row = await _row(store, mailbox_id)
     if row is None:
-        return _refuse("No connected inbox with that id.", 404)
+        return _refuse("Nenhuma caixa conectada com esse id.", 404)
     config, env = _config_env()
     ok, detail = await _test(row, config, env, _secrets())
     return {"success": True, "ok": ok, "detail": detail}

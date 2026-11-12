@@ -1422,7 +1422,10 @@ async def outbox_edit(item_id: str, request: Request):
         # recipient isn't something an edit can change.
         from sellbird.gate import pre_send_check
         checked = text
-        footer = _compliance_view()["footer"]
+        # Sellbird PT-BR: e-mail em português recebe o rodapé em português.
+        from sellbird.language import looks_portuguese
+        view = _compliance_view()
+        footer = view.get("footer_pt") if looks_portuguese(text) and view.get("footer_pt") else view["footer"]
         if item.get("kind") == "sequence" and footer and not text.rstrip().endswith(footer):
             checked = text.rstrip() + "\n\n" + footer  # as the Sender will send it
         gate = pre_send_check("reviewer@example.com", subject, checked)
@@ -1712,7 +1715,9 @@ async def get_campaigns():
     rows = await query_db("SELECT * FROM campaigns ORDER BY created_at DESC LIMIT 100")
     sellbird_sends = _sellbird_can_send()
     send_as = "" if sellbird_sends else _send_as()
-    footer = _compliance_view()["footer"]
+    view = _compliance_view()
+    footer = view["footer"]
+    footer_pt = view.get("footer_pt", "")   # rodapé dos e-mails em português
     committed = await _sellbird_committed_ids()
     hand_sent = await _hand_sent_ids()
     for row in rows:
@@ -1735,6 +1740,7 @@ async def get_campaigns():
         row["send_as"] = send_as
         # A cold email sent by hand needs the same footer Sellbird adds.
         row["footer"] = footer
+        row["footer_pt"] = footer_pt
         for r in row["recipients"]:
             r["sent_by_hand"] = r["id"] in hand_sent
             # "I already emailed them": always recordable before Sellbird commits.

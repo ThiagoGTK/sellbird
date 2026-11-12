@@ -183,7 +183,7 @@ def test_the_agent_can_never_connect_or_test_an_inbox(env, keychain):
 def test_gmail_needs_its_client_first(env, keychain):
     with _client(env["user"]) as c:
         r = c.post("/api/inboxes/connect/gmail", json={"address": "g@side.co"})
-    assert r.status_code == 400 and "isn't set up yet" in r.json()["message"]
+    assert r.status_code == 400 and "ainda não está configurado" in r.json()["message"]
 
 
 def test_a_gmail_sign_in_runs_in_the_background_and_connects(env, keychain, monkeypatch):
