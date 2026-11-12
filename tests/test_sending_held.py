@@ -123,7 +123,7 @@ def test_sellbird_status_shows_it(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(state_mod, "StateManager", lambda *a, **k: real(str(db)))
     cli.cmd_status(argparse.Namespace(check=False))
     out = capsys.readouterr().out
-    assert "NOT SENDING" in out and "sellbird gmail auth" in out
+    assert "NÃO ESTÁ ENVIANDO" in out and "sellbird gmail auth" in out
 
 
 # ── review of the notice ──

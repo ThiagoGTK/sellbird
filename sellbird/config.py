@@ -357,10 +357,10 @@ def sending_notice(config) -> str:
     if not legacy_sending_held(config):
         return ""
     return (
-        "Instantly sending is held: channels.email.require_approval is true, and "
-        "Instantly has no approval queue. Campaigns stay as drafts and replies go to "
-        "a human (dashboard Activity tab). Set require_approval: false to let Instantly "
-        "send automatically, or switch to gmail, microsoft or smtp to approve each email."
+        "O envio pelo Instantly está retido: channels.email.require_approval está ligado e o Instantly não tem fila de aprovação. As campanhas ficam como rascunho e as respostas vão para uma pessoa (aba Atividade do painel). Defina require_approval: false para o Instantly enviar sozinho, ou troque para gmail, microsoft ou smtp para aprovar cada e-mail."
+        ""
+        ""
+        ""
     )
 
 
@@ -624,16 +624,16 @@ class ComplianceConfig(BaseModel):
                 or _HEBREW_CLICK_RE.search(v) or _FRENCH_CLICK_RE.search(folded)
                 or _PORTUGUESE_CLICK_RE.search(folded)):
             raise ValueError(
-                "opt_out_line can't contain a link or an email address: cold email "
-                "allows one link, and opting out must be as simple as replying."
+                "A linha de descadastro (opt_out_line / opt_out_line_pt) não pode ter link nem e-mail: o e-mail frio só pode ter um link, e sair precisa ser tão simples quanto responder."
+                ""
             )
         if not (_SAYS_IT_STOPS_RE.search(v) or _SAYS_IT_STOPS_HE_RE.search(v)
                 or _SAYS_IT_STOPS_ES_RE.search(v) or _SAYS_IT_STOPS_IT_RE.search(v)
                 or _SAYS_IT_STOPS_FR_RE.search(folded) or _SAYS_IT_STOPS_PT_RE.search(folded)):
             raise ValueError(
-                "opt_out_line doesn't tell people they can stop these emails. Say so in "
-                "any words (\"Not interested? Just let me know and I won't email you "
-                "again.\"), or set it to \"\" to leave the line off."
+                "A linha de descadastro (opt_out_line / opt_out_line_pt) não diz que a pessoa pode parar de receber. Diga isso com qualquer palavra (\"Não faz sentido pra você? É só me avisar que não envio mais e-mails.\"), ou deixe \"\" para não ter a linha."
+                ""
+                ""
             )
         return v
 
@@ -677,16 +677,16 @@ def compliance_notice(config) -> str:
     compliance = compliance_of(config)
     missing = []
     if not compliance.postal_address.strip():
-        missing.append("a postal address (compliance.postal_address: a street "
-                       "address, PO box or virtual mailbox)")
+        missing.append("um endereço (compliance.postal_address: rua, caixa postal ou endereço fiscal)"
+                       "")
     if not compliance.opt_out_line.strip():
-        missing.append("a way to opt out (compliance.opt_out_line)")
+        missing.append("um jeito de sair (compliance.opt_out_line)")
     if not missing:
         return ""
     return (
-        "Cold emails are going out without " + " or ".join(missing) + ". US law "
-        "(CAN-SPAM) requires both in every cold email. Set them in sellbird.yaml "
-        "(or sellbird.local.yaml if you trained Sellbird)."
+        "Os e-mails frios estão saindo sem " + " nem ".join(missing) + ". A lei americana (CAN-SPAM) exige os dois em todo e-mail frio, e a LGPD pede que quem envia esteja identificado e que sair seja fácil. Defina no sellbird.yaml (ou no sellbird.local.yaml, se você treinou o Sellbird)."
+        ""
+        ""
     )
 
 
@@ -702,7 +702,7 @@ class QuietHoursConfig(BaseModel):
             _time.fromisoformat(v)
         except ValueError:
             raise ValueError(
-                f"'{v}' is not a valid time. Use 24h HH:MM format, e.g. '22:00'."
+                f"'{v}' não é um horário válido. Use o formato 24h HH:MM, ex.: '22:00'."
             )
         return v
 
@@ -713,7 +713,7 @@ class QuietHoursConfig(BaseModel):
 
         if v not in pytz.all_timezones_set:
             raise ValueError(
-                f"'{v}' is not a valid timezone. Use an IANA name like 'America/New_York'."
+                f"'{v}' não é um fuso horário válido. Use um nome IANA como 'America/Sao_Paulo'."
             )
         return v
 
@@ -727,14 +727,14 @@ class UsageConfig(BaseModel):
     @classmethod
     def _valid_percent(cls, v: float) -> float:
         if not 0 < v <= 100:
-            raise ValueError("max_daily_claude_percent must be between 0 and 100")
+            raise ValueError("max_daily_claude_percent precisa estar entre 0 e 100")
         return v
 
     @field_validator("heartbeat_interval_minutes")
     @classmethod
     def _valid_interval(cls, v: int) -> int:
         if v < 1:
-            raise ValueError("heartbeat_interval_minutes must be at least 1")
+            raise ValueError("heartbeat_interval_minutes precisa ser pelo menos 1")
         return v
 
 
@@ -986,23 +986,23 @@ def load_config(config_path: str | None = None) -> SellbirdConfig:
         if current_home().hosted:
             # A hosted home has no file to fall back to: its settings must have
             # been loaded with use_config for this request or tick.
-            raise ConfigFileNotFoundError("This workspace's settings weren't loaded.")
+            raise ConfigFileNotFoundError("As configurações deste espaço não foram carregadas.")
         config_path = _find_config_file()
 
     try:
         data = yaml.safe_load(read_user_text(config_path))
     except FileNotFoundError:
         raise ConfigFileNotFoundError(
-            f"Config file not found: {config_path}. "
-            "Create one from sellbird.yaml.example or run 'sellbird setup'."
+            f"Arquivo de configuração não encontrado: {config_path}. "
+            "Crie um a partir do sellbird.yaml ou rode 'sellbird setup'."
         )
     except yaml.YAMLError as e:
-        raise ConfigError(f"Invalid YAML in {config_path}:\n  {e}")
+        raise ConfigError(f"YAML inválido em {config_path}:\n  {e}")
     except OSError as e:
-        raise ConfigError(f"Could not read {config_path}: {e}")
+        raise ConfigError(f"Não deu para ler {config_path}: {e}")
 
     if data is None:
-        raise ConfigError(f"{config_path} is empty. Run 'sellbird setup' to configure Sellbird.")
+        raise ConfigError(f"{config_path} está vazio. Rode 'sellbird setup' para configurar o Sellbird.")
     if not isinstance(data, dict):
         raise ConfigError(
             f"{config_path} must contain a YAML mapping (key: value pairs), "
@@ -1017,8 +1017,8 @@ def load_config(config_path: str | None = None) -> SellbirdConfig:
         # Log a friendly, actionable summary, then re-raise the original
         # ValidationError so callers (and tests) keep the pydantic type.
         logger.error(
-            f"Invalid configuration in {config_path}:\n{_format_validation_error(e)}\n"
-            "Fix the fields above or re-run 'sellbird setup'."
+            f"Configuração inválida em {config_path}:\n{_format_validation_error(e)}\n"
+            "Corrija os campos acima ou rode 'sellbird setup' de novo."
         )
         raise
 
@@ -1142,7 +1142,7 @@ def set_require_approval(value: bool, path=None) -> Path:
     try:
         data = yaml.safe_load(raw)
     except yaml.YAMLError as e:
-        raise ConfigError(f"Invalid YAML in {path.name}: {e}")
+        raise ConfigError(f"YAML inválido em {path.name}: {e}")
     if _email_section(data) is None:
         raise ConfigError(f"{path.name} has no channels.email section. Set "
                           f"channels.email.require_approval there by hand.")
@@ -1273,8 +1273,8 @@ def _find_config_file() -> str:
     if home_config is not None:
         if not home_config.exists():
             raise ConfigFileNotFoundError(
-                f"sellbird.yaml not found at {home_config}. "
-                "Create one from sellbird.yaml.example or run 'sellbird setup'."
+                f"sellbird.yaml não encontrado em {home_config}. "
+                "Crie um a partir do sellbird.yaml ou rode 'sellbird setup'."
             )
         return str(home_config)
     # The working directory counts only for a checkout run in place. A home
@@ -1295,7 +1295,7 @@ def _find_config_file() -> str:
         if path.exists():
             return str(path)
     raise ConfigFileNotFoundError(
-        "sellbird.yaml not found in "
+        "sellbird.yaml não encontrado em "
         + ", ".join(str(p.parent) for p in candidates)
-        + ". Create one from sellbird.yaml.example or run 'sellbird setup'."
+        + ". Crie um a partir do sellbird.yaml ou rode 'sellbird setup'."
     )

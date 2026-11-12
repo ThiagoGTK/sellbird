@@ -345,7 +345,7 @@ def test_install_outside_a_checkout_skips_pip(tmp_path, monkeypatch, capsys):
     cli.cmd_install(argparse.Namespace(_project_root=str(tmp_path / "home")))
     assert calls == [[sys.executable, "-m", "playwright", "install", "chromium"]]
     out = capsys.readouterr().out
-    assert "already part of this install" in out and "Python packages installed" not in out
+    assert "já fazem parte desta instalação" in out and "Pacotes Python instalados" not in out
 
 
 def test_install_in_a_checkout_still_runs_pip_there(tmp_path, monkeypatch):

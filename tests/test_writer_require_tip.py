@@ -136,7 +136,7 @@ def test_retry_writes_no_tip_only_touches_skipped_prospects(state, capsys, monke
     skipped, failed = asyncio.run(seed())
     monkeypatch.setattr("sellbird.state.StateManager", lambda *a, **k: state)
     cli.cmd_retry_writes(argparse.Namespace(no_tip=True))
-    assert "1 prospect(s) are back in line" in capsys.readouterr().out
+    assert "1 prospect(s) voltaram para a fila" in capsys.readouterr().out
     assert asyncio.run(status(state, skipped)) == "new"
     assert asyncio.run(status(state, failed)) == "write_failed"
 

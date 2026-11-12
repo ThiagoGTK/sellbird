@@ -162,7 +162,7 @@ def test_the_command_saves_a_free_key_and_never_prints_it(env_file, monkeypatch,
     assert "SMTP_PASSWORD=a=b=c" in lines and "# a comment" in lines
     assert calls == [("jo@example.com", "GB")]
     out = capsys.readouterr().out
-    assert "saved in .env as PRECLEARED_API_KEY" in out
+    assert "salva no .env como PRECLEARED_API_KEY" in out
     assert "100 checks a day for 14 days" in out
     assert FAKE_KEY not in out
     if os.name != "nt":   # Windows uses the folder's ACLs, not POSIX modes
@@ -198,7 +198,7 @@ def test_the_command_keeps_a_key_that_is_already_there(env_file, monkeypatch, ca
     assert run("jo@example.com") == 0
 
     assert calls == []
-    assert "kept it" in capsys.readouterr().out
+    assert "manteve" in capsys.readouterr().out
     assert where == "environment" or env_file.read_text() == "PRECLEARED_API_KEY=existing_key\n"
 
 
@@ -208,7 +208,7 @@ def test_the_command_says_why_no_key_came_back(env_file, monkeypatch, capsys):
     assert run("jo@example.com") == 1
 
     out = capsys.readouterr().out
-    assert "Couldn't get a key: Too many keys from this network today." in out
+    assert "Não deu para pegar uma chave: Too many keys from this network today." in out
     assert "https://precleared.dev/get-key" in out
     assert not env_file.exists()
 

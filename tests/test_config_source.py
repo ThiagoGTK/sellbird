@@ -43,7 +43,7 @@ def test_an_explicit_path_still_reads_that_file(tmp_path):
 
 def test_a_hosted_home_without_loaded_settings_is_an_error(tmp_path):
     with use_home(Home.for_root(tmp_path, mode="hosted")):
-        with pytest.raises(ConfigFileNotFoundError, match="weren't loaded"):
+        with pytest.raises(ConfigFileNotFoundError, match="não foram carregadas"):
             load_config()
         given = _config(tmp_path)
         with use_config(given):

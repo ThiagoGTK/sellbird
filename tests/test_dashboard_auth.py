@@ -704,7 +704,7 @@ def test_cli_dashboard_refuses_and_prints_links(env, monkeypatch, capsys):
     with pytest.raises(SystemExit) as e:
         cli.cmd_dashboard(args)
     assert e.value.code == 2
-    assert "Dashboard not started" in capsys.readouterr().out
+    assert "O painel não foi iniciado" in capsys.readouterr().out
     args = type("A", (), {"host": "127.0.0.1", "port": 5555, "url": True})()
     cli.cmd_dashboard(args)
     assert capsys.readouterr().out.strip() == f"http://127.0.0.1:5555/#token={env['token']}"

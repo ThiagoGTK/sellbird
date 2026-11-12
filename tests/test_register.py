@@ -134,7 +134,7 @@ def test_cli_writes_the_register(tmp_path, monkeypatch, capsys):
     cmd_companies(SimpleNamespace(out=str(out)))
     text = out.read_text(encoding="utf-8-sig")
     assert "Acme Forge" in text and text.startswith("company,website")
-    assert "1 companies" in capsys.readouterr().out
+    assert "1 empresas" in capsys.readouterr().out
 
 
 def test_cli_without_a_database_says_so(tmp_path, monkeypatch, capsys):
@@ -143,5 +143,5 @@ def test_cli_without_a_database_says_so(tmp_path, monkeypatch, capsys):
 
     monkeypatch.setattr(sellbird_state, "DB_PATH", tmp_path / "missing.db")
     cmd_companies(SimpleNamespace(out=str(tmp_path / "x.csv")))
-    assert "No database yet" in capsys.readouterr().out
+    assert "Ainda não há banco de dados" in capsys.readouterr().out
     assert not (tmp_path / "x.csv").exists()

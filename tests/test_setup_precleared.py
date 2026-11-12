@@ -99,7 +99,7 @@ def test_check_stays_off_unless_the_user_says_yes(files, monkeypatch):
     wizard._setup_compliance()
     finish(wizard)
 
-    assert asked.yes_no == [("Turn on the cold-email check?", False)]
+    assert asked.yes_no == [("Ligar a checagem de e-mail frio?", False)]
     assert asked.questions == []  # no country or key questions after a no
     assert wizard.precleared is None
     assert saved(files.config)["enabled"] is False
@@ -214,7 +214,7 @@ def test_uk_timezone_recommends_the_check_and_offers_gb(files, monkeypatch, caps
 
     out = capsys.readouterr().out
     assert "Recommended for a UK sender like you" in out
-    assert asked.yes_no[0] == ("Turn on the cold-email check?", False)  # still their call
+    assert asked.yes_no[0] == ("Ligar a checagem de e-mail frio?", False)  # still their call
     assert asked.questions[0].default == "GB"  # Enter takes GB
     assert saved(files.config)["sender_country"] == "GB"
 
@@ -333,7 +333,7 @@ async def test_setup_asks_about_the_check_before_writing_anything(monkeypatch, c
     await wizard.run()
 
     assert calls.index("_setup_behavior") < calls.index("_setup_compliance") < calls.index("_write_env")
-    assert "Step 7/7: Cold-Email Check (Optional)" in capsys.readouterr().out
+    assert "Etapa 7/7: Checagem de e-mail frio (opcional)" in capsys.readouterr().out
 
 
 def test_saving_the_key_keeps_other_env_lines_and_stays_private(files, monkeypatch, capsys, caplog):
@@ -380,7 +380,7 @@ def test_setup_gets_a_free_key_for_an_email_address(files, monkeypatch, capsys, 
     out = capsys.readouterr().out
     assert "100 a day for its first 14 days" in out
     assert "precleared.dev/privacy" in out
-    assert "Got your free key and saved it to .env." in out
+    assert "Peguei sua chave grátis e salvei no .env." in out
     assert FAKE_KEY not in out
     assert FAKE_KEY not in caplog.text
 
@@ -498,8 +498,8 @@ async def test_summary_shows_whether_the_check_was_saved_on(files, monkeypatch, 
     finish(wizard)
 
     out = await summary(wizard, monkeypatch, capsys)
-    assert ("✓ Cold-email check (Precleared)" in out) is turn_on
-    assert ("– Cold-email check (Precleared)" in out) is not turn_on
+    assert ("✓ Checagem de e-mail frio (Precleared)" in out) is turn_on
+    assert ("– Checagem de e-mail frio (Precleared)" in out) is not turn_on
 
 
 @pytest.mark.asyncio
@@ -513,7 +513,7 @@ async def test_a_config_that_cannot_be_saved_is_reported_not_ticked(files, monke
     wizard._write_env()
     wizard._write_config()  # must not crash setup
 
-    assert "Couldn't save" in capsys.readouterr().out
+    assert "Não deu para salvar" in capsys.readouterr().out
     assert files.config.read_text() == "channels:\n"
     out = await summary(wizard, monkeypatch, capsys)
-    assert "– Cold-email check (Precleared)" in out
+    assert "– Checagem de e-mail frio (Precleared)" in out

@@ -638,7 +638,7 @@ def test_flags_without_an_action_are_an_error(monkeypatch, capsys, argv):
     assert served == []
     out = capsys.readouterr()
     assert out.out == ""
-    assert "go with install or uninstall" in out.err
+    assert "vão junto com install ou uninstall" in out.err
 
 
 def test_print_config_writes_nothing(tmp_path, capsys):

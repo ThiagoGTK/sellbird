@@ -1033,7 +1033,7 @@ def test_an_opt_out_line_has_to_say_the_emails_can_stop():
     import pydantic
     for bad in ("Cheers!", "Have a great week.", "Thanks for reading, Jordan",
                 "Hope this helps."):
-        with pytest.raises(pydantic.ValidationError, match="stop these emails"):
+        with pytest.raises(pydantic.ValidationError, match="não diz que a pessoa pode parar"):
             ComplianceConfig(opt_out_line=bad)
     for good in ("If this isn't for you, tell me and I'll stop reaching out.",
                  "Wrong person? Let me know and you won't hear from me again.",

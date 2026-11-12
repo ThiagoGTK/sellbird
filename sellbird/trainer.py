@@ -152,7 +152,7 @@ class CloudflareCrawler:
             finished = data.get("finished", 0)
 
             elapsed = int(time.time() - start_time)
-            print(f"\r      Crawling... {finished}/{total} pages ({elapsed}s)", end="", flush=True)
+            print(f"\r      Lendo... {finished}/{total} páginas ({elapsed}s)", end="", flush=True)
 
             if status in ("completed", "cancelled_due_to_timeout", "cancelled_due_to_limits"):
                 print()  # newline after progress
@@ -254,7 +254,7 @@ class FallbackCrawler:
                     continue
 
                 pages[url] = text
-                print(f"\r      Scraped {len(pages)} pages...", end="", flush=True)
+                print(f"\r      {len(pages)} páginas lidas...", end="", flush=True)
 
                 # Discover new links from this page and add to queue
                 if html:
@@ -442,11 +442,11 @@ def write_trained_config(learned: dict, path: Path) -> dict:
             existing = None
         if not isinstance(existing, dict) and source == path and raw.strip():
             backup = _backup(path, raw)
-            print(f"      Couldn't read the existing {path.name}; saved it as {backup.name}.")
+            print(f"      Não deu para ler o {path.name} atual; ele foi salvo como {backup.name}.")
     config = merge_trained_config(learned, existing)
     if config is not learned and source == path:
-        print(f"      Kept your settings from {path.name} (email provider, schedule, limits,")
-        print("      compliance, sender identity); updated the product, targeting and company.")
+        print(f"      Mantive suas configurações do {path.name} (provedor de e-mail, horários, limites,")
+        print("      conformidade, remetente); atualizei o produto, o público-alvo e a empresa.")
 
     tmp = path.with_name(path.name + ".tmp")
     try:
@@ -489,15 +489,15 @@ class Trainer:
         parsed = urlparse(url)
         domain = parsed.netloc
         if not domain:
-            print(f"\nERROR: '{url}' doesn't look like a valid URL.")
-            print("Try something like: https://yourcompany.com")
+            print(f"\nERRO: '{url}' não parece uma URL válida.")
+            print("Tente algo como: https://suaempresa.com.br")
             return None
         base_url = f"{parsed.scheme}://{domain}"
 
         logger.info(f"Training Sellbird on {base_url}...")
         print(f"\n{'='*60}")
-        print(f"  Sellbird Training Mode")
-        print(f"  Learning from: {base_url}")
+        print(f"  Sellbird: modo de treinamento")
+        print(f"  Aprendendo com: {base_url}")
         print(f"{'='*60}\n")
 
         # Step 1: Deep crawl
@@ -505,62 +505,62 @@ class Trainer:
         cf_api_token = os.getenv("CLOUDFLARE_API_TOKEN", "")
 
         if cf_account_id and cf_api_token:
-            print(f"[1/6] Deep crawling with Cloudflare (up to {max_pages} pages)...")
+            print(f"[1/6] Lendo o site a fundo com a Cloudflare (até {max_pages} páginas)...")
             crawler = CloudflareCrawler(cf_account_id, cf_api_token)
             self.scraped_pages = await crawler.crawl(
                 base_url, max_pages=max_pages, depth=10
             )
         else:
-            print("[1/6] Crawling website (add CLOUDFLARE_ACCOUNT_ID and")
-            print("      CLOUDFLARE_API_TOKEN to .env for deep JS-rendered crawling)...")
+            print("[1/6] Lendo o site (adicione CLOUDFLARE_ACCOUNT_ID e")
+            print("      CLOUDFLARE_API_TOKEN no .env para ler sites com JavaScript)...")
             crawler = FallbackCrawler()
             self.scraped_pages = await crawler.crawl(base_url, max_pages=max_pages)
 
         if not self.scraped_pages:
             if getattr(crawler, "blocked", False):
-                print(f"\nERROR: {base_url} points to a local or private address. Sellbird only")
-                print("learns from public websites, so it never reaches into your own network.")
-                print("Train on the live public site instead.")
+                print(f"\nERRO: {base_url} aponta para um endereço local ou privado. O Sellbird só")
+                print("aprende com sites públicos, então nunca acessa a sua rede interna.")
+                print("Treine com o site público no ar.")
             else:
-                print("\nERROR: Could not scrape any pages. Check the URL.")
+                print("\nERRO: Não deu para ler nenhuma página. Confira a URL.")
             return None
 
-        print(f"      Done! Crawled {len(self.scraped_pages)} pages.\n")
+        print(f"      Pronto! {len(self.scraped_pages)} páginas lidas.\n")
 
         # Step 2: Extract product information
-        print("[2/6] Analyzing product information...")
+        print("[2/6] Analisando as informações do produto...")
         product_info = await self._extract_product_info()
         if not product_info:
-            print("ERROR: Could not extract product information.")
+            print("ERRO: Não deu para extrair as informações do produto.")
             return None
-        print(f"      Found: {product_info.get('product_name', 'Unknown Product')}\n")
+        print(f"      Encontrado: {product_info.get('product_name', 'Produto desconhecido')}\n")
 
         # Step 3: Identify ICP
-        print("[3/6] Identifying ideal customer profile...")
+        print("[3/6] Identificando o perfil de cliente ideal...")
         icp_info = await self._extract_icp()
-        print(f"      Target: {', '.join(icp_info.get('industries', ['Unknown']))}\n")
+        print(f"      Público: {', '.join(icp_info.get('industries', ['Desconhecido']))}\n")
 
         # Step 4: Competitive analysis
-        print("[4/6] Analyzing competitive landscape...")
+        print("[4/6] Analisando a concorrência...")
         competitive_intel = await self._extract_competitive_intel(product_info)
-        print(f"      Identified {len(competitive_intel.get('competitors', []))} competitors.\n")
+        print(f"      {len(competitive_intel.get('competitors', []))} concorrentes identificados.\n")
 
         # Step 5: Generate objection responses
-        print("[5/6] Generating objection handling playbook...")
+        print("[5/6] Gerando o playbook de objeções...")
         objections = await self._generate_objections(
             product_info,
             competitive_intel,
         )
 
         if not objections:
-            print("\nERROR: Could not generate a valid objection playbook.")
-            print("Training stopped. Existing configuration was not modified.")
+            print("\nERRO: Não deu para gerar um playbook de objeções válido.")
+            print("Treinamento interrompido. A configuração atual não foi alterada.")
             return None
 
-        print(f"      Prepared {len(objections)} objection responses.\n")
+        print(f"      {len(objections)} respostas a objeções preparadas.\n")
 
         # Step 6: Generate config + skills
-        print("[6/6] Building configuration and product knowledge...")
+        print("[6/6] Montando a configuração e o conhecimento do produto...")
         config = self._build_config(product_info, icp_info, objections, domain)
 
         # Write config (relative paths resolve against the project root,
@@ -579,33 +579,33 @@ class Trainer:
             await self._generate_battle_cards(product_info, competitive_intel)
 
         print(f"\n{'='*60}")
-        print(f"  Training complete!")
+        print(f"  Treinamento concluído!")
         print(f"{'='*60}")
-        print(f"\n  Product:      {config['product']['name']}")
-        print(f"  Company:      {config['persona']['company']}")
-        print(f"  ICP titles:   {', '.join(config['icp']['titles'])}")
-        print(f"  Industries:   {', '.join(config['icp']['industries'])}")
-        print(f"  Pages crawled: {len(self.scraped_pages)}")
+        print(f"\n  Produto:      {config['product']['name']}")
+        print(f"  Empresa:      {config['persona']['company']}")
+        print(f"  Cargos (ICP): {', '.join(config['icp']['titles'])}")
+        print(f"  Segmentos:    {', '.join(config['icp']['industries'])}")
+        print(f"  Páginas lidas: {len(self.scraped_pages)}")
         offer = (config.get("product") or {}).get("offer") or {}
         if offer.get("entry"):
-            print(f"\n  First-email offer: {offer['entry']}")
+            print(f"\n  Oferta do primeiro e-mail: {offer['entry']}")
         else:
-            print("\n  Next: work out the offer every first email ends with. Ask your coding agent")
-            print("  to work it out with you, or open the dashboard's Your company tab.")
+            print("\n  Próximo passo: defina a oferta que fecha todo primeiro e-mail. Peça ao seu agente de código")
+            print("  para definir com você, ou abra a aba Sua empresa no painel.")
             if offer.get("entry_ideas"):
-                print("  Ideas to start from: " + "; ".join(offer["entry_ideas"]))
-        print(f"\n  Files generated:")
+                print("  Ideias para começar: " + "; ".join(offer["entry_ideas"]))
+        print(f"\n  Arquivos gerados:")
         print(f"    - {config_path}")
         print(f"    - skills/product_knowledge.md")
         if competitive_intel.get("competitors"):
             print(f"    - skills/competitive_intel.md")
         if config["persona"].get("email") == guessed_email:
-            print(f"\n  Review {config_path} and adjust as needed — especially the")
-            print(f"  persona name/email, which I guessed from your domain.")
+            print(f"\n  Revise {config_path} e ajuste o que precisar, principalmente o")
+            print(f"  nome/e-mail da persona, que eu deduzi pelo seu domínio.")
         else:
-            print(f"\n  Review {config_path} and adjust as needed. Emails still go out as")
+            print(f"\n  Revise {config_path} e ajuste o que precisar. Os e-mails continuam saindo como")
             print(f"  {config['persona'].get('name', '')} <{config['persona']['email']}>.")
-        print(f"  Then run: sellbird run\n")
+        print(f"  Depois rode: sellbird run\n")
 
         return config
 

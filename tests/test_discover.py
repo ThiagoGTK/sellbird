@@ -1352,9 +1352,9 @@ def test_missing_key_fails_loudly_at_startup(monkeypatch, capsys):
         cmd_discover(_cli_args())
     assert ei.value.code == 1
     out = capsys.readouterr().out
-    assert "provider skipped: missing key" in out
+    assert "fonte pulada: falta a chave" in out
     assert "SERPER_API_KEY" in out
-    assert "0 queries can run" in out
+    assert "nenhuma busca pode rodar" in out
     # The guard fires before the estimate is even attempted.
     assert "Estimated cost" not in out
 
@@ -1364,7 +1364,7 @@ def test_placeholder_key_is_treated_as_missing(monkeypatch, capsys):
     with pytest.raises(SystemExit) as ei:
         cmd_discover(_cli_args())
     assert ei.value.code == 1
-    assert "provider skipped: missing key" in capsys.readouterr().out
+    assert "fonte pulada: falta a chave" in capsys.readouterr().out
 
 
 def test_absent_key_is_treated_as_missing(monkeypatch, capsys):
