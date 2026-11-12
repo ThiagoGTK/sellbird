@@ -878,7 +878,7 @@ async function loadDiscoverProviders() {
   _provider = _provider || data.selected || data.default;
   el.innerHTML = '<div class="prov-grid">' + data.providers.map(p => {
     const ready = p.configured
-      ? '<span class="badge t-good">ready</span>'
+      ? '<span class="badge t-good">pronto</span>'
       : '<span class="badge t-waiting">precisa de chave</span>';
     return '<div class="prov-card ' + (p.key === _provider ? 'selected' : '') +
       '" onclick="pickProvider(' + jsq(p.key) + ')">' +
@@ -1002,8 +1002,8 @@ function renderProfileCard(pending, running) {
   if (!el) return;
   if (!pending) { el.innerHTML = ''; return; }
   el.innerHTML = '<div class="subhead">Ler sites</div><div class="card"><div class="queue-item good" style="padding:0;border:0;box-shadow:none">' +
-    '<div class="qtext"><div class="qtitle">' + pending + ' compan' + (pending === 1 ? 'y' : 'ies') +
-    ' ainda não vistos</div><div class="qdetail">Grátis, sem precisar de conta. O Sellbird lê cada site para ver ' +
+    '<div class="qtext"><div class="qtitle">' + pending + (pending === 1 ? ' empresa ainda não vista' : ' empresas ainda não vistas') +
+    '</div><div class="qdetail">Grátis, sem precisar de conta. O Sellbird lê cada site para ver ' +
     'qual é a agência deles, o que está faltando e se fazem anúncios. Até 200 por vez.</div></div>' +
     '<button class="btn btn-primary btn-sm" onclick="runProfile(this)"' + (running ? ' disabled' : '') + '>' +
     (running ? 'Ocupado…' : 'Ler os sites') + '</button></div></div>';
