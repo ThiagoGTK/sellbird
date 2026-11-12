@@ -536,7 +536,10 @@ _SAYS_IT_STOPS_PT_RE = re.compile(
     r"|nao\s+(?:te\s+|lhe\s+|vos\s+)?(?:envio|enviarei|vou\s+enviar|mando|mandarei|vou\s+mandar"
     r"|escrevo|escreverei|vou\s+escrever|incomodo|vou\s+incomodar|contato|vou\s+contatar)"
     r"|nao\s+(?:quer|quiser|deseja|desejar)\s+(?:mais\s+)?receber"
-    r"|cancelar\s+(?:o\s+)?(?:envio|cadastro|inscricao))",
+    r"|cancelar\s+(?:o\s+)?(?:envio|cadastro|inscricao)"
+    # Sem depender do acento do "não" (um arquivo salvo em outra codificação
+    # pode estragar o "ã"): "...que (não) envio mais e-mails".
+    r"|\b(?:envio|enviarei|mando|mandarei|escrevo|escreverei)\s+mais\b)",
     re.IGNORECASE)
 # "Clique" em português: "clique aqui para sair" (o rodapé não tem link).
 _PORTUGUESE_CLICK_RE = re.compile(r"\bcliqu(?:e|em|ar)\b", re.IGNORECASE)

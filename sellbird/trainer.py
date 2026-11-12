@@ -31,6 +31,14 @@ from sellbird.paths import PROJECT_ROOT
 from sellbird.textio import read_user_text
 from sellbird.untrusted import UNTRUSTED_RULE, fence
 
+# Sellbird PT-BR: o que o treinamento grava (descrição, benefícios, ICP,
+# objeções) fica em português do Brasil, para você ler e editar. O Writer
+# traduz na hora quando o e-mail vai para uma empresa de fora em inglês.
+TRAINER_LANGUAGE_RULE = (
+    "LANGUAGE: write every text value in the JSON in Brazilian Portuguese (pt-BR), "
+    "even when the website is in English. Keep proper names (company, product, tool "
+    "and competitor names) exactly as they are. Keep the JSON keys in English.")
+
 
 def _normalize_start_url(url: str) -> str:
     """Accept 'acmecorp.com' as well as 'https://acmecorp.com'."""
@@ -627,6 +635,7 @@ WEBSITE CONTENT ({len(self.scraped_pages)} pages):
 {all_content}
 
 {UNTRUSTED_RULE}
+{TRAINER_LANGUAGE_RULE}
 
 Extract the following and return as JSON:
 {{
@@ -664,6 +673,7 @@ WEBSITE CONTENT ({len(self.scraped_pages)} pages):
 {all_content}
 
 {UNTRUSTED_RULE}
+{TRAINER_LANGUAGE_RULE}
 
 Return as JSON:
 {{
@@ -722,6 +732,7 @@ WEBSITE CONTENT:
 {all_content}
 
 {UNTRUSTED_RULE}
+{TRAINER_LANGUAGE_RULE}
 
 Look for comparison pages, "why us" messaging, feature differentiation,
 and any mentions of competitors or alternatives.
@@ -774,6 +785,8 @@ Pricing: {product_info.get('pricing', '')}
 Key Benefits: {', '.join(str(item) for item in key_benefits)}
 Competitors: {', '.join(competitor_names)}
 Differentiators: {', '.join(str(item) for item in differentiators)}
+
+{TRAINER_LANGUAGE_RULE}
 
 Generate 8-12 objections covering:
 - Price/budget concerns
@@ -846,62 +859,62 @@ Do not return an empty object, markdown, or explanations.
         """Generate comprehensive product knowledge skill file."""
         product_name = product_info.get("product_name", "the product")
 
-        knowledge = f"""# Product Knowledge: {product_name}
+        knowledge = f"""# Conhecimento do produto: {product_name}
 
-## What We Sell
+## O que vendemos
 {product_info.get('product_description', '')}
 
-## Core Value Proposition
+## Proposta de valor principal
 {product_info.get('value_proposition', '')}
 
-## Key Benefits
+## Principais benefícios
 {chr(10).join('- ' + b for b in product_info.get('key_benefits', []))}
 
-## Features
+## Recursos
 {chr(10).join('- ' + f for f in product_info.get('features', []))}
 
-## Use Cases
+## Casos de uso
 {chr(10).join('- ' + u for u in product_info.get('use_cases', []))}
 
-## Pricing
-{product_info.get('pricing', 'Contact for pricing')}
+## Preço
+{product_info.get('pricing', 'Sob consulta')}
 
-## Target Audience
+## Público-alvo
 {product_info.get('target_audience', '')}
 
-## Ideal Buyer Persona
+## Persona do comprador ideal
 {icp_info.get('buyer_persona', '')}
 
-## Integrations
+## Integrações
 {chr(10).join('- ' + i for i in product_info.get('integrations', []))}
 
-## What Makes Us Different
+## O que nos diferencia
 {chr(10).join('- ' + d for d in product_info.get('differentiators', []))}
 
-## Social Proof & Case Studies
+## Prova social e casos de sucesso
 {chr(10).join('- ' + s for s in product_info.get('social_proof', []))}
 
-## Prospect Pain Points
+## Dores dos prospects
 {chr(10).join('- ' + p for p in icp_info.get('pain_points', []))}
 
-## Buying Triggers
-When these events happen, prospects are most likely to buy:
+## Gatilhos de compra
+Quando estes eventos acontecem, os prospects estão mais propensos a comprar:
 {chr(10).join('- ' + t for t in icp_info.get('buying_triggers', []))}
 
-## Disqualifiers
-Do NOT pursue prospects who:
+## Desqualificadores
+NÃO siga com prospects que:
 {chr(10).join('- ' + d for d in icp_info.get('disqualifiers', []))}
 
-## Market Positioning
+## Posicionamento de mercado
 {competitive_intel.get('positioning', '')}
 
-## Tone & Voice
+## Tom e voz
 {product_info.get('tone', 'professional, consultative, confident')}
 """
 
         skills_path = PROJECT_ROOT / "skills" / "product_knowledge.md"
         skills_path.write_text(knowledge, encoding="utf-8")
-        print(f"      Generated: skills/product_knowledge.md")
+        print(f"      Gerado: skills/product_knowledge.md")
 
     async def _generate_battle_cards(self, product_info: dict, competitive_intel: dict):
         """Generate competitive battle cards as a skill file."""
@@ -911,18 +924,18 @@ Do NOT pursue prospects who:
 
         product_name = product_info.get("product_name", "Our Product")
 
-        cards = f"""# Competitive Battle Cards: {product_name}
+        cards = f"""# Comparativos com concorrentes: {product_name}
 
-Use these when a prospect mentions a competitor or asks "how are you different?"
+Use quando um prospect citar um concorrente ou perguntar "qual a diferença de vocês?"
 
-## Market Positioning
+## Posicionamento de mercado
 {competitive_intel.get('positioning', '')}
 
-## Our Unique Strengths
+## Nossas forças exclusivas
 {chr(10).join('- ' + s for s in competitive_intel.get('unique_strengths', []))}
 
-## Common Alternatives (Non-Competitors)
-What prospects do instead of buying a solution like ours:
+## Alternativas comuns (que não são concorrentes)
+O que os prospects fazem em vez de comprar uma solução como a nossa:
 {chr(10).join('- ' + a for a in competitive_intel.get('common_alternatives', []))}
 
 ---
@@ -931,25 +944,25 @@ What prospects do instead of buying a solution like ours:
         for comp in competitors:
             if not isinstance(comp, dict):
                 continue
-            name = comp.get("name", "Unknown")
+            name = comp.get("name", "Desconhecido")
             cards += f"""
 ## vs. {name}
 
-**How we win:** {comp.get('how_we_win', 'N/A')}
+**Como ganhamos:** {comp.get('how_we_win', 'N/D')}
 
-**Their weakness:** {comp.get('their_weakness', 'N/A')}
+**Ponto fraco deles:** {comp.get('their_weakness', 'N/D')}
 
-**Migration angle:** {comp.get('migration_angle', 'N/A')}
+**Ângulo de migração:** {comp.get('migration_angle', 'N/D')}
 
-**When a prospect says "We use {name}":**
-"That's a solid tool. The teams that've moved to {product_name} from {name} tell us the biggest difference is {comp.get('how_we_win', 'the experience')}. Worth a quick comparison?"
+**Quando o prospect disser "Usamos o {name}":**
+"É uma boa ferramenta. Quem trocou o {name} pelo {product_name} diz que a maior diferença é {comp.get('how_we_win', 'a experiência')}. Vale comparar?"
 
 ---
 """
 
         skills_path = PROJECT_ROOT / "skills" / "competitive_intel.md"
         skills_path.write_text(cards, encoding="utf-8")
-        print(f"      Generated: skills/competitive_intel.md")
+        print(f"      Gerado: skills/competitive_intel.md")
 
     def _build_config(
         self,
