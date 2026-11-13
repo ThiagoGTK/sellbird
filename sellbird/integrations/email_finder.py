@@ -24,6 +24,7 @@ import logging
 import os
 import random
 import re
+import unicodedata
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Optional
@@ -99,7 +100,13 @@ def _clean_domain(domain: str) -> str:
 
 
 def _clean_name_part(value: str) -> str:
-    return re.sub(r"[^a-z]", "", (value or "").lower())
+    """Nome → parte local do e-mail: minúsculas, só a-z.
+
+    Tira o acento antes de filtrar (PT-BR): "João" vira "joao", "Conceição"
+    vira "conceicao". Sem isso as letras acentuadas sumiam ("joo")."""
+    decomposed = unicodedata.normalize("NFKD", (value or "").lower())
+    plain = "".join(c for c in decomposed if not unicodedata.combining(c))
+    return re.sub(r"[^a-z]", "", plain)
 
 
 def build_email(pattern: str, first: str, last: str, domain: str) -> str:

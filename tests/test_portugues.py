@@ -297,3 +297,15 @@ async def test_writer_separa_campanhas_por_idioma(tmp_path):
     assert names == ["Dental-outreach", "Dental-outreach-pt-BR"]
     assert sum("IDIOMA DO E-MAIL: português do Brasil" in p for p in brain.prompts) == 1
     assert sum("EMAIL LANGUAGE: English" in p for p in brain.prompts) == 1
+
+
+# ── E-mail montado a partir de nome com acento ──
+
+def test_nome_com_acento_vira_email_sem_acento():
+    """"João" precisa virar "joao@", não "joo@" (bug visto em produção)."""
+    from sellbird.integrations.email_finder import _clean_name_part, build_email
+
+    assert _clean_name_part("João") == "joao"
+    assert _clean_name_part("Conceição") == "conceicao"
+    assert _clean_name_part("Müller") == "muller"
+    assert build_email("{f}", "João", "Heckert", "hec.adv.br") == "joao@hec.adv.br"
