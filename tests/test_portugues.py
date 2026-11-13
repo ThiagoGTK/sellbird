@@ -503,3 +503,32 @@ def test_sitemap_simples_continua_igual():
     p = ProfileCollector.__new__(ProfileCollector)
     p._get = fake_get
     assert asyncio.run(p._sitemap_text(site)) == simples
+
+
+# ── Palavras proibidas pelo remetente (writer.avoid_words) ──
+
+def test_palavra_proibida_vira_problema_de_estilo():
+    from sellbird.email_style import avoided_words, style_problems
+    corpo = "Oi Ana,\n\nFaço sites para pequenos negócios. Quer ver uma prévia?\n\nThiago"
+    avoid = ["pequeno", "pequenos", "pequena", "pequenas"]
+    assert avoided_words(corpo, avoid) == ["pequenos"]
+    assert avoided_words("Faço sites para PEQUENOS negócios", avoid) == ["pequenos"]
+    assert avoided_words("Não é pequenez nenhuma", avoid) == []   # palavra inteira
+    problemas = style_problems("site", corpo, avoid=avoid)
+    assert any("never to use" in p for p in problemas)
+    # Sem lista, nada muda.
+    assert not any("never to use" in p for p in style_problems("site", corpo))
+
+
+def test_nome_do_prospect_com_palavra_proibida_nao_conta():
+    from sellbird.email_style import style_problems
+    corpo = "Oi Ana,\n\nVi o site da Pequena Padaria Exemplo. Quer ver uma prévia?\n\nThiago"
+    problemas = style_problems("site", corpo, names=["Pequena Padaria Exemplo"], avoid=["pequena"])
+    assert not any("never to use" in p for p in problemas)
+
+
+def test_config_aceita_avoid_words():
+    from sellbird.config import WriterConfig
+    assert WriterConfig(avoid_words="pequeno").avoid_words == ["pequeno"]
+    assert WriterConfig(avoid_words=[" pequenos negócios ", ""]).avoid_words == ["pequenos negócios"]
+    assert WriterConfig().avoid_words == []

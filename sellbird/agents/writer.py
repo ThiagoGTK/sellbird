@@ -644,7 +644,7 @@ Requirements:
 {footer_rule(self.config, rules)}
 {strict}{inbox_rule}
 {language_rule(await self._language(prospect))}
-Return ONLY JSON: {{"subject": "...", "body": "..."}}"""
+{self._avoid_rule()}Return ONLY JSON: {{"subject": "...", "body": "..."}}"""
 
         result = await self.brain.think_json(
             prompt, session_id="sellbird-writer",
@@ -741,7 +741,7 @@ Requirements:
 {footer_rule(self.config, rules)}
 {strict}
 {language_rule(await self._language(prospects[0]) if prospects else EN)}
-Return ONLY a JSON array (no markdown fences, no commentary):
+{self._avoid_rule()}Return ONLY a JSON array (no markdown fences, no commentary):
 [
   {{"step": 1, "subject": "...", "body": "...", "delay_days": 0}},
   {{"step": 2, "subject": "...", "body": "...", "delay_days": 3}},
@@ -795,7 +795,8 @@ Return ONLY a JSON array (no markdown fences, no commentary):
 
         def problems(d: dict) -> list[str]:
             return style_problems(d["subject"], d["body"], kind="cold", step=step,
-                                  names=names, shape=shape)
+                                  names=names, shape=shape,
+                                  avoid=getattr(getattr(self.config, "writer", None), "avoid_words", None) or [])
 
         draft = finish(draft)
         found = problems(draft)
@@ -810,6 +811,19 @@ Return ONLY a JSON array (no markdown fences, no commentary):
         logger.warning(f"Writer: dropped a draft for email {step} that breaks the rules: "
                        + "; ".join(found))
         return None
+
+    def _avoid_rule(self) -> str:
+        """Regra do prompt com writer.avoid_words (Sellbird PT-BR), ou "".
+
+        Dita antes de escrever, para o rascunho já sair certo; a checagem
+        de style_problems continua sendo a garantia."""
+        words = [w for w in (getattr(getattr(self.config, "writer", None), "avoid_words", None) or []) if w]
+        if not words:
+            return ""
+        shown = ", ".join(f'"{w}"' for w in words)
+        return (f"- NEVER use these words or expressions, in any form: {shown}. "
+                "Never describe the prospect's company as small, and never say who "
+                "you serve by size.\n")
 
     async def _rewrite_to_rules(self, draft: dict, found: list[str], step: int,
                                 shape: bool) -> dict | None:

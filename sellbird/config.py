@@ -817,6 +817,22 @@ class WriterConfig(BaseModel):
     # written for, instead of getting a draft that says it has no advice. Put
     # them back with `sellbird retry-writes --no-tip`, once more is known.
     require_tip: bool = False
+    # Palavras e expressões que nenhum e-mail escrito pelo Sellbird pode usar
+    # (Sellbird PT-BR), por exemplo ["pequeno", "pequenos negócios"]. Um
+    # rascunho que use uma delas é reescrito sem ela; se ainda usar, é
+    # descartado. Não diferencia maiúsculas nem acentos e vale para palavras
+    # inteiras ("pequeno" não pega "pequenez"). E-mails que você mesmo editar
+    # no painel não são barrados.
+    avoid_words: list[str] = []
+
+    @field_validator("avoid_words", mode="before")
+    @classmethod
+    def _clean_avoid_words(cls, v):
+        if v is None:
+            return []
+        if isinstance(v, str):
+            v = [v]
+        return [str(w).strip() for w in v if str(w or "").strip()]
 
     @field_validator("email_rules", mode="before")
     @classmethod

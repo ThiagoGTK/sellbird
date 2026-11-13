@@ -1698,7 +1698,8 @@ Write a reply that:"""
         Sender holds it for you rather than send it, and a reply someone is
         waiting for shouldn't vanish."""
         names = [n for n in (prospect.company, prospect.first_name, prospect.last_name) if n]
-        found = style_problems("", body, kind="reply", names=names)
+        avoid = getattr(getattr(self.config, "writer", None), "avoid_words", [])
+        found = style_problems("", body, kind="reply", names=names, avoid=avoid)
         if not found:
             return body
         problems = "\n".join(f"- It {p}." for p in found)
@@ -1721,6 +1722,6 @@ Write ONLY the email body."""
         except Exception as e:
             logger.warning(f"Handler: rewrite to rules failed: {e}")
             return body
-        if rewrite and not style_problems("", rewrite, kind="reply", names=names):
+        if rewrite and not style_problems("", rewrite, kind="reply", names=names, avoid=avoid):
             return rewrite
         return body

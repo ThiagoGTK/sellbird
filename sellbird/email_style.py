@@ -177,14 +177,37 @@ def _first_line(body: str) -> str:
     return ""
 
 
+def _fold(text: str) -> str:
+    """Minúsculas e sem acento, para comparar palavras ("Negócios" = "negocios")."""
+    import unicodedata
+    decomposed = unicodedata.normalize("NFKD", text.lower())
+    return "".join(c for c in decomposed if not unicodedata.combining(c))
+
+
+def avoided_words(text: str, avoid=()) -> list[str]:
+    """As palavras de ``avoid`` (writer.avoid_words) que aparecem em ``text``.
+
+    Compara sem maiúsculas e sem acento, sempre palavra inteira, para que
+    "pequeno" pegue "Pequeno" e "pequenó" mas não "pequenez".
+    """
+    folded = _fold(text or "")
+    found = []
+    for word in avoid or ():
+        w = _fold(str(word).strip())
+        if w and re.search(rf"(?<!\w){re.escape(w)}(?!\w)", folded):
+            found.append(str(word).strip())
+    return found
+
+
 def style_problems(subject: str, body: str, *, kind: str = "cold", step: int = 1,
-                   names=(), shape: bool = True) -> list[str]:
+                   names=(), shape: bool = True, avoid=()) -> list[str]:
     """Why this email breaks Sellbird's writing rules, or [] when it doesn't.
 
     kind: "cold" for a sequence email, "reply" for an answer to someone.
     step: the sequence step, for the word cap.
     names: the prospect's name, company and similar: text that is theirs, so
         it is never read as a tell.
+    avoid: words the operator never wants in an email (writer.avoid_words).
     shape: False when the operator's own email rules set length and
         structure; the always-rules still apply.
 
@@ -215,6 +238,13 @@ def style_problems(subject: str, body: str, *, kind: str = "cold", step: int = 1
     if hits:
         shown = ", ".join(f'"{h}"' for h in hits[:4])
         reasons.append(f"sounds AI-written or salesy: {shown}")
+    # Sellbird PT-BR: palavras que o remetente pediu para nunca usar
+    # (writer.avoid_words). O nome do prospect e da empresa não contam.
+    banned = avoided_words(text, avoid)
+    if banned:
+        shown = ", ".join(f'"{w}"' for w in banned[:4])
+        reasons.append(f"uses words the sender asked never to use: {shown}; "
+                       "rephrase without them (never describe the prospect's size)")
 
     if kind == "cold" and shape:
         cap = max_words(step, portuguese)
