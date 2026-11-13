@@ -63,6 +63,15 @@ JUNK_DOMAIN_PATTERNS = tuple(re.compile(p, re.I) for p in (
     # Indian directories & marketplaces
     r"(^|\.)(indiamart|justdial|tradeindia|exportersindia|sulekha|urbanpro|yet5)\.",
     r"(^|\.)(olx|quikr|flipkart|snapdeal|myntra|shopclues|etsy|ebay|alibaba|aliexpress)\.",
+    # Brasil (Sellbird PT-BR): guias, catálogos e consultas de CNPJ. O site do
+    # guia aparece como "site" da empresa listada nele, mas não é a empresa.
+    r"(^|\.)(listamais|guiamais|apontador|telelistas|solutudo|guiafacil|hagah|kekanto|cylex|infobel|tudoaqui)\.",
+    r"(^|\.)encontra[a-z]*\.com\.br$",
+    r"(^|\.)(cnpj|cnpja|casadosdados|econodata|consultasocio|informecadastral|empresascnpj|cnpjbrasil|speedio)\.",
+    # Brasil: marketplaces, avaliações, reservas e diretórios profissionais
+    r"(^|\.)(doctoralia|boaconsulta|getninjas|habitissimo|reclameaqui|mercadolivre|elo7|ifood|enjoei|shopee)\.",
+    r"(^|\.)(booking|airbnb|trivago|decolar|hoteis|hurb)\.",
+    r"(^|\.)(jusbrasil|escavador|catho|infojobs|vagas|gupy)\.",
     # hobby communities & model repositories — never a prospect
     r"(^|\.)(boardgamegeek|team-bhp|hackaday|instructables|thingiverse|printables|cults3d|thangs|grabcad)\.",
     # media & reference
@@ -1264,7 +1273,11 @@ class OpenStreetMap(DiscoveryProvider):
                 name=name,
                 domain=normalize_domain(site),
                 website=site,
-                phone=tags.get("phone") or tags.get("contact:phone") or "",
+                # No Brasil o número do WhatsApp muitas vezes vem só em
+                # contact:whatsapp ou contact:mobile (Sellbird PT-BR).
+                phone=(tags.get("phone") or tags.get("contact:phone")
+                       or tags.get("contact:whatsapp") or tags.get("contact:mobile")
+                       or tags.get("mobile") or ""),
                 address=" ".join(x for x in (tags.get("addr:housenumber"),
                                              tags.get("addr:street")) if x),
                 location=city or query.location,
@@ -2054,7 +2067,9 @@ async def _upsert(state, biz: Business, query: DiscoveryQuery) -> tuple[str, boo
         domain=biz.domain,
         website=biz.website,
         phone=biz.phone,
-        industry=biz.category or query.term,
+        # O OpenStreetMap devolve a categoria como etiqueta em inglês ("accountant",
+        # "dentist"); o termo pesquisado é o do usuário, no idioma dele (PT-BR).
+        industry=(query.term if biz.provider == "osm" else "") or biz.category or query.term,
         location=biz.location or query.location,
         source=f"discover:{biz.provider}",
         source_url=biz.source_url,

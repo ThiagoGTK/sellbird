@@ -106,14 +106,14 @@ class Analyst:
             reply_rate = total_replied / total_contacted * 100
             if reply_rate < 5:
                 insights.append(
-                    f"ACTION: Reply rate is low ({reply_rate:.1f}%, benchmark 5-10%). "
-                    "Rewrite email 1 in prompts/writer.md with a sharper observation, "
-                    "and test 2-3 new subject lines via skills/email_frameworks.md."
+                    f"AÇÃO: a taxa de resposta está baixa ({reply_rate:.1f}%; o normal é 5-10%). "
+                    "Reescreva o e-mail 1 em prompts/writer.md com uma observação mais afiada "
+                    "e teste 2 ou 3 assuntos novos (skills/email_frameworks.md)."
                 )
             elif reply_rate > 15:
                 insights.append(
-                    f"KEEP: Reply rate is strong ({reply_rate:.1f}%). Don't change the "
-                    "current messaging. Scale prospecting to feed it more leads."
+                    f"MANTER: a taxa de resposta está ótima ({reply_rate:.1f}%). Não mude as "
+                    "mensagens; aumente a prospecção para alimentar com mais contatos."
                 )
 
         # Deliverability / reputation warning — the most urgent signal
@@ -121,16 +121,16 @@ class Analyst:
             optout_rate = total_unsubscribes / total_contacted * 100
             if optout_rate > 2:
                 insights.append(
-                    f"URGENT: Opt-out rate is {optout_rate:.1f}% (>2% risks blacklisting). "
-                    "Pause sending, tighten ICP targeting in sellbird.yaml, and reduce "
-                    "max_daily_sends until the list quality improves."
+                    f"URGENTE: {optout_rate:.1f}% pediram para sair (acima de 2% arrisca lista negra). "
+                    "Pause o envio, aperte o público (icp) no sellbird.local.yaml e reduza "
+                    "max_daily_sends até a qualidade da lista melhorar."
                 )
 
         if total_escalations > 0:
             insights.append(
-                f"HUMAN NEEDED: {total_escalations} conversation(s) escalated (angry/legal). "
-                "Review conversations with status 'needs_human' in the dashboard before "
-                "any further sending to those domains."
+                f"PRECISA DE VOCÊ: {total_escalations} conversa(s) escalada(s) (irritação ou questão legal). "
+                "Veja as conversas marcadas como 'precisa de você' no painel antes de "
+                "enviar de novo para esses domínios."
             )
 
         # Objection patterns
@@ -139,17 +139,17 @@ class Analyst:
             objection_pct = total_objections / total_replies * 100
             if objection_pct > 40:
                 insights.append(
-                    f"ACTION: {objection_pct:.0f}% of replies are objections. Add the "
-                    "recurring objections to objection_responses in sellbird.yaml and "
-                    "skills/objection_handling.md, or narrow targeting to better-fit accounts."
+                    f"AÇÃO: {objection_pct:.0f}% das respostas são objeções. Inclua as "
+                    "objeções que se repetem em objection_responses (sellbird.local.yaml) e em "
+                    "skills/objection_handling.md, ou estreite o público."
                 )
 
         # Interest conversion
         if total_interested > 0 and total_contacted > 0:
             interest_rate = total_interested / total_contacted * 100
             insights.append(
-                f"Interest rate: {interest_rate:.1f}% of contacted prospects show interest "
-                f"({total_interested} of {total_contacted})."
+                f"Interesse: {interest_rate:.1f}% dos contatados demonstraram interesse "
+                f"({total_interested} de {total_contacted})."
             )
 
         # Campaign comparison — name winner AND loser so the fix is obvious
@@ -159,29 +159,31 @@ class Analyst:
             worst = min(rated, key=lambda c: c.get("reply_rate", 0))
             if best.get("reply_rate", 0) > 0 and best is not worst:
                 insights.append(
-                    f"ACTION: '{best.get('name')}' ({best.get('reply_rate')}% replies) beats "
-                    f"'{worst.get('name')}' ({worst.get('reply_rate', 0)}%). Reuse the winner's "
-                    "angle and subject-line style for the next campaign; pause or rewrite the loser."
+                    f"AÇÃO: '{best.get('name')}' ({best.get('reply_rate')}% de respostas) vai melhor que "
+                    f"'{worst.get('name')}' ({worst.get('reply_rate', 0)}%). Use o ângulo e o estilo "
+                    "de assunto da vencedora na próxima campanha; pause ou reescreva a outra."
                 )
 
         # Pipeline bottlenecks
         if stages.get("engaged", 0) > 3 and stages.get("closing", 0) == 0:
             insights.append(
-                "ACTION: Prospects engage but none reach closing. Update prompts/handler.md "
-                "CLOSING guidance to propose specific meeting times earlier (by message 2)."
+                "AÇÃO: os contatos conversam, mas nenhum chega ao fechamento. Ajuste a parte de "
+                "fechamento em prompts/handler.md para propor horários mais cedo (até a 2ª mensagem)."
             )
         if total_queued > 0 and total_contacted == 0:
             insights.append(
-                f"BLOCKED: {total_queued} prospects are queued but nothing has been sent. "
-                "Check the Instantly API key and Sender logs — campaigns may be failing to deploy."
+                f"TRAVADO: {total_queued} contato(s) na fila e nada enviado ainda. Confira a "
+                "Caixa de saída: e-mails esperando aprovação, endereços não confirmados "
+                "('arriscado' ou 'palpite' não são enviados), fora do horário de envio, ou "
+                "erro na caixa de e-mail (Configurações)."
             )
         if total_new < 10 and total_queued == 0:
             insights.append(
-                f"ACTION: Prospect pool is nearly empty ({total_new} new). Scout should run "
-                "next cycle; if it keeps coming up dry, broaden the ICP in sellbird.yaml."
+                f"AÇÃO: quase não há contatos novos ({total_new}). O Scout roda no próximo ciclo; "
+                "se continuar vindo vazio, amplie o público (icp) no sellbird.local.yaml."
             )
 
         if not insights:
-            insights.append("Not enough data yet. Keep prospecting and sending campaigns.")
+            insights.append("Ainda há poucos dados. Continue prospectando e enviando.")
 
         return insights

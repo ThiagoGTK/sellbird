@@ -416,6 +416,30 @@ def cmd_usage(args):
     asyncio.run(_usage())
 
 
+def cmd_sem_site(args):
+    """Grava a planilha de empresas sem site (telefone + link do WhatsApp)."""
+    from collections import Counter
+    from datetime import date
+    from sellbird.paths import PROJECT_ROOT
+    from sellbird.register import sqlite_query
+    from sellbird.sem_site import build_rows, to_csv
+    from sellbird.state import DB_PATH
+
+    if not DB_PATH.exists():
+        print("\n  Ainda não há banco de dados: rode 'sellbird discover' ou 'sellbird run' primeiro.\n")
+        return
+    rows = asyncio.run(build_rows(sqlite_query(DB_PATH)))
+    out = Path(args.out) if args.out else (
+        PROJECT_ROOT / "data" / "exports" / f"empresas-sem-site-{date.today():%Y-%m-%d}.csv")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(to_csv(rows), encoding="utf-8-sig")   # BOM: acentos certos no Excel
+    kinds = Counter(r["tipo"] or "sem telefone" for r in rows)
+    print(f"\n  Empresas sem site: {len(rows)} → {out}")
+    for kind, n in kinds.most_common():
+        print(f"    {kind:<14} {n}")
+    print("\n  O Sellbird não manda WhatsApp sozinho: abra cada link e mande a sua mensagem.\n")
+
+
 def cmd_companies(args):
     """Write the company register to a CSV and summarise it."""
     from collections import Counter
@@ -1200,6 +1224,13 @@ def main():
     )
     sub.add_argument("--out", default="", help="Arquivo de saída (padrão: data/exports/company-register-<data>.csv)")
     sub.set_defaults(func=cmd_companies)
+
+    # sellbird sem-site
+    sub = subparsers.add_parser(
+        "sem-site", help="Exporta as empresas sem site, com telefone e link do WhatsApp"
+    )
+    sub.add_argument("--out", default="", help="Arquivo de saída (padrão: data/exports/empresas-sem-site-<data>.csv)")
+    sub.set_defaults(func=cmd_sem_site)
 
     # sellbird gmail auth|test
     sub = subparsers.add_parser("gmail", help="Configuração do Gmail")

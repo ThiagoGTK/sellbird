@@ -518,7 +518,7 @@ async function loadLiveStatus() {
     : '';
   el.innerHTML =
     '<div class="live-head">' + runningHtml +
-      '<span class="setup-pct">Cost so far $' + Number(d.cost_usd || 0).toFixed(2) + '</span></div>' +
+      '<span class="setup-pct">Gasto até agora: US$ ' + Number(d.cost_usd || 0).toFixed(2) + '</span></div>' +
     stoppedHtml +
     '<div class="steps">' + rows + '</div>' +
     (d.next ? '<div class="live-next">' + icon('arrow') + '<span><b>Próximo</b> · ' + escHtml(d.next) + '</span>' +
@@ -954,9 +954,9 @@ async function estimateDiscovery() {
   const over = data.estimated_cost > cap;
   el.innerHTML = '<div class="estimate-box">' +
     '<div class="amount ' + (data.free ? 'free' : 'paid') + '">' +
-      (data.free ? 'Grátis' : '$' + data.estimated_cost.toFixed(4)) + '</div>' +
+      (data.free ? 'Grátis' : 'US$ ' + data.estimated_cost.toFixed(4)) + '</div>' +
     '<div class="muted" style="font-size:13px;margin-top:2px">' +
-      data.query_count + ' quer' + (data.query_count === 1 ? 'y' : 'ies') +
+      data.query_count + (data.query_count === 1 ? ' busca' : ' buscas') +
       (data.free ? '' : ' &middot; limite US$ ' + cap.toFixed(2)) + '</div>' +
     (over ? '<div class="test-result error" style="margin-top:12px">' +
       'Acima do seu limite. Aumente o limite ou estreite a busca.</div>' : '') +
@@ -1042,7 +1042,7 @@ function renderDiscoverResult(report, running) {
       stat('Sites lidos', report.profiled_companies || 0, 'accent') +
       stat('Fatos registrados', report.profile_observations || 0) +
       stat('Custo', 'free') + '</div>' +
-      (report.stopped ? '<div class="test-result error" style="margin-top:14px">Stopped early: ' + escHtml(report.stopped) + '</div>' : '');
+      (report.stopped ? '<div class="test-result error" style="margin-top:14px">Parou antes do fim: ' + escHtml(report.stopped) + '</div>' : '');
     return;
   }
   el.innerHTML = '<div class="subhead">Última execução</div>' +
@@ -1713,7 +1713,7 @@ async function loadOutbox() {
     ]) +
     table('Não enviados', data.failed, [
       ['Para', r => r.to_email], ['Situação', r => badge(r.status), false, true],
-      ['Motivo', r => r.error, true], ['Atualizado', r => formatDate(r.updated_at), true],
+      ['Motivo', r => motivoPt(r.error), true], ['Atualizado', r => formatDate(r.updated_at), true],
     ]);
 }
 
@@ -1860,12 +1860,47 @@ async function setSendingMode(mode) {
   loadOutbox();
 }
 
+// Sellbird PT-BR: os motivos do filtro de envio (gate.py) são gravados em
+// inglês, porque outras partes do código os leem. Aqui só traduzimos na hora
+// de mostrar no painel; o texto guardado não muda.
+const MOTIVOS_PT = [
+  [/^gate: /, ''],
+  [/^held for your review: /, 'segurado para você revisar: '],
+  [/email_status '(risky)' is not deliverable/g, "e-mail 'arriscado' (o servidor aceita qualquer endereço): não é enviado"],
+  [/email_status '(guess)' is not deliverable/g, "e-mail só no 'palpite' (não confirmado): não é enviado"],
+  [/email_status '([^']+)' is not deliverable/g, "e-mail com status '$1': não é enviado"],
+  [/invalid recipient address '([^']*)'/g, "endereço inválido '$1'"],
+  [/'([^']+)' is on the do-not-contact list/g, "'$1' está na lista de não contatar"],
+  [/recipient does not match the prospect record/g, 'o destinatário não bate com o cadastro do contato'],
+  [/empty subject/g, 'assunto vazio'],
+  [/empty body/g, 'corpo vazio'],
+  [/subject too long \((\d+) > (\d+)\)/g, 'assunto longo demais ($1 > $2)'],
+  [/body too long \((\d+) words > (\d+)\)/g, 'texto longo demais ($1 palavras > $2)'],
+  [/unrendered merge tags: /g, 'campos não preenchidos: '],
+  [/banned phrases: /g, 'frases proibidas: '],
+  [/too many links \((\d+) > (\d+)\)/g, 'links demais ($1 > $2)'],
+  [/postal address footer missing/g, 'falta o endereço no rodapé'],
+  [/HTML markup in body \(plain text only\)/g, 'HTML no texto (só texto simples)'],
+  [/links to (.+?), not one of your domains \(add it to channels\.email\.link_domains if it's yours\)/g,
+   'tem link para $1, que não é um domínio seu (se for, inclua em channels.email.link_domains)'],
+  [/gives the phone number (.+?), not one of yours \(add it to channels\.email\.phone_numbers if it's yours\)/g,
+   'cita o telefone $1, que não é seu (se for, inclua em channels.email.phone_numbers)'],
+  [/asks about sending money/g, 'fala de envio de dinheiro'],
+  [/quotes Sellbird's instructions/g, 'cita as instruções do próprio Sellbird'],
+];
+function motivoPt(text) {
+  let t = String(text || '');
+  for (const [re, pt] of MOTIVOS_PT) t = t.replace(re, pt);
+  return t;
+}
+
 // Why autopilot sent this back for a human (sender: gate.autopilot_review).
 const HELD_PREFIX = 'held for your review: ';   // state.HELD_FOR_REVIEW
 function heldReason(item) {
   const e = String((item && item.error) || '');
   const why = e.startsWith(HELD_PREFIX) ? e.slice(HELD_PREFIX.length) : '';
-  return why.charAt(0).toUpperCase() + why.slice(1);
+  const pt = motivoPt(why);
+  return pt.charAt(0).toUpperCase() + pt.slice(1);
 }
 
 function renderDesk(items, i) {

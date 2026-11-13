@@ -62,16 +62,30 @@ BENIGN_HOSTS = (
     # industry bodies / certs
     "gaf.com", "owenscorning", "certainteed", "nrca.net", "iko.com",
     "energystar.gov", "osha.gov", "nahb.org",
+    # Brasil (Sellbird PT-BR): links de rodapé que nunca são a agência do site
+    "api.whatsapp.com", "whatsapp.com", "reclameaqui", "mercadopago", "pagseguro",
+    "doctoralia", "ifood.", "nuvemshop", "lojaintegrada", "tray.com.br",
+    "hostinger", "locaweb", "kinghost", "registro.br", "gov.br", "cfo.org.br",
+    "oab.org.br", "cfc.org.br", "creci", "procon",
 )
 
 # Credit wording → confidence. Only >= 0.75 is recorded: a wrong incumbent in
 # an email is worse than saying nothing at all.
 STRONG_CREDIT = re.compile(
     r"\b(powered|website|site|web\s*design|designed|developed|built|created|"
-    r"marketing)\s+(by|&)\b", re.I)
+    r"marketing)\s+(by|&)\b"
+    # Brasil (Sellbird PT-BR): "Desenvolvido por", "Criado por", "Site por",
+    # "Feito com ♥ por", "Desenvolvimento: X", "Criação de site: X".
+    r"|\b(desenvolvid[oa]|criad[oa]|feit[oa]|produzid[oa]|projetad[oa]|"
+    r"site|design|layout|tema)\b[^.<>]{0,20}?\bpor\b"
+    r"|\b(desenvolvimento|cria[cç][aã]o(\s+de\s+sites?)?|ag[eê]ncia|"
+    r"produ[cç][aã]o)\s*:", re.I)
 DESCRIPTIVE_CREDIT = re.compile(
     r"\b(web\s*design|website\s*design|digital\s*marketing|seo|marketing\s*"
-    r"agency|web\s*development)\b", re.I)
+    r"agency|web\s*development"
+    # Brasil: a âncora do link descreve uma agência.
+    r"|ag[eê]ncia\s+(digital|de\s+marketing|web)|cria[cç][aã]o\s+de\s+sites?|"
+    r"marketing\s+digital|desenvolvimento\s+(web|de\s+sites?))\b", re.I)
 RECORD_FLOOR = 0.75
 
 # ── Tech / platform fingerprints (name -> regexes over raw HTML) ──
@@ -110,7 +124,14 @@ BOOKING_HINTS = (r"calendly\.com", r"acuityscheduling", r"schedulicity",
                  r"doctoralia\.com\.br", r"agende[-_]?(?:ja|online|sua|seu|agora)",
                  r"agendamento[-_]?online", r"marque[-_]?(?:sua|seu)[-_]?(?:consulta|horario|avaliacao)",
                  r"agendar[-_]?(?:consulta|horario|avaliacao|online)", r"simplesagenda", r"agendor",
-                 r"clinicorp", r"feegow", r"iclinic", r"trinks\.com", r"avec\.app")
+                 r"clinicorp", r"feegow", r"iclinic", r"trinks\.com", r"avec\.app",
+                 # Mais agendas brasileiras (clínicas, salões, serviços).
+                 r"simplesdental", r"boaconsulta\.com", r"agendapro", r"salaovip",
+                 r"belasis", r"gendo\.app", r"amplimed", r"ninsaude",
+                 # No Brasil o botão de WhatsApp É o agendamento: quem tem um
+                 # não "precisa ligar", então não marca a empresa como sem agenda.
+                 r"wa\.me/", r"api\.whatsapp\.com/send", r"web\.whatsapp\.com/send",
+                 r"whatsapp\.com/send")
 
 AI_CRAWLERS = ("gptbot", "google-extended", "ccbot", "anthropic-ai", "claudebot",
                "perplexitybot", "bytespider")

@@ -2147,7 +2147,13 @@ Respond ONLY with the JSON array."""
         }
         if domain in noise:
             return True
-        return any(domain == n or domain.endswith(f".{n}") for n in noise)
+        if any(domain == n or domain.endswith(f".{n}") for n in noise):
+            return True
+        # Sellbird PT-BR: os mesmos padrões da busca (discover), que incluem os
+        # guias e catálogos brasileiros (Lista Mais, Guia Mais, Apontador...).
+        # Sem isso, uma página de guia achada na busca na web virava "empresa".
+        from sellbird.collectors.discover import JUNK_DOMAIN_PATTERNS
+        return any(p.search(domain) for p in JUNK_DOMAIN_PATTERNS)
 
     def _domain_to_name(self, domain: str) -> str:
         """Convert a domain to a rough company name."""

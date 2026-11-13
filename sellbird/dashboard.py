@@ -757,6 +757,22 @@ async def get_companies():
     return rows[:COMPANIES_TAB_LIMIT]
 
 
+@app.get("/api/export/sem-site.csv")
+async def export_sem_site():
+    """Empresas sem site, com telefone e link do WhatsApp (Sellbird PT-BR)."""
+    from sellbird.sem_site import build_rows, to_csv
+    try:
+        text = to_csv(await build_rows(query_db))
+    except Exception as e:
+        logger.warning("Exportação de empresas sem site falhou: %s", e)
+        return PlainTextResponse(f"A exportação falhou: {e}", status_code=500)
+    return PlainTextResponse(
+        "﻿" + text,   # BOM: o Excel reconhece os acentos (UTF-8)
+        media_type="text/csv",
+        headers={"Content-Disposition": 'attachment; filename="empresas-sem-site.csv"'},
+    )
+
+
 @app.get("/api/export/companies.csv")
 async def export_companies():
     """The company register: every company, why it fits, why it wasn't contacted."""
@@ -867,7 +883,9 @@ async def get_feedback(entity_type: str, entity_id: str):
 async def get_sellbird_status():
     """Check if Sellbird is currently running."""
     pid = _check_sellbird_pid()
-    started = _sellbird_started_at.isoformat() if _sellbird_started_at else None
+    # Com fuso: o painel trata horário sem fuso como UTC, e o horário de
+    # início aparecia 3 h adiantado ou atrasado (Sellbird PT-BR).
+    started = _sellbird_started_at.astimezone().isoformat() if _sellbird_started_at else None
     try:
         state = _state()
         await state.init_db()

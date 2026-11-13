@@ -246,7 +246,8 @@
 <!-- Companies -->
 <div id="companies" class="section">
   <div class="section-head"><div><h2>Empresas</h2><p>Empresas que o Sellbird pesquisou, as que mais encaixam primeiro. Clique numa linha para ver os contatos.</p></div>
-    <div><button class="btn btn-secondary btn-sm" onclick="downloadCsv('/api/export/companies.csv', 'company-register.csv', this)"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Exportar registro</button></div></div>
+    <div><button class="btn btn-secondary btn-sm" onclick="downloadCsv('/api/export/sem-site.csv', 'empresas-sem-site.csv', this)" title="Empresas sem site, com telefone e link para abrir a conversa no WhatsApp. O Sellbird não manda WhatsApp sozinho."><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Sem site (WhatsApp)</button>
+    <button class="btn btn-secondary btn-sm" onclick="downloadCsv('/api/export/companies.csv', 'company-register.csv', this)"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Exportar registro</button></div></div>
   <div id="companies-list"></div>
 </div>
 

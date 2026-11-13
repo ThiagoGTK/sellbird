@@ -309,3 +309,118 @@ def test_nome_com_acento_vira_email_sem_acento():
     assert _clean_name_part("Conceição") == "conceicao"
     assert _clean_name_part("Müller") == "muller"
     assert build_email("{f}", "João", "Heckert", "hec.adv.br") == "joao@hec.adv.br"
+
+
+# ── Ferramentas brasileiras no detector de plataformas e de agendamento ──
+
+def test_detecta_ferramentas_brasileiras():
+    from sellbird.integrations.tech_detect import detect_tech
+    html = ('<script src="https://d335luupugsy2.cloudfront.net/js/x.js"></script>'
+            '<a href="https://wa.me/5500000000000">WhatsApp</a>'
+            '<img src="https://www.doctoralia.com.br/widget.png">'
+            '<link href="https://cdn.lojaintegrada.com.br/x.css">')
+    found = detect_tech(html)
+    for tool in ("RD Station", "WhatsApp", "Doctoralia", "Loja Integrada"):
+        assert tool in found
+
+
+def test_botao_de_whatsapp_conta_como_agendamento():
+    """Quem agenda pelo WhatsApp não é "sem agendamento online"."""
+    from sellbird.collectors.profile import BOOKING_HINTS, ProfileCollector
+    assert ProfileCollector._any('<a href="https://wa.me/5500000000000">Agende</a>', BOOKING_HINTS)
+    assert ProfileCollector._any('<a href="https://api.whatsapp.com/send?phone=55">x</a>', BOOKING_HINTS)
+    assert ProfileCollector._any('<iframe src="https://app.simplesdental.com/agenda">', BOOKING_HINTS)
+    assert not ProfileCollector._any('<p>Ligue para marcar.</p>', BOOKING_HINTS)
+
+
+# ── Agência creditada no rodapé ("Desenvolvido por") ──
+
+def _agencia(html):
+    from sellbird.collectors.profile import ProfileCollector
+    return ProfileCollector.__new__(ProfileCollector).detect_agency(html, "clinica.example.com.br")
+
+
+def test_rodape_desenvolvido_por_vira_agencia():
+    found = _agencia('<footer>© Clínica. Desenvolvido por <a href="https://agencia.example.com">Agência X</a></footer>')
+    assert found and found[0] == "Agência X" and found[1] >= 0.75
+    found = _agencia('<footer>Desenvolvimento: <a href="https://web.example.com">Web Y</a></footer>')
+    assert found and found[0] == "Web Y"
+    found = _agencia('<footer>Feito com ♥ por <a href="https://estudio.example.com">Estúdio Z</a></footer>')
+    assert found and found[0] == "Estúdio Z"
+
+
+def test_link_solto_ou_whatsapp_no_rodape_nao_e_agencia():
+    assert _agencia('<footer><a href="https://parceiro.example.com">Parceiro</a></footer>') is None
+    assert _agencia('<footer>Fale por <a href="https://api.whatsapp.com/send?phone=55">WhatsApp</a></footer>') is None
+
+
+# ── Guias e diretórios brasileiros não viram empresa ──
+
+def test_guias_brasileiros_sao_descartados():
+    from sellbird.collectors.discover import is_junk
+    for domain in ("listamais.com.br", "www.guiamais.com.br", "apontador.com.br",
+                   "telelistas.net", "encontrabalneariocamboriu.com.br", "casadosdados.com.br",
+                   "doctoralia.com.br", "jusbrasil.com.br", "booking.com"):
+        assert is_junk(domain), domain
+    # Uma empresa de verdade passa.
+    assert not is_junk("clinicaexemplo.com.br")
+    assert not is_junk("escritorio-exemplo.adv.br")
+
+
+def test_scout_usa_os_mesmos_padroes():
+    from sellbird.agents.scout import Scout
+    scout = Scout.__new__(Scout)
+    assert scout._is_noise_domain("listamais.com.br")
+    assert not scout._is_noise_domain("clinicaexemplo.com.br")
+
+
+# ── Planilha de empresas sem site (WhatsApp) ──
+
+def test_numero_brasileiro_para_whatsapp():
+    from sellbird.sem_site import brazil_number, phone_kind, whatsapp_link
+    assert brazil_number("+55 (47) 99999-0000") == "5547999990000"
+    assert brazil_number("(47) 3333-0000") == "554733330000"
+    assert brazil_number("047 99999-0000") == "5547999990000"
+    assert brazil_number("0xx41 99999-0000".replace("xx", "15")) == "5541999990000"
+    assert brazil_number("+55 47 99999-0000; +55 47 3333-0000") == "5547999990000"
+    assert brazil_number("123") == ""
+    assert brazil_number("") == ""
+    assert phone_kind("5547999990000") == "celular"
+    assert phone_kind("554733330000") == "fixo"
+    assert whatsapp_link("5547999990000") == "https://wa.me/5547999990000"
+    assert whatsapp_link("") == ""
+
+
+def test_planilha_sem_site_so_traz_quem_nao_tem_site():
+    import asyncio
+    from sellbird.sem_site import build_rows, to_csv
+
+    empresas = [
+        {"name": "Clínica Sem Site", "phone": "(47) 3333-0000", "industry": "Clínica odontológica",
+         "location": "Itajaí, SC", "source_url": "https://www.openstreetmap.org/node/1",
+         "created_at": "2026-01-02 10:00:00", "domain": "", "website": ""},
+        {"name": "Contabilidade Celular", "phone": "+55 47 99999-0000", "industry": "Contabilidade",
+         "location": "Itajaí, SC", "source_url": "", "created_at": "2026-01-03 10:00:00",
+         "domain": "", "website": ""},
+    ]
+
+    async def fake_query(sql, params=()):
+        assert "domain" in sql and "website" in sql   # filtro de "sem site" vai no SQL
+        return empresas
+
+    rows = asyncio.run(build_rows(fake_query))
+    assert [r["empresa"] for r in rows] == ["Contabilidade Celular", "Clínica Sem Site"]  # celular primeiro
+    assert rows[0]["link_whatsapp"] == "https://wa.me/5547999990000"
+    text = to_csv(rows)
+    assert text.splitlines()[0].startswith("empresa;telefone;tipo;link_whatsapp")
+
+
+# ── Avisos do analista em português ──
+
+def test_aviso_travado_em_portugues_e_sem_instantly():
+    from sellbird.agents.analyst import Analyst
+    a = Analyst.__new__(Analyst)
+    report = {"pipeline": {"queued": 2, "contacted": 0, "new": 0}, "intents": {},
+              "stages": {}, "campaigns": []}
+    text = " ".join(a._generate_insights(report))
+    assert "TRAVADO" in text and "Instantly" not in text

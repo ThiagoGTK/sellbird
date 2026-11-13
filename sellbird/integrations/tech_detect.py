@@ -62,6 +62,33 @@ FINGERPRINTS: dict[str, list[str]] = {
     "WooCommerce": [r"woocommerce", r"wc-ajax"],
     "BigCommerce": [r"cdn\d*\.bigcommerce\.com"],
 
+    # ── Brasil (Sellbird PT-BR): ferramentas comuns em sites brasileiros ──
+    # Criadores de site e lojas virtuais
+    "Nuvemshop": [r"nuvemshop", r"lojanuvem\.com\.br", r"tiendanube"],
+    "Tray": [r"tray\.com\.br", r"traycorp"],
+    "Loja Integrada": [r"lojaintegrada\.com\.br"],
+    "VTEX": [r"vteximg\.com\.br", r"vtexassets\.com", r"vtex\.com\.br"],
+    "Hostinger Website Builder": [r"zyrosite\.com", r"zyro\.com", r"assets\.zyrosite"],
+    # Marketing / CRM
+    "RD Station": [r"rdstation\.com\.br", r"d335luupugsy2\.cloudfront\.net", r"rdstation-static"],
+    "Kommo": [r"kommo\.com", r"amocrm\.(?:com|ru)"],
+    "Leadster": [r"leadster\.com\.br"],
+    # Atendimento
+    "WhatsApp": [r"wa\.me/", r"api\.whatsapp\.com/send", r"web\.whatsapp\.com/send"],
+    "JivoChat": [r"jivosite\.com", r"jivochat"],
+    "Blip": [r"blip\.ai", r"take\.net/blip"],
+    # Agenda (clínicas, salões, serviços)
+    "Doctoralia": [r"doctoralia\.com\.br"],
+    "iClinic": [r"iclinic\.com\.br"],
+    "Simples Dental": [r"simplesdental\.com"],
+    "Feegow": [r"feegow\.com"],
+    "Clinicorp": [r"clinicorp\.com"],
+    "Trinks": [r"trinks\.com"],
+    # Pagamentos e infoprodutos
+    "PagSeguro": [r"pagseguro\.uol\.com\.br", r"stc\.pagseguro"],
+    "Mercado Pago": [r"mercadopago\.com", r"sdk\.mercadopago"],
+    "Hotmart": [r"hotmart\.com"],
+
     # Hosting/infra hints
     "Cloudflare": [r"/cdn-cgi/"],
     "Vercel": [r"vercel\.app", r"x-vercel"],

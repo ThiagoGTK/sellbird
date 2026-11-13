@@ -262,6 +262,21 @@ sellbird discover --city "Curitiba, PR, Brasil"      # roda a busca
 Depois, o Sellbird lê os sites encontrados (grátis) e procura os decisores nas
 páginas "Quem somos", "Equipe", "Sobre", "Corpo clínico".
 
+**Empresas sem site.** O Sellbird só manda e-mail para quem tem site (é do domínio
+que ele tira o endereço). As empresas que a busca acha sem site ficam na aba
+**Empresas**: o botão **Sem site (WhatsApp)** baixa uma planilha com nome, telefone,
+se é celular ou fixo, um link `wa.me` para abrir a conversa, segmento, cidade e o
+link do mapa. No terminal: `sellbird sem-site`. O Sellbird **não** manda WhatsApp
+sozinho: mensagem automática em massa faz o número ser banido.
+
+**O que ele reconhece em sites brasileiros.** Agenda online pela Doctoralia, iClinic,
+Simples Dental, Feegow, Clinicorp, Trinks e pelo botão de WhatsApp (quem tem não é
+marcado como "sem agendamento"); plataformas como RD Station, Kommo, Nuvemshop, Tray,
+Loja Integrada, VTEX, JivoChat, PagSeguro e Mercado Pago; e a agência que fez o site
+quando o rodapé diz "Desenvolvido por", "Criado por", "Feito com ♥ por" ou
+"Desenvolvimento:". Guias e catálogos (Lista Mais, Guia Mais, Apontador, TeleListas,
+sites de consulta de CNPJ, Doctoralia, Booking) são descartados: não viram empresa.
+
 ### 5.7 Abrir o painel e ligar
 
 ```bash
@@ -414,6 +429,11 @@ Para quem quer entender (ou manter) a tradução:
 | `sellbird/web/`, `sellbird/dashboard.py`, `sellbird/signals.py` | Painel em português |
 | `sellbird/cli.py`, `setup.py`, `trainer.py`, `main.py` | Terminal em português; o treino grava em português |
 | `prompts/`, `skills/` | Traduzidos e adaptados ao Brasil |
+| `sellbird/sem_site.py` | **Novo.** Planilha de empresas sem site com link do WhatsApp (botão no painel e `sellbird sem-site`) |
+| `sellbird/integrations/tech_detect.py`, `sellbird/collectors/profile.py` | Ferramentas brasileiras, WhatsApp como agendamento, "Desenvolvido por" no rodapé |
+| `sellbird/collectors/discover.py`, `sellbird/agents/scout.py` | Guias e catálogos brasileiros descartados; telefone do WhatsApp e segmento em português vindos do OpenStreetMap |
+| `sellbird/integrations/email_finder.py` | Acento tirado ao montar o e-mail pelo nome (João → joao@) |
+| `sellbird/agents/analyst.py`, `sellbird/web/app.js` | Avisos do analista e motivos de bloqueio da Caixa de saída em português |
 | `tests/test_portugues.py` | **Novo.** Testes de tudo acima |
 
 Os testes rodam com `python -m pytest -q` (mais de 3.700 testes).
