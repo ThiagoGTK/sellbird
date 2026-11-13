@@ -215,7 +215,9 @@ realisations accueil equipe equipes propos joindre contactez
 
 # Tokens that are words, not names, whatever the vertical: abstract nouns
 # ("Scope Alignment", "Board Communication") and shouted acronyms ("HOA").
-_NOUN_SUFFIX = re.compile(r"(tion|tions|sion|sions|ness)$")
+# Português (Sellbird PT-BR): -ção/-ções (sem acento: cao/coes), -mento(s),
+# -dade(s): "Harmonização", "Preenchimento", "Qualidade" não são nomes.
+_NOUN_SUFFIX = re.compile(r"(tion|tions|sion|sions|ness|cao|coes|mento|mentos|dade|dades)$")
 
 
 def _is_name_token(token: str) -> bool:

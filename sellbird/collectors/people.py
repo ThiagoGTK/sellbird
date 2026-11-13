@@ -71,6 +71,15 @@ diretoria socios socio socia fundador fundadora fundadores proprietario propriet
 diretor diretora gerente responsavel tecnico tecnica dentista dentistas advogado advogada
 advogados medico medica medicos doutor doutora dra bem vindo vinda saiba mais veja
 pacientes cliente clientes atendimento orcamento whatsapp ligue entre desde anos
+tratamento tratamentos procedimento procedimentos preenchimento preenchimentos
+clareamento implante implantes ortodontia ortodontico protese proteses lente lentes
+facetas faceta restauracao canal limpeza botox harmonizacao facial estetica estetico
+avancada avancado premium odontologica odontologico cirurgia exame exames especialista
+especialistas unidade unidades centro instituto grupo nucleo espaco studio estudio
+escritorio advocacia contabilidade contabil imobiliaria imoveis corretor corretora
+assessoria consultoria juridico juridica direito familia trabalhista previdenciario
+balneario camboriu itajai florianopolis itapema joinville blumenau brusque navegantes
+curitiba sao paulo rio janeiro porto alegre santa catarina parana bc sc pr sp rj rs
 """.split())
 
 # Particles that sit lower-case inside a surname ("Van de Wal", "de la Cruz").

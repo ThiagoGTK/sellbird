@@ -424,3 +424,33 @@ def test_aviso_travado_em_portugues_e_sem_instantly():
               "stages": {}, "campaigns": []}
     text = " ".join(a._generate_insights(report))
     assert "TRAVADO" in text and "Instantly" not in text
+
+
+# ── Nomes de serviço e de cidade não viram pessoa ──
+
+def test_servico_e_cidade_nao_sao_nome_de_pessoa():
+    from sellbird.collectors.people import split_person_name
+    for texto in ("Tratamentos Camboriú", "Preenchimento BC", "Harmonização Facial",
+                  "Clareamento Dental", "Odontologia Avançada"):
+        assert split_person_name(texto) is None, texto
+    assert split_person_name("João Exemplo") == ("João", "Exemplo")
+    assert split_person_name("Maria da Silva Exemplo") == ("Maria", "Exemplo")
+
+
+# ── Endereços de setor em português (contato@, secretaria@...) ──
+
+def test_endereco_de_setor_nao_ensina_padrao_de_nome():
+    """secretaria@ não pode fazer o Sellbird achar que o escritório usa {primeiro nome}@."""
+    from sellbird.integrations.email_finder import ROLE_LOCALS, pattern_from_local
+    for local in ("contato", "secretaria", "atendimento", "comercial", "financeiro", "faleconosco"):
+        assert local in ROLE_LOCALS
+        assert pattern_from_local(local) is None
+
+
+# ── Funil: e-mail inválido não conta como "Para escrever" ──
+
+def test_email_invalido_sai_do_para_escrever():
+    from sellbird.dashboard import _pipeline_bucket
+    assert _pipeline_bucket("new", None, None, "invalid") == "closed_out"
+    assert _pipeline_bucket("new", None, None, "verified") == "to_write"
+    assert _pipeline_bucket("queued", None, None, "risky") == "to_write"

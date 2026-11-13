@@ -208,6 +208,11 @@ reception frontdesk front appointments appointment schedule scheduling dispatch
 customerservice customercare care clients client mail email general main owner
 manager management operations ops legal privacy compliance security it tech
 feedback reviews referrals warranty claims insurance parts shop store
+contato contatos faleconosco atendimento secretaria secretariado recepcao comercial
+vendas financeiro administrativo administracao adm juridico rh sac ouvidoria suporte
+orcamento orcamentos agendamento agendamentos agenda consultorio clinica escritorio
+geral loja pedidos cobranca fiscal contabil contabilidade diretoria gerencia
+marketing imprensa trabalheconosco curriculos vagas
 """.split())
 
 def pattern_from_local(local: str) -> Optional[tuple[str, float]]:

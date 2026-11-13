@@ -1017,7 +1017,9 @@ def _pipeline_bucket(status: str | None, stage: str | None, intent: str | None,
     """One funnel stage per contact, from its status and latest conversation."""
     status = status or "new"
     if status in ("new", "queued"):
-        return "to_write"
+        # Endereço inválido nunca recebe e-mail: não conta como "Para escrever"
+        # (Sellbird PT-BR; antes inflava o número do funil).
+        return "closed_out" if email_status == "invalid" else "to_write"
     if status == "contacted":
         # A bounce leaves the status alone and marks the address invalid.
         return "closed_out" if email_status == "invalid" else "contacted"
