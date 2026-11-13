@@ -514,7 +514,7 @@ async function loadLiveStatus() {
     : '<span class="live-now">Nada rodando agora</span>';
   const stoppedHtml = (d.stopped || []).length
     ? '<div class="banner bad" style="margin:8px 0 0">' + icon('alert') + '<p style="color:inherit">' +
-      (d.stopped || []).map(r => escHtml(jobName(r))).join(', ') + ' stopped before finishing.</p></div>'
+      (d.stopped || []).map(r => escHtml(jobName(r))).join(', ') + ': parou antes de terminar (o painel ou o robô foi desligado no meio). Na próxima rodada continua.</p></div>'
     : '';
   el.innerHTML =
     '<div class="live-head">' + runningHtml +
