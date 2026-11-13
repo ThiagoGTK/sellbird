@@ -454,3 +454,52 @@ def test_email_invalido_sai_do_para_escrever():
     assert _pipeline_bucket("new", None, None, "invalid") == "closed_out"
     assert _pipeline_bucket("new", None, None, "verified") == "to_write"
     assert _pipeline_bucket("queued", None, None, "risky") == "to_write"
+
+
+# ── Índice de sitemaps (WordPress/Yoast): conta páginas, não sitemaps ──
+
+def test_indice_de_sitemaps_conta_as_paginas_de_verdade():
+    import asyncio
+    import re
+    from sellbird.collectors.profile import ProfileCollector
+
+    site = "https://escritorio.example.com.br"
+    paginas = {
+        f"{site}/sitemap.xml": (
+            "<sitemapindex>"
+            f"<sitemap><loc>{site}/page-sitemap.xml</loc></sitemap>"
+            f"<sitemap><loc>{site}/post-sitemap.xml</loc></sitemap>"
+            f"<sitemap><loc>{site}/video-sitemap.xml</loc></sitemap>"
+            "<sitemap><loc>https://outro.example.com/sitemap.xml</loc></sitemap>"
+            "</sitemapindex>"),
+        f"{site}/page-sitemap.xml": "<urlset>" + "".join(
+            f"<url><loc>{site}/p{i}/</loc></url>" for i in range(12)) + "</urlset>",
+        f"{site}/post-sitemap.xml": "<urlset>" + "".join(
+            f"<url><loc>{site}/post{i}/</loc></url>" for i in range(30)) + "</urlset>",
+    }
+    pedidos = []
+
+    async def fake_get(url):
+        pedidos.append(url)
+        return paginas.get(url, "")
+
+    p = ProfileCollector.__new__(ProfileCollector)
+    p._get = fake_get
+    texto = asyncio.run(p._sitemap_text(site))
+    assert len(re.findall(r"<loc>", texto)) == 42          # 12 páginas + 30 posts, não "4"
+    assert f"{site}/video-sitemap.xml" not in pedidos       # vídeo repete páginas
+    assert "https://outro.example.com/sitemap.xml" not in pedidos   # outro site: ignorado
+
+
+def test_sitemap_simples_continua_igual():
+    import asyncio
+    from sellbird.collectors.profile import ProfileCollector
+    site = "https://clinica.example.com.br"
+    simples = f"<urlset><url><loc>{site}/</loc></url><url><loc>{site}/artigos/</loc></url></urlset>"
+
+    async def fake_get(url):
+        return simples if url.endswith("/sitemap.xml") else ""
+
+    p = ProfileCollector.__new__(ProfileCollector)
+    p._get = fake_get
+    assert asyncio.run(p._sitemap_text(site)) == simples

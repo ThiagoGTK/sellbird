@@ -922,6 +922,30 @@ class ProfileCollector:
         if self._client:
             await self._client.aclose()
 
+    async def _sitemap_text(self, site: str) -> str:
+        """O sitemap do site, já com as páginas de verdade.
+
+        Um índice (WordPress/Yoast, Rank Math...) lista outros sitemaps, não
+        páginas: contar os <loc> dele dava "4 páginas" para um site com
+        dezenas (Sellbird PT-BR, visto num e-mail real). Segue os sitemaps
+        filhos do mesmo site (até 6), pula os de vídeo, imagem e geo, que
+        repetem páginas, e junta o resto.
+        """
+        sm = await self._get(f"{site}/sitemap.xml")
+        if not sm or not re.search(r"<sitemapindex\b", sm, re.I):
+            return sm
+        host = urlparse(site).netloc.lower().removeprefix("www.")
+        parts = []
+        for child in [u.strip() for u in re.findall(r"<loc>\s*([^<]+)\s*</loc>", sm)][:6]:
+            if urlparse(child).netloc.lower().removeprefix("www.") != host:
+                continue
+            if re.search(r"(video|image|geo|news)[-_]?sitemap", child, re.I):
+                continue
+            body = await self._get(child)
+            if body and not re.search(r"<sitemapindex\b", body, re.I):
+                parts.append(body)
+        return "\n".join(parts)
+
     async def _get(self, url: str) -> str:
         try:
             resp = await self._client.get(url)
@@ -1301,7 +1325,7 @@ class ProfileCollector:
 
         # sitemap.xml → size + content freshness
         if self.wants("SITE_PAGE_COUNT") or self.wants("BLOG_STALE"):
-            sm = await self._get(f"{site}/sitemap.xml")
+            sm = await self._sitemap_text(site)
             if sm:
                 locs = re.findall(r"<loc>\s*([^<]+)\s*</loc>", sm)
                 if self.wants("SITE_PAGE_COUNT") and locs:
