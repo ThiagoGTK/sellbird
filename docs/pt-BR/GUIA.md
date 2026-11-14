@@ -262,6 +262,14 @@ sellbird discover --city "Curitiba, PR, Brasil"      # roda a busca
 Depois, o Sellbird lê os sites encontrados (grátis) e procura os decisores nas
 páginas "Quem somos", "Equipe", "Sobre", "Corpo clínico".
 
+**Mais alcance (Google).** O OpenStreetMap é grátis, mas tem pouca empresa e pouco
+telefone no Brasil. Em **Configurações → Busca de empresas** você cola a chave de uma
+fonte do Google: o **Scavio** (Google Maps, 50 créditos grátis no cadastro), o
+**Serper** (2.500 buscas grátis) ou o **TinyFish** (grátis com chave). O **DataForSEO**
+é pago (depósito mínimo de US$ 50) e é o mais barato em escala. Depois é só escolher a
+fonte na aba **Descobrir**: ela mostra o custo antes de rodar e respeita o limite de
+gasto. As empresas sem site que o Google Maps traz já vêm com telefone.
+
 **Empresas sem site.** O Sellbird só manda e-mail para quem tem site (é do domínio
 que ele tira o endereço). As empresas que a busca acha sem site ficam na aba
 **Empresas**: o botão **Sem site (WhatsApp)** baixa uma planilha com nome, telefone,

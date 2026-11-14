@@ -393,6 +393,9 @@ async def get_settings():
         "IMAP_HOST", "IMAP_PORT", "IMAP_USERNAME", "IMAP_PASSWORD",
         "M365_CLIENT_ID", "M365_TENANT_ID",
         "REOON_API_KEY", "ZEROBOUNCE_API_KEY", "HUNTER_API_KEY",
+        # Fontes de busca de empresas (aba Descobrir) — Sellbird PT-BR
+        "SCAVIO_API_KEY", "SERPER_API_KEY", "TINYFISH_API_KEY",
+        "DATAFORSEO_LOGIN", "DATAFORSEO_PASSWORD",
     ]
     for key in all_keys:
         if key not in env_vars:
@@ -432,6 +435,13 @@ async def get_settings():
         "reoon_api_key_set": is_set("REOON_API_KEY"),
         "zerobounce_api_key_set": is_set("ZEROBOUNCE_API_KEY"),
         "hunter_api_key_set": is_set("HUNTER_API_KEY"),
+        # Fontes de busca: chaves só como "definida ou não"; o login do
+        # DataForSEO não é segredo e volta para o campo.
+        "scavio_api_key_set": is_set("SCAVIO_API_KEY"),
+        "serper_api_key_set": is_set("SERPER_API_KEY"),
+        "tinyfish_api_key_set": is_set("TINYFISH_API_KEY"),
+        "dataforseo_login": env_vars.get("DATAFORSEO_LOGIN", ""),
+        "dataforseo_password_set": is_set("DATAFORSEO_PASSWORD"),
     }
 
 
@@ -452,7 +462,9 @@ async def save_env_settings(request: Request):
                      "SMTP_HOST", "SMTP_PORT", "SMTP_USERNAME", "SMTP_PASSWORD",
                      "IMAP_HOST", "IMAP_PORT", "IMAP_USERNAME", "IMAP_PASSWORD",
                      "M365_CLIENT_ID", "M365_TENANT_ID",
-                     "REOON_API_KEY", "ZEROBOUNCE_API_KEY", "HUNTER_API_KEY"]:
+                     "REOON_API_KEY", "ZEROBOUNCE_API_KEY", "HUNTER_API_KEY",
+                     "SCAVIO_API_KEY", "SERPER_API_KEY", "TINYFISH_API_KEY",
+                     "DATAFORSEO_LOGIN", "DATAFORSEO_PASSWORD"]:
             if key in data and data[key] is not None:
                 value = data[key]
                 if isinstance(value, bool) or not isinstance(value, (str, int, float)):

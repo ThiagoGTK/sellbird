@@ -532,3 +532,31 @@ def test_config_aceita_avoid_words():
     assert WriterConfig(avoid_words="pequeno").avoid_words == ["pequeno"]
     assert WriterConfig(avoid_words=[" pequenos negócios ", ""]).avoid_words == ["pequenos negócios"]
     assert WriterConfig().avoid_words == []
+
+
+# ── Chaves das fontes de busca pelo painel ──
+
+def test_painel_salva_e_mostra_chaves_de_busca(tmp_path, monkeypatch):
+    """Scavio, Serper, TinyFish e DataForSEO entram pelo painel como o Reoon."""
+    import asyncio
+    import json
+    from sellbird import dashboard
+
+    env = tmp_path / ".env"
+    env.write_text("SMTP_HOST=smtp.example.com\n", encoding="utf-8")
+    monkeypatch.setattr(dashboard, "ENV_FILE", env)
+    for k in ("SCAVIO_API_KEY", "DATAFORSEO_LOGIN", "DATAFORSEO_PASSWORD"):
+        monkeypatch.delenv(k, raising=False)
+
+    class Req:
+        async def json(self):
+            return {"SCAVIO_API_KEY": "chave-de-teste", "DATAFORSEO_LOGIN": "conta@example.com"}
+
+    r = asyncio.run(dashboard.save_env_settings(Req()))
+    r = r if isinstance(r, dict) else json.loads(r.body)
+    assert r["success"]
+    texto = env.read_text(encoding="utf-8")
+    assert "SCAVIO_API_KEY=chave-de-teste" in texto and "SMTP_HOST=smtp.example.com" in texto
+    s = asyncio.run(dashboard.get_settings())
+    assert s["scavio_api_key_set"] is True and "chave-de-teste" not in json.dumps(s)
+    assert s["dataforseo_login"] == "conta@example.com" and s["dataforseo_password_set"] is False

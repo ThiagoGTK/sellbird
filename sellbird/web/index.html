@@ -429,6 +429,30 @@
     </div>
   </div>
 
+  <div class="subhead">Busca de empresas <span class="hint">Aba Descobrir</span></div>
+  <div class="card">
+    <div class="settings-row">
+      <div>
+        <h3>Fontes do Google e da web</h3>
+        <p class="desc">O OpenStreetMap funciona sem chave. Estas fontes acham muito mais empresas, inclusive as sem site, com telefone. Cada uma tem um plano grátis para testar; nada é cobrado sem um cartão cadastrado no próprio serviço, e a aba Descobrir sempre mostra o custo antes de rodar.</p>
+      </div>
+      <div class="fields">
+        <div class="form-group"><label class="form-label" for="scavio-key">Chave de API do Scavio (Google Maps) <span id="scavio-status" class="email-tag"></span></label>
+          <div class="with-btn"><input type="password" class="form-input" id="scavio-key" placeholder="50 créditos grátis no cadastro, scavio.dev" autocomplete="off">
+            <button class="btn btn-secondary" onclick="toggleVisibility('scavio-key')">Mostrar</button></div></div>
+        <div class="form-group"><label class="form-label" for="serper-key">Chave de API do Serper (busca no Google) <span id="serper-status" class="email-tag"></span></label>
+          <input type="password" class="form-input" id="serper-key" placeholder="2.500 buscas grátis, serper.dev" autocomplete="off"></div>
+        <div class="form-group"><label class="form-label" for="tinyfish-key">Chave de API do TinyFish (busca na web) <span id="tinyfish-status" class="email-tag"></span></label>
+          <input type="password" class="form-input" id="tinyfish-key" placeholder="Grátis com uma chave, sem cartão" autocomplete="off"></div>
+        <div class="form-group"><label class="form-label" for="dfs-login">DataForSEO: login <span id="dfs-status" class="email-tag"></span></label>
+          <input type="text" class="form-input" id="dfs-login" placeholder="O e-mail da conta (pago: depósito mínimo de US$ 50)" autocomplete="off"></div>
+        <div class="form-group"><label class="form-label" for="dfs-pass">DataForSEO: senha da API</label>
+          <input type="password" class="form-input" id="dfs-pass" placeholder="A senha da API (não a do site)" autocomplete="off"></div>
+        <button class="btn btn-primary btn-sm" onclick="saveDiscoveryKeys()">Salvar chaves de busca</button>
+      </div>
+    </div>
+  </div>
+
   <div class="subhead">Opcional</div>
   <div class="card">
     <div class="settings-row">

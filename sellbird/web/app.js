@@ -1291,6 +1291,12 @@ async function loadSettings() {
   savedPh('reoon-key', data.reoon_api_key_set, '600 grátis/mês, reoon.com/email-verifier');
   savedPh('zerobounce-key', data.zerobounce_api_key_set, '100 grátis/mês, melhor para domínios aceita-tudo do M365/Workspace');
   savedPh('hunter-key', data.hunter_api_key_set, '50 grátis/mês + busca de padrão de e-mail');
+  savedPh('scavio-key', data.scavio_api_key_set, '50 créditos grátis no cadastro, scavio.dev');
+  savedPh('serper-key', data.serper_api_key_set, '2.500 buscas grátis, serper.dev');
+  savedPh('tinyfish-key', data.tinyfish_api_key_set, 'Grátis com uma chave, sem cartão');
+  savedPh('dfs-pass', data.dataforseo_password_set, 'A senha da API (não a do site)');
+  const dfsLogin = document.getElementById('dfs-login');
+  if (dfsLogin) dfsLogin.value = data.dataforseo_login || '';
   savedPh('linkedin-password', data.linkedin_password_set, 'Digite a senha');
   savedPh('cf-api-token', data.cloudflare_api_token_set, 'Seu token de API da Cloudflare');
 
@@ -1311,9 +1317,27 @@ async function loadSettings() {
     else if (data.m365_client_id) { m.className = 'email-tag risky'; m.textContent = 'entre em Caixas de e-mail'; }
     else { m.className = 'email-tag guess'; m.textContent = 'não configurado'; }
   }
-  tag('reoon-status', data.reoon_api_key_set, 'set');
-  tag('zerobounce-status', data.zerobounce_api_key_set, 'set');
-  tag('hunter-status', data.hunter_api_key_set, 'set');
+  tag('reoon-status', data.reoon_api_key_set, 'salva');
+  tag('zerobounce-status', data.zerobounce_api_key_set, 'salva');
+  tag('hunter-status', data.hunter_api_key_set, 'salva');
+  tag('scavio-status', data.scavio_api_key_set, 'salva');
+  tag('serper-status', data.serper_api_key_set, 'salva');
+  tag('tinyfish-status', data.tinyfish_api_key_set, 'salva');
+  tag('dfs-status', !!(data.dataforseo_login && data.dataforseo_password_set), 'salva');
+}
+
+// Chaves das fontes de busca (aba Descobrir). Campo vazio = manter a salva.
+function saveDiscoveryKeys() {
+  const payload = {};
+  const pairs = [['scavio-key', 'SCAVIO_API_KEY'], ['serper-key', 'SERPER_API_KEY'],
+                 ['tinyfish-key', 'TINYFISH_API_KEY'], ['dfs-login', 'DATAFORSEO_LOGIN'],
+                 ['dfs-pass', 'DATAFORSEO_PASSWORD']];
+  for (const [id, key] of pairs) {
+    const v = (document.getElementById(id) || {}).value || '';
+    if (v.trim()) payload[key] = v.trim();
+  }
+  if (!Object.keys(payload).length) { showToast('Digite pelo menos uma chave primeiro.', 'error'); return; }
+  saveEnv(payload, 'Chaves de busca salvas. Já aparecem como prontas na aba Descobrir.').then(loadSettings);
 }
 
 function saveGmail() {
