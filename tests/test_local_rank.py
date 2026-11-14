@@ -352,7 +352,11 @@ async def test_each_keyword_gets_its_own_rank_and_duplicates_keep_the_best(state
 @pytest.mark.asyncio
 async def test_maps_run_records_maps_rank_and_no_website(state, monkeypatch):
     _install(monkeypatch, lambda r: httpx.Response(200, json=MAPS))
-    await D.run_discovery(state, load_config(), "dataforseo_maps", [
+    config = load_config()
+    # Sellbird PT-BR: em inglês o segmento é a categoria do Google ("Roofer");
+    # em português seria o termo pesquisado (ver test_portugues.py).
+    config.language.default = "en"
+    await D.run_discovery(state, config, "dataforseo_maps", [
         D.DiscoveryQuery(term="roofer", location="Denver, CO")], max_spend=1.0)
     bob = await state.get_company_by_external_id("dataforseo:cid:333")
     codes = {r["signal_code"]: r for r in await state.get_observations(company_id=bob.id)}

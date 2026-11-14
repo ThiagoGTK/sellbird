@@ -560,3 +560,51 @@ def test_painel_salva_e_mostra_chaves_de_busca(tmp_path, monkeypatch):
     s = asyncio.run(dashboard.get_settings())
     assert s["scavio_api_key_set"] is True and "chave-de-teste" not in json.dumps(s)
     assert s["dataforseo_login"] == "conta@example.com" and s["dataforseo_password_set"] is False
+
+
+# ── Segmento das empresas no idioma do usuário (todas as fontes) ──
+
+def test_segmento_e_o_termo_pesquisado_para_google_e_osm():
+    import asyncio
+    from sellbird.collectors.discover import Business, DiscoveryQuery, _upsert
+
+    class FakeState:
+        def __init__(self):
+            self.saved = []
+        async def get_company_by_domain(self, d):
+            return None
+        async def get_company_by_external_id(self, e):
+            return None
+        async def add_company(self, company):
+            self.saved.append(company)
+            return "id"
+
+    q = DiscoveryQuery(term="Imobiliária", location="Itajaí, SC")
+    for provider in ("osm", "scavio_maps", "dataforseo_listings"):
+        st = FakeState()
+        biz = Business(name="Imob Exemplo", provider=provider, category="Real estate agency",
+                       external_id=f"{provider}:1")
+        asyncio.run(_upsert(st, biz, q, prefer_term=True))
+        assert st.saved[0].industry == "Imobiliária", provider
+    # Buscas de preset (startups) mantêm a categoria da fonte.
+    st = FakeState()
+    q2 = DiscoveryQuery(term="yc startup", preset="yc")
+    asyncio.run(_upsert(st, Business(name="Startup Exemplo", provider="serper",
+                                     category="Software company", external_id="s:1"), q2,
+                        prefer_term=True))
+    assert st.saved[0].industry == "Software company"
+    # Em inglês (padrão do projeto original), o Google Maps mantém a categoria.
+    st = FakeState()
+    asyncio.run(_upsert(st, Business(name="Roof Co", provider="scavio_maps",
+                                     category="Roofer", external_id="r:1"),
+                        DiscoveryQuery(term="roofer")))
+    assert st.saved[0].industry == "Roofer"
+
+
+def test_idioma_portugues_prefere_o_termo():
+    from types import SimpleNamespace
+    from sellbird.collectors.discover import _prefers_term
+    pt = SimpleNamespace(language=SimpleNamespace(default="pt-BR", by_country=True))
+    en = SimpleNamespace(language=SimpleNamespace(default="en", by_country=True))
+    assert _prefers_term(pt) is True
+    assert _prefers_term(en) is False

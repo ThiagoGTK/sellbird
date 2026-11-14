@@ -1977,7 +1977,8 @@ async def run_discovery(
                     first = ident not in seen
                     if first:
                         seen.add(ident)
-                        company_id, is_new = await _upsert(state, biz, query)
+                        company_id, is_new = await _upsert(state, biz, query,
+                                                           prefer_term=_prefers_term(config))
                         if is_new:
                             report.new_companies += 1
                         else:
@@ -2049,7 +2050,23 @@ async def run_discovery(
     return report
 
 
-async def _upsert(state, biz: Business, query: DiscoveryQuery) -> tuple[str, bool]:
+def _prefers_term(config) -> bool:
+    """O segmento deve ser o termo pesquisado (e não a categoria da fonte)?
+
+    Sim quando o idioma padrão do Sellbird é português (Sellbird PT-BR): o
+    OpenStreetMap e o Google Maps devolvem categorias em inglês ("accountant",
+    "Real estate agency"), que depois apareciam nos e-mails em português. Em
+    inglês, a categoria da fonte continua valendo, como no projeto original.
+    """
+    try:
+        from sellbird.language import default_language
+        return str(default_language(config) or "").lower().startswith("pt")
+    except Exception:
+        return False
+
+
+async def _upsert(state, biz: Business, query: DiscoveryQuery,
+                  prefer_term: bool = False) -> tuple[str, bool]:
     """Record the business, returning (id, was_new)."""
     # Look before inserting, so "already knew this one" is a fact we report
     # rather than something inferred from an insert's return value.
@@ -2067,9 +2084,12 @@ async def _upsert(state, biz: Business, query: DiscoveryQuery) -> tuple[str, boo
         domain=biz.domain,
         website=biz.website,
         phone=biz.phone,
-        # O OpenStreetMap devolve a categoria como etiqueta em inglês ("accountant",
-        # "dentist"); o termo pesquisado é o do usuário, no idioma dele (PT-BR).
-        industry=(query.term if biz.provider == "osm" else "") or biz.category or query.term,
+        # Em português, o segmento é o que o usuário pesquisou (ver
+        # _prefers_term). O OpenStreetMap continua usando o termo em qualquer
+        # idioma, porque as etiquetas dele ("estate_agent") nunca servem.
+        # Buscas de preset (startups, vagas) têm termo técnico: usam a categoria.
+        industry=((query.term if (prefer_term or biz.provider == "osm") and not query.preset else "")
+                  or biz.category or query.term),
         location=biz.location or query.location,
         source=f"discover:{biz.provider}",
         source_url=biz.source_url,
